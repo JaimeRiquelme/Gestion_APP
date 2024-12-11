@@ -37,7 +37,7 @@ public class Process {
 
     private String end_date_real;
 
-    @OneToMany(mappedBy = "id_process")
+    @OneToMany(mappedBy = "id_process",cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Exit> exits;
 
 }

@@ -27,7 +27,7 @@ public class Management {
 
     private String description;
 
-    @OneToMany(mappedBy = "id_management")
+    @OneToMany(mappedBy = "id_management",cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Process> processes;
 
 }

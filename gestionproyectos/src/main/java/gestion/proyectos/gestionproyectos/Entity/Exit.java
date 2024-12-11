@@ -39,7 +39,7 @@ public class Exit {
 
     private String description;
 
-    @OneToMany(mappedBy = "id_exit")
+    @OneToMany(mappedBy = "id_exit",cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Parameter> parameters;
 
 }

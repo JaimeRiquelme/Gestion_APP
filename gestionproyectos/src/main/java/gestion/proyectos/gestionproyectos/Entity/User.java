@@ -30,6 +30,6 @@ public class User {
 
     private String phone_number;
 
-    @OneToMany(mappedBy = "id_usuario")
+    @OneToMany(mappedBy = "id_usuario",cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Proyect> proyects;
 }

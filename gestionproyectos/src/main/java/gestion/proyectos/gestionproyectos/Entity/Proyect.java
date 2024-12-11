@@ -15,15 +15,6 @@ import java.util.List;
 @Data
 public class Proyect {
 
-    /*atributos a generar:
-    * id_proyecto PK
-    * id_usuario FK con User
-    * nombre_proyecto
-    * descripcion
-    * organizacion
-    * fecha_inicio
-    * fecha_estimada_fin
-    * fecha_estimada_real*/
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -46,7 +37,7 @@ public class Proyect {
 
     private String real_estimated_end_date;
 
-    @OneToMany(mappedBy = "id_proyect")
+    @OneToMany(mappedBy = "id_proyect",cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Management> managements;
 
 
