@@ -1,52 +1,48 @@
 package gestion.proyectos.gestionproyectos.Controller;
 
-
 import gestion.proyectos.gestionproyectos.Entity.User;
 import gestion.proyectos.gestionproyectos.Service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@Controller
-@RequestMapping("/api/v1/user")
+@RestController
+@RequestMapping("/api/v1/users")
 public class UserController {
 
     @Autowired
     private UserService userService;
 
-    //Creamos el CRUD
-
-    //Create
-    @PostMapping("/saveUser")
-    public User saveUser(User user){
-        return userService.saveUser(user);
+    @PostMapping
+    public ResponseEntity<User> createUser(@RequestBody User user) {
+        return new ResponseEntity<>(userService.saveUser(user), HttpStatus.CREATED);
     }
 
-    //Read
-    @PostMapping("/getUsers")
-    public List<User> getUsers(){
-        return userService.getUsers();
+    @GetMapping
+    public ResponseEntity<List<User>> getAllUsers() {
+        return new ResponseEntity<>(userService.getUsers(), HttpStatus.OK);
     }
 
-    @PostMapping("/getUserById")
-    public User getUserById(Long id) {
-        return userService.getUserById(id);
+    @GetMapping("/{id}")
+    public ResponseEntity<User> getUserById(@PathVariable Long id) {
+        User user = userService.getUserById(id);
+        return user != null ?
+                new ResponseEntity<>(user, HttpStatus.OK) :
+                new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
-    //Update
-    @PostMapping("/updateUser")
-    public User updateUser(User user){
-        return userService.updateUser(user);
+    @PutMapping("/{id}")
+    public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody User user) {
+        user.setIdUsuario(id);
+        return new ResponseEntity<>(userService.updateUser(user), HttpStatus.OK);
     }
 
-    //Delete
-    @PostMapping("/deleteUser")
-    public String deleteUser(Long id){
-        return userService.deleteUser(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
+        userService.deleteUser(id);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
-
-
 }

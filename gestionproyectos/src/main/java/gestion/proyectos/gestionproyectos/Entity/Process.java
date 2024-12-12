@@ -17,11 +17,11 @@ public class Process {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_process")
-    private Long id_process;
+    private Long idProcess;
 
     @ManyToOne
     @JoinColumn(name = "id_management")
-    private Management id_management;
+    private Management management;
 
     private String name_process;
 

@@ -17,19 +17,21 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_usuario")
-    private Long id_usuario;
+    private Long idUsuario;
 
     private String names;
 
-    private String second_names;
+    @Column(name = "second_names")
+    private String secondNames;
 
     @Column(unique = true)
     private String email;
 
     private String password;
 
-    private String phone_number;
+    @Column(name = "phone_number")
+    private String phoneNumber;
 
-    @OneToMany(mappedBy = "id_usuario",cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Proyect> proyects;
 }

@@ -17,17 +17,17 @@ public class Management {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_management")
-    private Long id_management;
+    private Long idManagement;
 
     @ManyToOne
     @JoinColumn(name = "id_proyect")
-    private Proyect id_proyect;
+    private Proyect proyect;  // Cambiado de id_proyect a proyect
 
-    private String name_management;
+    @Column(name = "name_management")
+    private String nameManagement;
 
     private String description;
 
-    @OneToMany(mappedBy = "id_management",cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "management", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Process> processes;
-
 }

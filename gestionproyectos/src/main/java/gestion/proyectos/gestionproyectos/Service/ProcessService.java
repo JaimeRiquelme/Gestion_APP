@@ -1,6 +1,6 @@
 package gestion.proyectos.gestionproyectos.Service;
 
-
+import gestion.proyectos.gestionproyectos.Entity.Process;
 import gestion.proyectos.gestionproyectos.Repository.ProcessRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,21 +13,23 @@ public class ProcessService {
     @Autowired
     private ProcessRepository processRepository;
 
-    public void SaveProcess(Process process) {
-        processRepository.save(process);
+    public Process saveProcess(Process process) {
+        return processRepository.save(process);
     }
-    public Process GetProcess(long id) {
-       return processRepository.getProcessById(id);
+
+    public Process getProcess(long id) {
+        return processRepository.findById(id).orElse(null);
     }
-    public List<Process> GetProcesses() {
+
+    public List<Process> getProcesses() {
         return processRepository.findAll();
     }
 
-    public void DeleteProcess(long id) {
-        processRepository.deleteProcess(id);
+    public void deleteProcess(long id) {
+        processRepository.deleteById(id);
     }
 
-    public void UpdateProcess(Process process) {
-        processRepository.updateProcess(process);
+    public Process updateProcess(Process process) {
+        return processRepository.save(process);
     }
 }

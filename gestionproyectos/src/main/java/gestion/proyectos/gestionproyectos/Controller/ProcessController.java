@@ -1,10 +1,9 @@
 package gestion.proyectos.gestionproyectos.Controller;
 
-
+import gestion.proyectos.gestionproyectos.Entity.Process; // Agregar esta importación
 import gestion.proyectos.gestionproyectos.Service.ProcessService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -17,24 +16,30 @@ public class ProcessController {
     @Autowired
     private ProcessService processService;
 
-    @PostMapping ("/saveProcess")
-    public void saveProcess(@RequestBody Process process) {
-        processService.SaveProcess(process);
-    }
-    @GetMapping ("/getAllProcess")
-    public List<Process> getAllProcess() {
-        return processService.GetProcesses();
+    @PostMapping("/saveProcess")
+    public ResponseEntity<Process> saveProcess(@RequestBody Process process) {
+        Process savedProcess = processService.saveProcess(process);
+        return new ResponseEntity<>(savedProcess, HttpStatus.CREATED);
     }
 
-    @GetMapping ("/GetProcess/{id}")
+    @GetMapping("/getAllProcess")
+    public ResponseEntity<List<Process>> getAllProcess() {
+        List<Process> processes = processService.getProcesses();
+        return new ResponseEntity<>(processes, HttpStatus.OK);
+    }
+
+    @GetMapping("/getProcess/{id}")
     public ResponseEntity<Process> getProcess(@PathVariable long id) {
-        Process process = processService.GetProcess(id);
-        return new ResponseEntity<>(process, HttpStatus.OK);
+        Process process = processService.getProcess(id);
+        if (process != null) {
+            return new ResponseEntity<>(process, HttpStatus.OK);
+        }
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
-    @PostMapping  ("/DeleteProcess/{id}")
-    public void deleteProcess(@PathVariable long id) {
-        processService.DeleteProcess(id);
+    @DeleteMapping("/deleteProcess/{id}")
+    public ResponseEntity<Void> deleteProcess(@PathVariable long id) {
+        processService.deleteProcess(id);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
-
 }
