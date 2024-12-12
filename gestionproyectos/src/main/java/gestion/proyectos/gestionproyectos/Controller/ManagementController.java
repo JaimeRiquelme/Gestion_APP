@@ -21,31 +21,31 @@ public class ManagementController {
     @Autowired
 	ManagementService service;
 
-    @PostMapping("/saveProcess")
+    @PostMapping("/saveManagement")
 	public ResponseEntity<Management> saveManagement(@RequestBody Management management) {
 		Management newManagement = service.save(management);
 		return ResponseEntity.ok(newManagement);
 	}
 
-    @GetMapping("/getAllProcess")
+    @GetMapping("/getAllManagement")
 	public ResponseEntity<List<Management>> listManagements() {
     	List<Management> managements = service.getAll();
 		return ResponseEntity.ok(managements);
 	}
 
-	@GetMapping("/GetProcess/{id}")
+	@GetMapping("/GetManagement/{id}")
 	public ResponseEntity<Management> getManagementById(@PathVariable Long id) {
 		Management management = service.getById(id);
 		return ResponseEntity.ok(management);
 	}
 
-	@PostMapping("/updateUser")
+	@PostMapping("/updateManagement")
 	public ResponseEntity<Management> updateManagement(@RequestBody Management management){
 		Management updatedManagement = service.update(management);
 		return ResponseEntity.ok(updatedManagement);
 	}
 
-	@DeleteMapping("/DeleteProcess/{id}")
+	@DeleteMapping("/DeleteManagement/{id}")
 	public ResponseEntity<Boolean> deleteManagementById(@PathVariable Long id) throws Exception {
 		service.delete(id);
 		return ResponseEntity.noContent().build();
