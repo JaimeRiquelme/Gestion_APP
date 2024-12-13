@@ -1,5 +1,7 @@
 package gestion.proyectos.gestionproyectos.Entity;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -9,11 +11,11 @@ import java.util.List;
 
 @Entity
 @Table(name = "process")
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "idProcess")
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
 public class Process {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_process")
@@ -23,21 +25,26 @@ public class Process {
     @JoinColumn(name = "id_management")
     private Management management;
 
-    private String name_process;
+    @Column(name = "name_process")
+    private String nameProcess;  // Cambiado de name_process a nameProcess
 
     private String description;
 
-    private String state_process;
+    @Column(name = "state_process")
+    private String stateProcess;  // Cambiado de state_process a stateProcess
 
-    private String start_date_planned;
+    @Column(name = "start_date_planned")
+    private String startDatePlanned;  // Cambiado de start_date_planned a startDatePlanned
 
-    private String end_date_planned;
+    @Column(name = "end_date_planned")
+    private String endDatePlanned;  // Cambiado de end_date_planned a endDatePlanned
 
-    private String start_date_real;
+    @Column(name = "start_date_real")
+    private String startDateReal;  // Cambiado de start_date_real a startDateReal
 
-    private String end_date_real;
+    @Column(name = "end_date_real")
+    private String endDateReal;  // Cambiado de end_date_real a endDateReal
 
-    @OneToMany(mappedBy = "id_process",cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "process", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Exit> exits;
-
 }
