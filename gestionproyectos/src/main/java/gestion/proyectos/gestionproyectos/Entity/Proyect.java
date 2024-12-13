@@ -1,5 +1,7 @@
 package gestion.proyectos.gestionproyectos.Entity;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -9,6 +11,10 @@ import java.util.List;
 
 @Entity
 @Table(name = "proyects")
+@JsonIdentityInfo(
+        generator = ObjectIdGenerators.PropertyGenerator.class,
+        property = "idProyecto"
+)
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
