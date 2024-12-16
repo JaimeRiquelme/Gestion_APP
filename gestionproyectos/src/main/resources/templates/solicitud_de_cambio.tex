@@ -1,0 +1,37 @@
+\documentclass{article}
+\usepackage[table]{xcolor} % Para colorear celdas
+\usepackage{tabularx} % Para tablas ajustables al ancho
+\usepackage{geometry} % Para ajustar márgenes
+\geometry{margin=1.5cm} % Márgenes pequeños
+
+\begin{document}
+
+\begin{center}
+{\huge\textbf{Solicitud de Cambio}}\\[2cm]
+\end{center}
+
+\vspace{0.5cm}
+
+\renewcommand{\arraystretch}{1.5} % Espacio entre filas
+\rowcolors{2}{gray!10}{white} % Colores alternos para filas
+
+\noindent
+\begin{tabularx}{\textwidth}{| X | X | X | X |}
+\hline
+\multicolumn{1}{|X|}{\cellcolor{gray!40}\textbf{NOMBRE DEL PROYECTO}} & \multicolumn{3}{|c|}{{{nombreProyecto}}} \\ \hline
+\cellcolor{gray!40}\textbf{ID PROYECTO}  & {{idProyecto}} & \cellcolor{gray!40}\textbf{NÚMERO DE SOLICITUD DE CAMBIO} & {{numeroSolicitud}} \\ \hline
+\end{tabularx}
+
+\vspace{0.5cm}
+
+\noindent
+\begin{tabularx}{\textwidth}{| X | X | X | X |}
+\hline
+\multicolumn{4}{|c|}{\cellcolor{blue!30}\textbf{SOLICITUD DE CAMBIO}} \\ \hline
+\cellcolor{gray!40}\textbf{NOMBRE DEL SOLICITANTE} & {{solicitante}} & \cellcolor{gray!40}\textbf{FECHA DE SOLICITUD} & {{fechaSolicitud}} \\ \hline
+\cellcolor{gray!40}\textbf{CONTACTO DEL SOLICITANTE} & {{contactoSolicitante}} & \cellcolor{gray!40}\textbf{PRIORIDAD} & {{prioridad}} \\ \hline
+\multicolumn{1}{|X|}{\cellcolor{gray!40}\textbf{ÁRTICULO A CAMBIAR}} & \multicolumn{3}{|c|}{{{articuloCambiar}}} \\ \hline
+\multicolumn{1}{|X|}{\cellcolor{gray!40}\textbf{DESCRIPCIÓN DEL CAMBIO}} & \multicolumn{3}{|c|}{{{descripcionCambio}}} \\ \hline
+\end{tabularx}
+
+\end{document}
