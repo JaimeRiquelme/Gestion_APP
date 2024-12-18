@@ -1,0 +1,88 @@
+\documentclass{article}
+\usepackage[table]{xcolor} % Para colorear celdas
+\usepackage{tabularx,lipsum}
+\usepackage{geometry} % Para ajustar márgenes
+\geometry{margin=1.5cm} % Márgenes pequeños
+
+\begin{document}
+
+\begin{center}
+{\huge\textbf{Registro de Supuestos}}\\[2cm]
+\end{center}
+
+\vspace{0.5cm}
+
+\newcommand{\wrappingmulticolumn}[3] 
+    {\multicolumn{#1}
+                 {|>{\hsize=\dimexpr#1\hsize+\tabcolsep * (2 * (#1 - 1) )+\arrayrulewidth* (#1 - 2)\relax}#2|}
+                 {#3}}
+\renewcommand{\arraystretch}{1.5} % Espacio entre filas
+\rowcolors{2}{gray!10}{white} % Colores alternos para filas
+
+\noindent
+\begin{tabularx}{\textwidth}{ X  X  X  X }
+\hline
+\multicolumn{2}{|c|}{\cellcolor{gray!40}\textbf{NOMBRE DEL PROYECTO}} & \multicolumn{1}{|X|}{\cellcolor{gray!40}\textbf{ID DEL PROYECTO}} & \multicolumn{1}{|X|}{\cellcolor{gray!40}\textbf{FECHA DEL PROYECTO}} \\ \hline
+\multicolumn{2}{|c|}{{{proyectName}}} & \multicolumn{1}{|X|}{{{idProyect}}} & \multicolumn{1}{|X|}{{{elaborationDate}}} \\ \hline
+\wrappingmulticolumn{4}{X}{\centering\cellcolor{gray!40}\textbf{OBJETIVOS DEL PROYECTO}} \\ \hline
+\wrappingmulticolumn{4}{X}{{proyectObjectives}} \\ \hline
+\rowcolor{white} & & &\\ 
+\end{tabularx}
+
+\vspace{0.5cm}
+
+\section{Salidas del Proyecto}
+{{proyectOutputs}}
+
+\section{Listado de Tareas del Proyecto}
+{{proyectTasks}}
+
+\section{Fuera del Alcance}
+\noindent
+\begin{tabularx}{\textwidth}{ X X X X X X }
+\hline
+\wrappingmulticolumn{1}{X}{\centering\cellcolor{gray!40}ESTE PROYECTO \textbf{NO ALCANSARA O INCLUIRA} LO SIGUIENTE} &
+\wrappingmulticolumn{5}{X}{{proyectOutOfScope}} \\ \hline
+\end{tabularx}
+
+\section{Supuestos del Proyecto}
+{{proyectAssumptions}}
+
+\section{Restricciones del Proyecto}
+
+\noindent
+\begin{tabularx}{\textwidth}{ X X X X X }
+\hline
+\wrappingmulticolumn{1}{X}{\centering\cellcolor{gray!40}\textbf{FECHA DE INICIO}} &
+\wrappingmulticolumn{4}{X}{{proyectStartDate}} \\ \hline
+\wrappingmulticolumn{1}{X}{\centering\cellcolor{gray!40}\textbf{FECHA DEL KICK OFF}} &
+\wrappingmulticolumn{4}{X}{{kickOffDate}} \\ \hline
+\wrappingmulticolumn{1}{X}{\centering\cellcolor{gray!40}\textbf{FECHA DE FINALIZACION}} &
+\wrappingmulticolumn{4}{X}{{proyectEndDate}} \\ \hline
+\wrappingmulticolumn{1}{X}{\centering\cellcolor{gray!40}\textbf{DEADLINES ESTRICTAS}} &
+\wrappingmulticolumn{4}{X}{{proyectDeadlines}} \\ \hline
+\wrappingmulticolumn{1}{X}{\centering\cellcolor{gray!40}\textbf{PRINCIPALES METAS}} &
+\wrappingmulticolumn{4}{X}{{proyectMilestones}} \\ \hline\hline
+\wrappingmulticolumn{1}{X}{\centering\cellcolor{gray!20}\textbf{RESTRICCIONES DE PRESUPUESTO}} &
+\wrappingmulticolumn{4}{X}{{budgetRestrictions}} \\ \hline
+\wrappingmulticolumn{1}{X}{\centering\cellcolor{gray!20}\textbf{RESTRICCIONES DE CALIDAD O RENDIMIENTO}} &
+\wrappingmulticolumn{4}{X}{{qualityRestrictions}} \\ \hline
+\wrappingmulticolumn{1}{X}{\centering\cellcolor{gray!20}\textbf{RESTRICCIONES DE EQUIPO O PERSONAL}} &
+\wrappingmulticolumn{4}{X}{{teamRestrictions}} \\ \hline
+\wrappingmulticolumn{1}{X}{\centering\cellcolor{gray!20}\textbf{RESTRICCIONES JURIDICAS O REGULATORIAS}} &
+\wrappingmulticolumn{4}{X}{{juridicalRestrictions}} \\ \hline
+\end{tabularx}
+
+\section{Estimaciones de plazo}
+\noindent
+\begin{tabularx}{\textwidth}{ X X X X X X }
+\hline
+\wrappingmulticolumn{1}{X}{\centering\cellcolor{gray!40}\textbf{HORAS ESTIMADAS PARA LA REALIZACION DEL PROYECTO}} &
+\wrappingmulticolumn{5}{X}{{timeEstimate}} \\ \hline
+\end{tabularx}
+
+\section{Verificacion}
+{{approvals}}
+
+
+\end{document}
