@@ -1,39 +1,48 @@
-\documentclass{article}
-\usepackage[table]{xcolor} % Para colorear celdas
-\usepackage{tabularx,lipsum} % Para tablas ajustables al ancho
-\usepackage{geometry} % Para ajustar márgenes
-\geometry{margin=1.5cm} % Márgenes pequeños
+\documentclass[12pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
+\usepackage[table]{xcolor}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{geometry}
+\geometry{margin=1.5cm}
+
+% Definir nuevo tipo de columna para texto envuelto
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+\newcolumntype{Z}{>{\raggedright\arraybackslash\hsize=1.5\hsize}X}
+\newcolumntype{W}{>{\raggedright\arraybackslash\hsize=0.5\hsize}X}
 
 \begin{document}
 
-\begin{center}
-{\huge\textbf{Solicitud de Cambio}}\\[2cm]
-\end{center}
+    \begin{center}
+    {\huge\textbf{Solicitud de Cambio}}\\[1cm]
+    \end{center}
 
-\newcommand{\wrappingmulticolumn}[3] 
-    {\multicolumn{#1}
-                 {|>{\hsize=\dimexpr#1\hsize+\tabcolsep * (2 * (#1 - 1) )+\arrayrulewidth* (#1 - 2)\relax}#2|}
-                 {#3}}
-\renewcommand{\arraystretch}{1.5} % Espacio entre filas
-\rowcolors{2}{gray!10}{white} % Colores alternos para filas
+    \renewcommand{\arraystretch}{1.5}
 
-\noindent
-\begin{tabularx}{\textwidth}{| X | X | X | X |}
-\hline
-\multicolumn{1}{|X|}{\centering\cellcolor{gray!40}\textbf{NOMBRE DEL PROYECTO}} & \wrappingmulticolumn{3}{X}{{{proyectName}}} \\ \hline
-\centering\cellcolor{gray!40}\textbf{ID PROYECTO}  & {{idProject}} & \centering\cellcolor{gray!40}\textbf{NÚMERO DE SOLICITUD DE CAMBIO} & {{requestNumber}} \\ \hline
-\end{tabularx}
-
-\vspace{0.5cm}
-
-\noindent
-\begin{tabularx}{\textwidth}{| X | X | X | X |}
-\hline
-\multicolumn{4}{|c|}{\centering\cellcolor{blue!30}\textbf{SOLICITUD DE CAMBIO}} \\ \hline
-\centering\cellcolor{gray!40}\textbf{NOMBRE DEL SOLICITANTE} & {{applicant}} & \centering\cellcolor{gray!40}\textbf{FECHA DE SOLICITUD} & {{requestDate}} \\ \hline
-\centering\cellcolor{gray!40}\textbf{CONTACTO DEL SOLICITANTE} & {{applicantContact}} & \centering\cellcolor{gray!40}\textbf{PRIORIDAD} & {{priority}} \\ \hline
-\multicolumn{1}{|X|}{\centering\cellcolor{gray!40}\textbf{ARTÍCULO A CAMBIAR}} & \wrappingmulticolumn{3}{X}{{{changeArticle}}} \\ \hline
-\multicolumn{1}{|X|}{\centering\cellcolor{gray!40}\textbf{DESCRIPCIÓN DEL CAMBIO}} & \wrappingmulticolumn{3}{X}{{{changeDescription}}} \\ \hline
-\end{tabularx}
+% Tabla de solicitud
+    \noindent
+    \begin{tabularx}{\textwidth}{|c|c|c|c|c|c|}
+        \hline
+        \multicolumn{6}{|>{\columncolor{gray!50}}p{18.13cm}|}{\centering\textbf{SOLICITUD DE CAMBIO}} \\ \hline
+        \multicolumn{1}{|>{\columncolor{gray!20}}p{3.2cm}|}{ \centering\textbf{NOMBRE DEL PROYECTO}} &
+        \multicolumn{5}{p{13.62cm}|}{\textbf{{{proyectName}}}} \\ \hline
+        \multicolumn{1}{|>{\centering\columncolor{gray!20}}p{3.2cm}|}{\textbf{ID DEL PROYECTO}} &
+        \multicolumn{2}{p{5.21cm}|}{\textbf{{{idProyect}}}} &
+        \multicolumn{1}{|>{\columncolor{gray!20}}p{3.2cm}|}{\textbf{NÚMERO DE SOLICITUD}} &
+        \multicolumn{2}{p{5.21cm}|}{\textbf{{{requestNumber}}}} \\ \hline
+        \multicolumn{1}{|>{\columncolor{gray!20}}p{3.2cm}|}{\textbf{FECHA DE SOLICITUD}} &
+        \multicolumn{2}{p{5.21cm}|}{\textbf{{{requestDate}}}} &
+        \multicolumn{1}{|>{\columncolor{gray!20}}p{3.2cm}|}{\textbf{PRIORIDAD}} &
+        \multicolumn{2}{p{5.21cm}|}{\textbf{{{priority}}}} \\ \hline
+        \multicolumn{1}{|>{\columncolor{gray!20}}p{3.2cm}|}{\textbf{SOLICITANTE}} &
+        \multicolumn{2}{p{5.21cm}|}{\textbf{{{applicant}}}} &
+        \multicolumn{1}{|>{\columncolor{gray!20}}p{3.2cm}|}{\textbf{CONTACTO}} &
+        \multicolumn{2}{p{5.21cm}|}{\textbf{{{applicantContact}}}} \\ \hline
+        \multicolumn{2}{|>{\centering\columncolor{gray!20}}p{5.0cm}|}{\textbf{ARTÍCULO A CAMBIAR}} &
+        \multicolumn{4}{p{11.82cm}|}{\textbf{{{changeArticle}}}} \\ \hline
+        \multicolumn{2}{|>{\centering\columncolor{gray!20}}p{5.0cm}|}{\textbf{DESCRIPCIÓN DEL CAMBIO}} &
+        \multicolumn{4}{p{11.82cm}|}{\textbf{{{changeDescription}}}} \\ \hline
+    \end{tabularx}
 
 \end{document}
