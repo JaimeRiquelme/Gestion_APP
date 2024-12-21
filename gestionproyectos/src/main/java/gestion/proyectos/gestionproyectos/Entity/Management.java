@@ -9,6 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -50,6 +51,18 @@ public class Management {
 
     private String description;
 
-    @OneToMany(mappedBy = "management", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Process> processes;
+    @JsonIgnore
+    @OneToMany(mappedBy = "management", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<Process> processes = new ArrayList<>();
+
+    // Métodos para sincronizar la relación bidireccional
+    public void addProcess(Process process) {
+        this.processes.add(process);
+        process.setManagement(this); // Sincronizar relación
+    }
+
+    public void removeProcess(Process process) {
+        this.processes.remove(process);
+        process.setManagement(null); // Romper relación
+    }
 }
