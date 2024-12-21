@@ -43,4 +43,12 @@ public class ExitService {
             throw new Exception("Exit " + id + " does not exist");
         }
     }
+
+    public void updateAssumptionsDocument(Long idExit, byte[] Documento) {
+        Exit exit = exitRepository.findById(idExit).orElse(null);
+        if (exit != null) {
+            exit.setDocument(Documento);
+            exitRepository.save(exit);
+        }
+    }
 }

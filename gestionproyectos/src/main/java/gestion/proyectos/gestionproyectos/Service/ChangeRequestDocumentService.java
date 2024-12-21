@@ -18,22 +18,34 @@ public class ChangeRequestDocumentService implements DocumentService {
     @Autowired
     private TemplatePathResolver pathResolver;
 
+    @Autowired
+    private ExitService exitService;
+
+    @Autowired
+    private ParameterService parameterService;
+
     private static final Set<String> REQUIRED_FIELDS = new HashSet<>(Arrays.asList(
-            "nombreProyecto",
-            "idProyecto",
-            "numeroSolicitud",
-            "solicitante",
-            "fechaSolicitud",
-            "contactoSolicitante",
-            "prioridad",
-            "articuloCambiar",
-            "descripcionCambio"
+            "proyectName",
+            "idProyect",
+            "requestNumber",
+            "applicant",
+            "requestDate",
+            "applicantContact",
+            "priority",
+            "changeArticle",
+            "changeDescription"
     ));
 
     @Override
-    public byte[] generateDocument(Map<String, String> data) throws IOException {
+    public byte[] generateDocument(Map<String, String> data,Long idExit) throws IOException {
         validateData(data);
         String templatePath = pathResolver.resolve("solicitud_de_cambio.tex");
+
+        byte[] Documento = latexService.generateDocument(templatePath, data);
+
+        exitService.updateAssumptionsDocument(idExit, Documento);
+        parameterService.saveParameters(data, idExit);
+
         return latexService.generateDocument(templatePath, data);
     }
 

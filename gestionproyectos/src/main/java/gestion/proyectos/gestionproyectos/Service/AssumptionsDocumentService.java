@@ -18,6 +18,12 @@ public class AssumptionsDocumentService implements DocumentService {
     @Autowired
     private TemplatePathResolver pathResolver;
 
+    @Autowired
+    private ExitService exitService;
+
+    @Autowired
+    private ParameterService parameterService;
+
     private static final Set<String> REQUIRED_FIELDS = new HashSet<>(Arrays.asList(
             "proyectName",
             "idProyect",
@@ -41,10 +47,16 @@ public class AssumptionsDocumentService implements DocumentService {
     ));
 
     @Override
-    public byte[] generateDocument(Map<String, String> data) throws IOException {
+    public byte[] generateDocument(Map<String, String> data, Long idExit) throws IOException {
         validateData(data);
         String templatePath = pathResolver.resolve("registro_de_supuestos.tex");
-        return latexService.generateDocument(templatePath, data);
+
+        byte[] Documento = latexService.generateDocument(templatePath, data);
+
+        exitService.updateAssumptionsDocument(idExit, Documento);
+        parameterService.saveParameters(data, idExit);
+
+        return Documento;
     }
 
     @Override

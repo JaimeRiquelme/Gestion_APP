@@ -9,7 +9,7 @@ public interface DocumentService {
      * @param data Mapa de datos necesarios para generar el documento
      * @return Array de bytes del documento generado
      */
-    byte[] generateDocument(Map<String, String> data) throws IOException;
+    byte[] generateDocument(Map<String, String> data, Long idExit) throws IOException;
 
     /**
      * Valida que los datos necesarios para generar el documento estén presentes

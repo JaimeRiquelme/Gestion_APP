@@ -1,6 +1,7 @@
 package gestion.proyectos.gestionproyectos.Entity;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -41,6 +42,7 @@ public class Exit {
     private String responsible;
     private String description;
 
+    @JsonManagedReference
     @OneToMany(mappedBy = "exit", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Parameter> parameters;
 }
