@@ -1,6 +1,6 @@
 package gestion.proyectos.gestionproyectos.Entity;
 
-
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
@@ -10,7 +10,6 @@ import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "parameter")
-@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "idParameter")
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
@@ -20,8 +19,9 @@ public class Parameter {
     @Column(name = "id_parameter")
     private Long idParameter;
 
+    @JsonBackReference
     @ManyToOne
-    @JoinColumn(name = "id_exit")
+    @JoinColumn(name = "exit_id")
     private Exit exit;
 
     @Column(name = "name_parameter", unique = true)
