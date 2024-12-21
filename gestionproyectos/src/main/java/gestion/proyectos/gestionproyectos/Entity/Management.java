@@ -25,7 +25,7 @@ public class Management {
     @Column(name = "id_management")
     private Long idManagement;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "id_proyecto")
     private Proyect proyect;
 

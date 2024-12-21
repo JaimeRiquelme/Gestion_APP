@@ -27,7 +27,7 @@ public class Proyect {
     @Column(name = "id_proyecto")
     private Long idProyecto;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne
     @JoinColumn(name = "id_usuario")
     @JsonIgnore
     private User user;
@@ -63,4 +63,10 @@ public class Proyect {
 
     @OneToMany(mappedBy = "proyect", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Management> managements;
+
+    @OneToMany(mappedBy = "proyect", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Incident> incidents;
+
+    @OneToMany(mappedBy = "proyect", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Lessons> lessons;
 }
