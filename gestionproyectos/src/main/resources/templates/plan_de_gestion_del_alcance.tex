@@ -1,0 +1,72 @@
+\documentclass{article}
+\usepackage[table]{xcolor} % Para colorear celdas
+\usepackage{tabularx} % Para tablas ajustables al ancho
+\usepackage{geometry} % Para ajustar márgenes
+\geometry{margin=1.5cm} % Márgenes pequeños
+
+\begin{document}
+
+\begin{center}
+{\huge\textbf{Plan de Gestión del Alcance}}\\[14cm]
+\end{center}
+
+\newcommand{\wrappingmulticolumn}[3] 
+    {\multicolumn{#1}
+                 {|>{\hsize=\dimexpr#1\hsize+\tabcolsep * (2 * (#1 - 1) )+\arrayrulewidth* (#1 - 2)\relax}#2|}
+                 {#3}}
+\renewcommand{\arraystretch}{1.5} % Espacio entre filas
+\rowcolors{2}{gray!10}{white} % Colores alternos para filas
+
+\begin{tabular}{|ll|} \hline
+\rowcolor{gray!10}\textbf{Nombre del proyecto:} & {{proyectName}} \\[0.3cm]
+\textbf{Identificador del proyecto:} & {{idProject}} \\[0.3cm]
+\textbf{Lider de producto:} & {{productLeader}} \\[0.3cm]
+\textbf{Lider de proyecto:} & {{projectLeader}} \\[0.3cm]
+\textbf{Fecha elaboración:} & {{elaborationDate}} \\ \hline
+\end{tabular}
+
+\newpage
+
+\tableofcontents
+\newpage
+
+\section{Enfoque del Alcance}
+{{scopeApproach}}
+\subsection{Objetivos del Plan de Gestión del Alcance}
+{{scopePlanObjectives}}
+
+\section{Definición del Alcance}
+{{scopeDefinition}}
+\subsection{Exclusiones del Alcance}
+{{scopeExclusions}}
+\subsection{Limitaciones del Alcance}
+{{scopeLimitations}}
+
+\section{Enunciado del Alcance}
+{{scopeStatement}}
+\subsection{Entregables del Alcance}
+{{scopeOutputs}}
+\subsection{Suposiciones del Proyecto}
+{{projectAssumptions}}
+
+\section{Recopilación de Requisitos}
+{{requirementGathering}}
+\subsection{Estrategias para la Recopilación de Requisitos}
+{{requirementsGatheringStrategy}}
+\subsection{Análisis de Requisitos}
+{{requirementsAnalysis}}
+\subsection{Documentación de Requisitos}
+{{requirementsDocumentation}}
+
+\section{Verificación y Control del Alcance}
+{{verificationAndControlOfScope}}
+\subsection{Aprobación del Alcance}
+{{scopeApproval}}
+\subsection{Aceptación Formal por parte de los Interesados}
+{{stakeholdersApproval}}
+\subsection{Sistema de control de cambios}
+{{changeControlSystem}}
+\subsection{Aprobación Formal del EDT}
+{{edtApproval}}
+
+\end{document}

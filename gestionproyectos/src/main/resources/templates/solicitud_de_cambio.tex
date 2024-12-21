@@ -1,0 +1,48 @@
+\documentclass[12pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
+\usepackage[table]{xcolor}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{geometry}
+\geometry{margin=1.5cm}
+
+% Definir nuevo tipo de columna para texto envuelto
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+\newcolumntype{Z}{>{\raggedright\arraybackslash\hsize=1.5\hsize}X}
+\newcolumntype{W}{>{\raggedright\arraybackslash\hsize=0.5\hsize}X}
+
+\begin{document}
+
+    \begin{center}
+    {\huge\textbf{Solicitud de Cambio}}\\[1cm]
+    \end{center}
+
+    \renewcommand{\arraystretch}{1.5}
+
+% Tabla de solicitud
+    \noindent
+    \begin{tabularx}{\textwidth}{|c|c|c|c|c|c|}
+        \hline
+        \multicolumn{6}{|>{\columncolor{gray!50}}p{18.13cm}|}{\centering\textbf{SOLICITUD DE CAMBIO}} \\ \hline
+        \multicolumn{1}{|>{\columncolor{gray!20}}p{3.2cm}|}{ \centering\textbf{NOMBRE DEL PROYECTO}} &
+        \multicolumn{5}{p{13.62cm}|}{\textbf{{{proyectName}}}} \\ \hline
+        \multicolumn{1}{|>{\centering\columncolor{gray!20}}p{3.2cm}|}{\textbf{ID DEL PROYECTO}} &
+        \multicolumn{2}{p{5.21cm}|}{\textbf{{{idProyect}}}} &
+        \multicolumn{1}{|>{\columncolor{gray!20}}p{3.2cm}|}{\textbf{NÚMERO DE SOLICITUD}} &
+        \multicolumn{2}{p{5.21cm}|}{\textbf{{{requestNumber}}}} \\ \hline
+        \multicolumn{1}{|>{\columncolor{gray!20}}p{3.2cm}|}{\textbf{FECHA DE SOLICITUD}} &
+        \multicolumn{2}{p{5.21cm}|}{\textbf{{{requestDate}}}} &
+        \multicolumn{1}{|>{\columncolor{gray!20}}p{3.2cm}|}{\textbf{PRIORIDAD}} &
+        \multicolumn{2}{p{5.21cm}|}{\textbf{{{priority}}}} \\ \hline
+        \multicolumn{1}{|>{\columncolor{gray!20}}p{3.2cm}|}{\textbf{SOLICITANTE}} &
+        \multicolumn{2}{p{5.21cm}|}{\textbf{{{applicant}}}} &
+        \multicolumn{1}{|>{\columncolor{gray!20}}p{3.2cm}|}{\textbf{CONTACTO}} &
+        \multicolumn{2}{p{5.21cm}|}{\textbf{{{applicantContact}}}} \\ \hline
+        \multicolumn{2}{|>{\centering\columncolor{gray!20}}p{5.0cm}|}{\textbf{ARTÍCULO A CAMBIAR}} &
+        \multicolumn{4}{p{11.82cm}|}{\textbf{{{changeArticle}}}} \\ \hline
+        \multicolumn{2}{|>{\centering\columncolor{gray!20}}p{5.0cm}|}{\textbf{DESCRIPCIÓN DEL CAMBIO}} &
+        \multicolumn{4}{p{11.82cm}|}{\textbf{{{changeDescription}}}} \\ \hline
+    \end{tabularx}
+
+\end{document}
