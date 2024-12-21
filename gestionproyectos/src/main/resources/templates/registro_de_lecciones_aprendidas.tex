@@ -1,0 +1,45 @@
+\documentclass{article}
+\usepackage[table]{xcolor} % Para colorear celdas
+\usepackage{tabularx} % Para tablas ajustables al ancho
+\usepackage{geometry} % Para ajustar márgenes
+\geometry{margin=1.5cm} % Márgenes pequeños
+
+% Definir nuevo tipo de columna para texto envuelto
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+\newcolumntype{Z}{>{\raggedright\arraybackslash\hsize=1.5\hsize}X}
+\newcolumntype{W}{>{\raggedright\arraybackslash\hsize=0.5\hsize}X}
+
+\begin{document}
+
+\begin{center}
+{\huge\textbf{Registro de Lecciones Aprendidas}}\\[1cm]
+\end{center}
+
+% Primera tabla - Información del proyecto
+    \noindent
+    \begin{tabularx}{\textwidth}{|c|c|c|c|c|c|}
+        \hline
+        \multicolumn{6}{|>{\columncolor{gray!50}}p{18.13cm}|}{\centering\textbf{LECCIÓN APRENDIDA}} \\ \hline
+        \multicolumn{1}{|>{\columncolor{gray!20}}p{2.91cm}|}{\textbf{NOMBRE DEL PROYECTO}} &
+        \multicolumn{5}{p{13.91cm}|}{\textbf{{{projectName}}}} \\ \hline
+        \multicolumn{1}{|>{\columncolor{gray!20}}p{2.91cm}|}{\textbf{ID DEL PROYECTO}} &
+        \multicolumn{2}{p{5.5cm}|}{\textbf{{{idProject}}}} &
+        \multicolumn{1}{|>{\columncolor{gray!20}}p{2.91cm}|}{\textbf{ÁREA}} &
+        \multicolumn{2}{p{5.5cm}|}{\textbf{{{lessonArea}}}} \\ \hline
+        \multicolumn{1}{|>{\columncolor{gray!20}}p{2.91cm}|}{\textbf{TIPO}} &
+        \multicolumn{2}{p{5.5cm}|}{\textbf{{{lessonType}}}} &
+        \multicolumn{1}{|>{\columncolor{gray!20}}p{2.91cm}|}{\textbf{NÚMERO DE LECCIÓN}} &
+        \multicolumn{2}{p{5.5cm}|}{\textbf{{{lessonNumber}}}} \\ \hline
+        \multicolumn{2}{|>{\centering\columncolor{gray!20}}p{5.0cm}|}{\textbf{TÍTULO}} &
+        \multicolumn{4}{p{11.82cm}|}{\textbf{{{lessonTitle}}}} \\ \hline
+        \multicolumn{2}{|>{\centering\columncolor{gray!20}}p{5.0cm}|}{\textbf{DESCRIPCIÓN DE LA SITUACIÓN}} &
+        \multicolumn{4}{p{11.82cm}|}{\textbf{{{situationDescription}}}} \\ \hline
+        \multicolumn{2}{|>{\centering\columncolor{gray!20}}p{5.0cm}|}{\textbf{DESCRIPCIÓN DEL IMPACTO EN LOS OBJETIVOS}} &
+        \multicolumn{4}{p{11.82cm}|}{\textbf{{{objectivesImpact}}}} \\ \hline
+        \multicolumn{2}{|>{\centering\columncolor{gray!20}}p{5.0cm}|}{\textbf{ACCIONES IMPLEMENTADAS}} &
+        \multicolumn{4}{p{11.82cm}|}{\textbf{{{implementedActions}}}} \\ \hline
+        \multicolumn{2}{|>{\centering\columncolor{gray!20}}p{5.0cm}|}{\textbf{LECCIÓN APRENDIDA / RECOMENDACIONES}} &
+        \multicolumn{4}{p{11.82cm}|}{\textbf{{{lessonRecommendation}}}} \\ \hline
+    \end{tabularx}
+
+\end{document}
