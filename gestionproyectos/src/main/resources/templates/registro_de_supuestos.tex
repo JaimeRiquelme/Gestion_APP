@@ -1,0 +1,99 @@
+\documentclass[12pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
+\usepackage[table]{xcolor}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{geometry}
+\geometry{margin=1.5cm}
+
+% Definir nuevos tipos de columnas
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+\newcolumntype{L}{>{\raggedright\arraybackslash\hsize=0.8\hsize}X}
+\newcolumntype{R}{>{\raggedright\arraybackslash\hsize=1.2\hsize}X}
+
+\begin{document}
+
+    \begin{center}
+    {\huge\textbf{Registro de Supuestos}}\\[1cm]
+    \end{center}
+
+    \renewcommand{\arraystretch}{1.5}
+
+% Primera tabla - Información del proyecto
+    \noindent
+    \begin{tabularx}{\textwidth}{|>{\columncolor{gray!40}}c|c|>{\columncolor{gray!40}}c|c|}
+        \hline
+        \rowcolor{gray!40}\multicolumn{2}{|>{\columncolor{gray!40}}l|}{\textbf{NOMBRE DEL PROYECTO}} &
+        \textbf{ID DEL PROYECTO} & \textbf{FECHA DEL PROYECTO} \\
+        \hline
+        \rowcolor{white}\multicolumn{2}{|l|}{{{proyectName}}} & {{idProyect}} & {{elaborationDate}} \\
+        \hline
+        \multicolumn{4}{|>{\columncolor{gray!40}}c|}{\textbf{OBJETIVOS DEL PROYECTO}} \\
+        \hline
+        \multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep}|}{{{proyectObjectives}}} \\
+        \hline
+    \end{tabularx}
+
+    \vspace{0.5cm}
+
+    \section{Salidas del Proyecto}
+    {{proyectOutputs}}
+
+    \section{Listado de Tareas del Proyecto}
+    {{proyectTasks}}
+
+    \section{Fuera del Alcance}
+    \noindent
+    \begin{tabularx}{\textwidth}{|>{\columncolor{gray!40}}L|R|}
+        \hline
+        \textbf{ESTE PROYECTO NO ALCANZARÁ O INCLUIRÁ LO SIGUIENTE} & {{proyectOutOfScope}} \\
+        \hline
+    \end{tabularx}
+
+    \section{Supuestos del Proyecto}
+    {{proyectAssumptions}}
+
+    \section{Restricciones del Proyecto}
+    \noindent
+    \begin{tabularx}{\textwidth}{|>{\columncolor{gray!40}}L|R|}
+        \hline
+        \textbf{FECHA DE INICIO} & {{proyectStartDate}} \\
+        \hline
+        \textbf{FECHA DEL KICK OFF} & {{kickOffDate}} \\
+        \hline
+        \textbf{FECHA DE FINALIZACIÓN} & {{proyectEndDate}} \\
+        \hline
+        \textbf{DEADLINES ESTRICTAS} & {{proyectDeadlines}} \\
+        \hline
+        \textbf{PRINCIPALES METAS} & {{proyectMilestones}} \\
+        \hline
+    \end{tabularx}
+
+    \vspace{2mm}
+
+    \noindent
+    \begin{tabularx}{\textwidth}{|>{\columncolor{gray!20}}L|R|}
+        \hline
+        \textbf{RESTRICCIONES DE PRESUPUESTO} & {{budgetRestrictions}} \\
+        \hline
+        \textbf{RESTRICCIONES DE CALIDAD O RENDIMIENTO} & {{qualityRestrictions}} \\
+        \hline
+        \textbf{RESTRICCIONES DE EQUIPO O PERSONAL} & {{teamRestrictions}} \\
+        \hline
+        \textbf{RESTRICCIONES JURÍDICAS O REGULATORIAS} & {{juridicalRestrictions}} \\
+        \hline
+    \end{tabularx}
+
+    \section{Estimaciones de plazo}
+    \noindent
+    \begin{tabularx}{\textwidth}{|>{\columncolor{gray!40}}L|R|}
+        \hline
+        \textbf{HORAS ESTIMADAS PARA LA REALIZACIÓN DEL PROYECTO} & {{timeEstimate}} \\
+        \hline
+    \end{tabularx}
+
+    \section{Verificación}
+    {{approvals}}
+
+\end{document}

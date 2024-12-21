@@ -1,0 +1,147 @@
+\documentclass{article}
+\usepackage[table]{xcolor} % Para colorear celdas
+\usepackage{tabularx,lipsum}
+\usepackage{geometry} % Para ajustar márgenes
+\geometry{margin=1.5cm} % Márgenes pequeños
+
+\begin{document}
+
+\begin{center}
+{\huge\textbf{Plan de Dirección del Proyecto}}\\[14cm]
+\end{center}
+
+\vspace{0.5cm}
+
+\newcommand{\wrappingmulticolumn}[3] 
+    {\multicolumn{#1}
+                 {|>{\hsize=\dimexpr#1\hsize+\tabcolsep * (2 * (#1 - 1) )+\arrayrulewidth* (#1 - 2)\relax}#2|}
+                 {#3}}
+\renewcommand{\arraystretch}{1.5} % Espacio entre filas
+\rowcolors{2}{gray!10}{white} % Colores alternos para filas
+
+
+\begin{tabular}{|ll|} \hline
+\rowcolor{gray!10}\textbf{Nombre del proyecto:} & {{proyectName}} \\[0.3cm]
+\textbf{Identificador del proyecto:} & {{idProyect}} \\[0.3cm]
+\textbf{Empresa encargada:} & {{company}} \\[0.3cm]
+\textbf{Promotor del Proyecto:} & {{proyectPromotor}} \\[0.3cm]
+\textbf{Lider del proyecto:} & {{proyectLeader}} \\[0.3cm]
+\textbf{Fecha elaboración:} & {{elaborationDate}} \\ \hline
+\end{tabular}
+
+\newpage
+
+\tableofcontents
+\newpage
+
+\section{Introducción}
+{{introduction}}
+\section{Enfoque del Manejo del Proyecto}
+{{managmentApproach}}
+\section{Alcance del Proyecto}
+{{proyectScope}}
+\section{Listado de Metas}
+{{milestones}}
+\section{Línea base del Cronograma}
+{{scheduleBaseline}}
+\section{WBS}
+{{wbs}}
+\section{Plan de Manejo de Cambios}
+{{changePlan}}
+\section{Plan de Gestión de Comunicaciones}
+{{comunicationManagmentPlanDescription}}
+\subsection{Comunicación de la Información del Proyecto}
+{{proyectInfoCommunication}}
+\subsection{Diagramas de Gestión de Comunicaciones}
+{{communicationManagmentDiagram}}
+\subsection{Logística del Trabajo}
+{{workLogistic}}
+\subsection{Definición de Reportes del Proyecto}
+{{reportDefinitions}}
+\section{Plan de Gestión de Costos}
+{{costManagmentPlanDescription}}
+\subsection{Metodología de Gestión de los Costos}
+{{costManagmentMetodology}}
+\subsection{Estrategia de Medición de los Costos}
+{{costMeasurment}}
+\subsection{Control de Cambios en los Costos}
+{{costChangeControl}}
+\subsection{Metodologia de Estimacion de Presupuesto}
+{{costEstimateMetodology}}
+\section{Plan de Gestión de Adquisiciones}
+{{adquisitionManagmentPlanDescription}}
+\subsection{Identificación de Adquisiciones}
+{{adquisitionIdentification}}
+\subsection{Planeamiento de Adquisiciones}
+{{adquisitionPlanning}}
+\subsection{Statement of Work}
+{{statementOfWork}}
+\section{Plan de Gestión de Alcance}
+{{scopeManagmentPlanDescription}}
+\subsection{Enfoque del Alcance}
+{{scopeApproach}}
+\subsection{Definición del Alcance}
+{{scopeDefinition}}
+\subsection{Enunciado del Alcance}
+{{scopeStatement}}
+\subsection{Estrategia de Recopilación de Requisitos}
+{{requirementGatheringStrategy}}
+\subsection{Verificación y Control del Alcance}
+{{verificationAndControlOfScope}}
+\section{Plan de Gestión del Cronograma}
+{{scheduleManagmentPlanDescription}}
+\subsection{Enfoque de la Gestión del Cronograma}
+{{scheduleManagmentApproach}}
+\subsection{Identificacion y Estrategia de Secuenciacion de Actividades}
+{{activityManagment}}
+\subsection{Control del Cronograma}
+{{scheduleControl}}
+\subsection{Revisiones del Cronograma}
+{{scheduleRevision}}
+\subsection{Cambios en el Cronograma y Umbral}
+{{scheduleChangesAndUmbral}}
+\section{Plan de Gestión de la Calidad}
+{{qualityManagmentPlanDescription}}
+\subsection{Enfoque de la Gestión de la Calidad}
+{{qualityManagmentApproach}}
+\subsection{Políticas y Normas}
+{{politicsAndNorms}}
+\subsection{Estándares y Requisitos de Calidad}
+{{standardsAndRequisitesOfQuality}}
+\subsection{Control de la Calidad}
+{{qualityControl}}
+\section{Plan de Gestión de los Riesgos}
+{{riskManagmentPlanDescription}}
+\subsection{Identificación de Riesgos}
+{{riskIdentification}}
+\subsection{Categorización y Priorización de Riesgos}
+{{riskCategorizationAndPriority}}
+\subsection{Monitoreo y Control de Riesgos}
+{{riskMonitoringAndControl}}
+\subsection{Mitigacion y Prevencion de Riesgos}
+{{riskPreventionAndMitigation}}
+\section{Registro de Riesgos}
+{{riskRegister}}
+\section{Plan de Gestión de los Recursos}
+{{resourceManagmentPlanDescription}}
+\subsection{Roles y Responsabilidades}
+{{rolsAndResponsabilities}}
+\subsection{Estimación de Recursos}
+{{resourceEstimate}}
+\section{Línea base de Costos}
+{{costBaseline}}
+\section{Línea base de Calidad}
+{{qualityBaseline}}
+\section{Aceptación del Sponsor}
+
+\vspace{2.5cm}
+
+\begin{tabular}{@{}p{.5in}p{4in}@{}}
+Aprovado: & \hrulefill \\
+\rowcolor{white} & {{proyectPromotor}} \\
+\rowcolor{white} & {{proyectPromotorTitle}}\\
+\end{tabular}
+
+
+
+\end{document}

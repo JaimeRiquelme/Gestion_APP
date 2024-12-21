@@ -1,0 +1,75 @@
+\documentclass[10pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
+\usepackage[table]{xcolor}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{geometry}
+\geometry{margin=1.5cm}
+
+% Definir nuevos tipos de columnas
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+\newcolumntype{L}{>{\raggedright\arraybackslash\hsize=0.5\hsize}X}
+\newcolumntype{R}{>{\raggedright\arraybackslash\hsize=1.2\hsize}X}
+
+\begin{document}
+
+    \begin{center}
+    {\huge\textbf{Revision de Desempeño de Trabajo}}\\[1cm]
+    \end{center}
+
+    \renewcommand{\arraystretch}{1.5}
+
+% Primera tabla - Información del proyecto
+    \noindent
+    \begin{tabularx}{\textwidth}{|c|c|c|c|c|c|}
+        \hline
+        \multicolumn{6}{|>{\columncolor{gray!50}}p{18.12cm}|}{\centering\textbf{INFORMACION DEL EMPLEADO}} \\ \hline
+        \multicolumn{1}{|>{\columncolor{gray!20}}p{2.91cm}|}{\textbf{NOMBRE DEL EMPLEADO}} &
+        \multicolumn{2}{p{5.5cm}|}{\textbf{{{employeeName}}}} &
+        \multicolumn{1}{|>{\columncolor{gray!20}}p{2.91cm}|}{\textbf{DEPART- AMENTO}} &
+        \multicolumn{2}{p{5.5cm}|}{\textbf{{{employeeDepartment}}}} \\ \hline
+        \multicolumn{1}{|>{\columncolor{gray!20}}p{2.91cm}|}{\textbf{ID DEL EMPLEADO}} &
+        \multicolumn{2}{p{5.5cm}|}{\textbf{{{idEmployee}}}} &
+        \multicolumn{1}{|>{\columncolor{gray!20}}p{2.91cm}|}{\textbf{NOMBRE REVISOR}} &
+        \multicolumn{2}{p{5.5cm}|}{\textbf{{{reviewerName}}}} \\ \hline
+        \multicolumn{1}{|>{\columncolor{gray!20}}p{2.91cm}|}{\textbf{POSICION EMPLEADO}} &
+        \multicolumn{2}{p{5.5cm}|}{\textbf{{{employeePosition}}}} &
+        \multicolumn{1}{|>{\columncolor{gray!20}}p{2.91cm}|}{\textbf{TITULO DEL REVISOR}} &
+        \multicolumn{2}{p{5.5cm}|}{\textbf{{{reviewerTitle}}}} \\ \hline
+        \multicolumn{2}{|>{\columncolor{gray!20}}p{5.5cm}|}{\textbf{FECHA DE ULTIMA REVISION}} &
+        \multicolumn{1}{p{2.9cm}|}{\textbf{{{lastReviewDate}}}} &
+        \multicolumn{2}{|>{\columncolor{gray!20}}p{5.5cm}|}{\textbf{FECHA ACTUAL}} &
+        \multicolumn{1}{p{2.9cm}|}{\textbf{{{currentDate}}}} \\ \hline
+    \end{tabularx}
+
+    \vspace{0.5cm}
+
+    \section{Evaluacion de Caracteristicas del Empleado}
+    {{employeeCharacteristicsEvaluations}}
+
+    \section{Metas}
+    \noindent
+    \begin{tabularx}{\textwidth}{|c|c|c|c|c|c|}
+        \hline
+        \multicolumn{6}{|>{\columncolor{gray!50}}p{18.12cm}|}{\centering\textbf{METAS}} \\ \hline
+        \multicolumn{6}{|>{\columncolor{gray!20}}p{18.12cm}|}{\centering\textbf{¿FUERON LAS METAS ALCANZADAS EN LA ACTUAL REVISION?}} \\ \hline
+        \multicolumn{6}{|p{18.12cm}|}{\centering\textbf{{{currentGoalsReview}}}} \\ \hline
+        \multicolumn{6}{|>{\columncolor{gray!20}}p{18.12cm}|}{\centering\textbf{METAS PARA SIGUIENTE REVISION}} \\ \hline
+        \multicolumn{6}{|p{18.12cm}|}{\centering\textbf{{{futureGoals}}}} \\ \hline
+    \end{tabularx}
+
+    \section{Comentarios y Aprovacion}
+    \noindent
+    \begin{tabularx}{\textwidth}{|c|c|c|c|c|c|}
+        \hline
+        \multicolumn{6}{|>{\columncolor{gray!50}}p{18.12cm}|}{\centering\textbf{COMENTARIOS Y APROVACION}} \\ \hline
+        \multicolumn{6}{|>{\columncolor{gray!20}}p{18.12cm}|}{\centering\textbf{COMENTARIOS}} \\ \hline
+        \multicolumn{6}{|p{18.12cm}|}{\centering\textbf{{{comments}}}} \\ \hline
+        \multicolumn{1}{|>{\columncolor{gray!20}}p{2.91cm}|}{\textbf{FIRMA EMPLEADO}} &
+        \multicolumn{2}{p{5.5cm}|}{} &
+        \multicolumn{1}{|>{\columncolor{gray!20}}p{2.91cm}|}{\textbf{FIRMA REVISOR}} &
+        \multicolumn{2}{p{5.5cm}|}{} \\ \hline
+    \end{tabularx}
+
+\end{document}
