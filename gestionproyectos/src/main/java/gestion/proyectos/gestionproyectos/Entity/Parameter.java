@@ -1,9 +1,6 @@
 package gestion.proyectos.gestionproyectos.Entity;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import com.fasterxml.jackson.annotation.*;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -21,9 +18,10 @@ public class Parameter {
     @Column(name = "id_parameter")
     private Long idParameter;
 
-    @JsonBackReference // Evita la serialización de la relación para evitar ciclos infinitos
+
     @ManyToOne
     @JoinColumn(name = "exit_id")
+    @JsonIgnore
     private Exit exit;
 
     @JsonProperty("idExit") // Exponer el ID del exit relacionado para permitir su uso en la serialización

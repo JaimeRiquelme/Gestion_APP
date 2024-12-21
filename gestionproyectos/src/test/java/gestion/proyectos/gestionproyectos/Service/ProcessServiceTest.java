@@ -74,7 +74,7 @@ class ProcessServiceTest {
         when(processRepository.save(any(Process.class))).thenReturn(testProcess1);
 
         // Act
-        Process savedProcess = processService.saveProcess(testProcess1);
+        Process savedProcess = processService.create(testProcess1);
 
         // Assert
         assertNotNull(savedProcess);
@@ -93,7 +93,7 @@ class ProcessServiceTest {
         when(processRepository.findById(1L)).thenReturn(Optional.of(testProcess1));
 
         // Act
-        Process found = processService.getProcess(1L);
+        Process found = processService.getById(1L);
 
         // Assert
         assertNotNull(found);
@@ -110,7 +110,7 @@ class ProcessServiceTest {
         when(processRepository.findById(999L)).thenReturn(Optional.empty());
 
         // Act
-        Process result = processService.getProcess(999L);
+        Process result = processService.getById(999L);
 
         // Assert
         assertNull(result);
@@ -125,7 +125,7 @@ class ProcessServiceTest {
         when(processRepository.findAll()).thenReturn(processList);
 
         // Act
-        List<Process> result = processService.getProcesses();
+        List<Process> result = processService.getAll();
 
         // Assert
         assertNotNull(result);
@@ -146,7 +146,7 @@ class ProcessServiceTest {
         when(processRepository.save(any(Process.class))).thenReturn(processToUpdate);
 
         // Act
-        Process updated = processService.updateProcess(processToUpdate);
+        Process updated = processService.update(processToUpdate.getIdProcess(), processToUpdate);
 
         // Assert
         assertNotNull(updated);
@@ -165,7 +165,7 @@ class ProcessServiceTest {
         doNothing().when(processRepository).deleteById(processId);
 
         // Act
-        processService.deleteProcess(processId);
+        processService.delete(processId);
 
         // Assert
         verify(processRepository, times(1)).deleteById(processId);

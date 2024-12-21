@@ -29,27 +29,29 @@ public class Proyect {
 
     @ManyToOne
     @JoinColumn(name = "id_usuario")
-    @JsonIgnore
+    @JsonIgnore // Ignorar la serialización directa de User
     private User user;
 
-    @JsonProperty("idUsuario")
+    @JsonProperty("idUsuario") // Exponer idUsuario para serialización
     public Long getIdUsuario() {
-        return user != null ? user.getIdUsuario() : null;
+        return user != null ? user.getIdUsuario() : null; // Obtener el id del usuario relacionado
     }
 
-    @JsonProperty("idUsuario")
+    @JsonProperty("idUsuario") // Permitir seteo durante la deserialización
     public void setIdUsuario(Long idUsuario) {
         if (idUsuario != null) {
             this.user = new User();
-            this.user.setIdUsuario(idUsuario); // Solo asignar el id del usuario
+            this.user.setIdUsuario(idUsuario); // Asociar solo el id del usuario
         }
     }
 
     @Column(name = "name_proyect")
     private String nameProyect;
 
+    @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
+    @Column(name = "organization")
     private String organization;
 
     @Column(name = "start_date")
@@ -61,12 +63,15 @@ public class Proyect {
     @Column(name = "real_estimated_end_date")
     private String realEstimatedEndDate;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "proyect", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Management> managements;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "proyect", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Incident> incidents;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "proyect", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Lessons> lessons;
 }
