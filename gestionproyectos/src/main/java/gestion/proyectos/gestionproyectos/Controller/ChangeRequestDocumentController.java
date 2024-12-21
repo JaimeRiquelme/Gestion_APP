@@ -1,6 +1,5 @@
 package gestion.proyectos.gestionproyectos.Controller;
 
-import gestion.proyectos.gestionproyectos.Service.AssumptionsDocumentService;
 import gestion.proyectos.gestionproyectos.Service.ChangeRequestDocumentService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,61 +15,45 @@ import java.time.format.DateTimeFormatter;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/documents")
+@RequestMapping("/api/documents/change-request")
 @CrossOrigin("*")
-public class DocumentController {
-    private static final Logger logger = LoggerFactory.getLogger(DocumentController.class);
+public class ChangeRequestDocumentController {
 
-    @Autowired
-    private AssumptionsDocumentService assumptionsService;
+    private static final Logger logger = LoggerFactory.getLogger(ChangeRequestDocumentController.class);
 
     @Autowired
     private ChangeRequestDocumentService changeRequestService;
 
     @PostMapping("/generate")
-    public ResponseEntity<?> generateDocument(@RequestParam Long idExit,
-            @RequestParam String type,
+    public ResponseEntity<?> generateChangeRequestDocument(
+            @RequestParam Long idExit,
             @RequestBody Map<String, String> requestData) {
+
         try {
-            logger.info("Generating document of type: {} with data: {}", type, requestData);
+            logger.info("Generating change-request document with data: {}", requestData);
 
-            byte[] pdfContent;
-            String filename;
-
-            switch (type.toLowerCase()) {
-                case "assumptions":
-                    pdfContent = assumptionsService.generateDocument(requestData,idExit);
-                    filename = generateFilename("registro_de_supuestos");
-                    break;
-                case "change-request":
-                    pdfContent = changeRequestService.generateDocument(requestData,idExit);
-                    filename = generateFilename("solicitud_cambio");
-                    break;
-                default:
-                    logger.error("Unsupported document type requested: {}", type);
-                    return ResponseEntity.badRequest()
-                            .body("Tipo de documento no soportado: " + type);
-            }
+            byte[] pdfContent = changeRequestService.generateDocument(requestData, idExit);
+            String filename = generateFilename("solicitud_cambio");
 
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_PDF);
             headers.setContentDispositionFormData("filename", filename);
 
-            logger.info("Successfully generated document: {}", filename);
+            logger.info("Successfully generated change-request document: {}", filename);
             return ResponseEntity.ok()
                     .headers(headers)
                     .body(pdfContent);
 
         } catch (IllegalArgumentException e) {
-            logger.error("Validation error while generating document", e);
+            logger.error("Validation error while generating change-request document", e);
             return ResponseEntity.badRequest()
                     .body("Error de validación: " + e.getMessage());
         } catch (IOException e) {
-            logger.error("Error generating document", e);
+            logger.error("Error generating change-request document", e);
             return ResponseEntity.internalServerError()
                     .body("Error generando el documento: " + e.getMessage());
         } catch (Exception e) {
-            logger.error("Unexpected error while generating document", e);
+            logger.error("Unexpected error while generating change-request document", e);
             return ResponseEntity.internalServerError()
                     .body("Error inesperado: " + e.getMessage());
         }

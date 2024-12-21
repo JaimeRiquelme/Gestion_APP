@@ -56,35 +56,12 @@ public class LatexService {
     }
 
     private boolean isTableFormat(String content) {
-        // Verificaciones básicas
-        if (content == null || content.isEmpty()) {
+        // Si el contenido es nulo o está vacío, no es tabla
+        if (content == null || content.trim().isEmpty()) {
             return false;
         }
-
-        // Debe comenzar y terminar con &
-        if (!content.startsWith("&") || !content.endsWith("&")) {
-            return false;
-        }
-
-        // Remover los & del inicio y final para procesar el contenido
-        content = content.substring(1, content.length() - 1);
-
-        // Si no hay contenido después de remover los &, no es una tabla
-        if (content.isEmpty()) {
-            return false;
-        }
-
-        // Dividir el contenido en filas (por &)
-        String[] rows = content.split("&");
-
-        // Validar cada fila
-        for (String row : rows) {
-            if (!row.matches("^\\d+,[^,]+(,[^,]+)*$")) {
-                return false;
-            }
-        }
-
-        return true;
+        // Verificar simplemente si contiene al menos un '&'
+        return content.contains("&");
     }
 
     private String replaceTemplateVariables(String template, Map<String, String> data) {
@@ -94,15 +71,16 @@ public class LatexService {
         for (Map.Entry<String, String> entry : data.entrySet()) {
             String value = entry.getValue() != null ? entry.getValue() : "";
 
-            // Solo convertir a tabla si cumple exactamente con el formato
+            // Si detectamos al menos un '&', procesamos como tabla
             if (isTableFormat(value)) {
                 value = processTableContent(value);
             } else {
-                // Si no es tabla, simplemente escapar caracteres especiales
+                // De lo contrario, se escapan caracteres especiales de LaTeX
                 value = escapeLatexSpecialChars(value);
             }
 
-            result = result.replace("${" + entry.getKey() + "}", value)
+            result = result
+                    .replace("${" + entry.getKey() + "}", value)
                     .replace("{{" + entry.getKey() + "}}", value);
         }
         return result;
@@ -125,9 +103,13 @@ public class LatexService {
         int numColumns = firstRow.length - 1; // -1 porque el primer elemento es el número
 
         // Crear el formato de la tabla
-        tableContent.append("\\begin{tabular}{|c|");
+        // Agregamos \begin{center} para centrar la tabla
+        tableContent.append("\\begin{center}\n");
+        // Usamos tabularx con ancho total (\textwidth)
+        tableContent.append("\\begin{tabularx}{\\textwidth}{|c|");
+        // Usamos X para columnas que se ajustan automáticamente
         for (int i = 0; i < numColumns; i++) {
-            tableContent.append("l|");
+            tableContent.append("X|");
         }
         tableContent.append("}\n\\hline\n");
 
@@ -148,7 +130,8 @@ public class LatexService {
             }
         }
 
-        tableContent.append("\\end{tabular}\n");
+        tableContent.append("\\end{tabularx}\n");
+        tableContent.append("\\end{center}\n");
         return tableContent.toString();
     }
 
