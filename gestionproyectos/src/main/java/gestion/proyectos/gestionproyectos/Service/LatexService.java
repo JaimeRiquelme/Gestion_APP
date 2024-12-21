@@ -1,228 +1,219 @@
 package gestion.proyectos.gestionproyectos.Service;
 
-import org.springframework.stereotype.Service;
-import org.springframework.beans.factory.annotation.Value;
-import java.io.*;
-import java.nio.file.*;
-import java.util.Map;
-import java.util.UUID;
-import java.util.ArrayList;
-import java.util.List;
+import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.*;
+import java.util.Map;
 
 @Service
 public class LatexService {
-
     private static final Logger logger = LoggerFactory.getLogger(LatexService.class);
 
     @Value("${latex.output.path}")
     private String outputPath;
 
     public byte[] generateDocument(String templatePath, Map<String, String> data) throws IOException {
-        createDirectories();
-        String processId = UUID.randomUUID().toString();
+        logger.info("Generating document from template: {}", templatePath);
 
+        // Verificar que el template existe
+        Path templateFilePath = Paths.get(templatePath).normalize();
+        if (!Files.exists(templateFilePath)) {
+            logger.error("Template file not found: {}", templateFilePath);
+            throw new FileNotFoundException("Template not found: " + templateFilePath);
+        }
+
+        // Read and populate the template
+        String template = Files.readString(templateFilePath);
+        String document = replaceTemplateVariables(template, data);
+
+        // Generate PDF
+        Path tempDirPath = createTempDirectory();
         try {
-            Path fullTemplatePath = Paths.get(templatePath);
-            logger.info("Buscando plantilla en: {}", fullTemplatePath);
+            // Escribir el contenido del documento en el directorio temporal
+            Path texFile = tempDirPath.resolve("document.tex");
+            Files.write(texFile, document.getBytes(StandardCharsets.UTF_8));
 
-            if (!Files.exists(fullTemplatePath)) {
-                throw new IOException("Template file not found: " + fullTemplatePath);
+            // Generar PDF
+            Path pdfPath = generatePDF(texFile);
+            if (Files.exists(pdfPath)) {
+                return Files.readAllBytes(pdfPath);
+            } else {
+                throw new IOException("PDF file was not generated");
             }
-
-            String template = new String(Files.readAllBytes(fullTemplatePath));
-            String documento = processTemplate(template, data);
-            String tempFilePath = saveTempFile(documento, processId);
-            String pdfPath = compileLaTeX(tempFilePath);
-            byte[] pdfContent = Files.readAllBytes(Paths.get(pdfPath));
-
-            cleanupTempFiles(processId);
-            return pdfContent;
-
-        } catch (Exception e) {
-            logger.error("Error generating document: ", e);
-            cleanupTempFiles(processId);
-            throw new IOException("Error generating LaTeX document: " + e.getMessage(), e);
+        } finally {
+            try {
+                FileUtils.deleteDirectory(tempDirPath.toFile());
+            } catch (IOException e) {
+                logger.warn("Error deleting temporary directory: {}", tempDirPath, e);
+            }
         }
     }
 
-    private String processTemplate(String template, Map<String, String> data) {
+    private boolean isTableFormat(String content) {
+        // Verificaciones básicas
+        if (content == null || content.isEmpty()) {
+            return false;
+        }
+
+        // Debe comenzar y terminar con &
+        if (!content.startsWith("&") || !content.endsWith("&")) {
+            return false;
+        }
+
+        // Remover los & del inicio y final para procesar el contenido
+        content = content.substring(1, content.length() - 1);
+
+        // Si no hay contenido después de remover los &, no es una tabla
+        if (content.isEmpty()) {
+            return false;
+        }
+
+        // Dividir el contenido en filas (por &)
+        String[] rows = content.split("&");
+
+        // Validar cada fila
+        for (String row : rows) {
+            if (!row.matches("^\\d+,[^,]+(,[^,]+)*$")) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private String replaceTemplateVariables(String template, Map<String, String> data) {
+        if (data == null) return template;
+
         String result = template;
         for (Map.Entry<String, String> entry : data.entrySet()) {
-            String value = entry.getValue();
-            String processedValue;
+            String value = entry.getValue() != null ? entry.getValue() : "";
 
-            if (value != null && value.contains("&")) {
-                processedValue = convertToLatexTable(value, entry.getKey());
+            // Solo convertir a tabla si cumple exactamente con el formato
+            if (isTableFormat(value)) {
+                value = processTableContent(value);
             } else {
-                processedValue = escapeLatex(value);
+                // Si no es tabla, simplemente escapar caracteres especiales
+                value = escapeLatexSpecialChars(value);
             }
 
-            result = result.replace("{{" + entry.getKey() + "}}", processedValue);
+            result = result.replace("${" + entry.getKey() + "}", value)
+                    .replace("{{" + entry.getKey() + "}}", value);
         }
         return result;
     }
 
-    private String convertToLatexTable(String tableData, String tableId) {
-        List<String[]> rows = parseTableData(tableData);
-        if (rows.isEmpty()) return "";
-
-        StringBuilder latex = new StringBuilder();
-        String[] headers = rows.get(0); // Primera fila como encabezados
-        int columnCount = headers.length;
-
-        // Iniciar tabla
-        latex.append("\\begin{center}\n");
-
-        // Definir ancho de columnas basado en el contenido
-        latex.append("\\begin{tabularx}{\\textwidth}{|");
-        for (int i = 0; i < columnCount; i++) {
-            latex.append("X|");
+    private String processTableContent(String content) {
+        // Si no es formato de tabla, retornar el texto escapado
+        if (!isTableFormat(content)) {
+            return escapeLatexSpecialChars(content);
         }
-        latex.append("}\n\\hline\n");
 
-        // Añadir encabezados con color de fondo
-        for (int i = 0; i < headers.length; i++) {
-            latex.append("\\cellcolor{gray!40}\\textbf{")
-                    .append(escapeLatex(headers[i].trim()))
-                    .append("}");
+        // Remover los & del inicio y final
+        content = content.substring(1, content.length() - 1);
 
-            if (i < headers.length - 1) {
-                latex.append(" & ");
+        StringBuilder tableContent = new StringBuilder();
+        String[] rows = content.split("&");
+
+        // Determinar el número de columnas basado en la primera fila
+        String[] firstRow = rows[0].split(",");
+        int numColumns = firstRow.length - 1; // -1 porque el primer elemento es el número
+
+        // Crear el formato de la tabla
+        tableContent.append("\\begin{tabular}{|c|");
+        for (int i = 0; i < numColumns; i++) {
+            tableContent.append("l|");
+        }
+        tableContent.append("}\n\\hline\n");
+
+        // Procesar las filas
+        for (String row : rows) {
+            if (row.trim().isEmpty()) continue;
+
+            String[] columns = row.split(",");
+            if (columns.length > 1) {
+                // Añadir el número con formato
+                tableContent.append(columns[0].trim());
+
+                // Añadir el resto de columnas
+                for (int i = 1; i < columns.length; i++) {
+                    tableContent.append(" & ").append(escapeLatexSpecialChars(columns[i].trim()));
+                }
+                tableContent.append(" \\\\ \\hline\n");
             }
         }
-        latex.append(" \\\\ \\hline\n");
 
-        // Añadir filas de datos
-        for (int i = 1; i < rows.size(); i++) {
-            String[] row = rows.get(i);
-            for (int j = 0; j < headers.length; j++) {
-                if (j < row.length) {
-                    latex.append(escapeLatex(row[j].trim()));
-                } else {
-                    latex.append(""); // Celda vacía si faltan datos
-                }
-
-                if (j < headers.length - 1) {
-                    latex.append(" & ");
-                }
-            }
-            latex.append(" \\\\ \\hline\n");
-        }
-
-        // Cerrar tabla
-        latex.append("\\end{tabularx}\n")
-                .append("\\end{center}\n")
-                .append("\\vspace{2mm}\n");
-
-        return latex.toString();
+        tableContent.append("\\end{tabular}\n");
+        return tableContent.toString();
     }
 
-    private List<String[]> parseTableData(String tableData) {
-        List<String[]> rows = new ArrayList<>();
-        if (tableData == null || tableData.trim().isEmpty()) {
-            return rows;
-        }
-
-        String[] rowsData = tableData.split("&");
-        for (String row : rowsData) {
-            row = row.trim();
-            if (!row.isEmpty()) {
-                // Dividir por coma y limpiar espacios en blanco
-                String[] columns = row.split(",");
-                // Limpiar cada columna
-                for (int i = 0; i < columns.length; i++) {
-                    columns[i] = columns[i].trim();
-                }
-                rows.add(columns);
-            }
-        }
-
-        return rows;
-    }
-
-    private String escapeLatex(String text) {
-        if (text == null) return "";
-        return text.replace("\\", "\\\\")
-                .replace("_", "\\_")
+    private String escapeLatexSpecialChars(String input) {
+        if (input == null) return "";
+        return input
+                .replace("\\", "\\textbackslash{}")
+                .replace("~", "\\textasciitilde{}")
+                .replace("^", "\\textasciicircum{}")
                 .replace("%", "\\%")
-                .replace("&", "\\&")
-                .replace("#", "\\#")
                 .replace("$", "\\$")
+                .replace("#", "\\#")
+                .replace("_", "\\_")
                 .replace("{", "\\{")
                 .replace("}", "\\}")
-                .replace("^", "\\^")
-                .replace("~", "\\~")
-                .replace("\n", "\\\\");
+                .replace(">", "\\textgreater{}")
+                .replace("<", "\\textless{}")
+                .replace("&", "\\&");
     }
 
-    private void createDirectories() throws IOException {
-        try {
-            Files.createDirectories(Paths.get(outputPath));
-            logger.info("Directorios creados/verificados: {}", outputPath);
-        } catch (Exception e) {
-            logger.error("Error creating directories: ", e);
-            throw e;
+    private Path createTempDirectory() throws IOException {
+        Path outputDir = Paths.get(outputPath).normalize();
+        Files.createDirectories(outputDir);
+        return Files.createTempDirectory(outputDir, "latex_");
+    }
+
+    private Path generatePDF(Path texFile) throws IOException {
+        Path tempDirPath = texFile.getParent();
+
+        // Ejecutar pdflatex dos veces para referencias cruzadas
+        for (int i = 0; i < 2; i++) {
+            ProcessBuilder pb = new ProcessBuilder(
+                    "pdflatex",
+                    "-interaction=nonstopmode",
+                    "-halt-on-error",
+                    texFile.getFileName().toString()
+            );
+            pb.directory(tempDirPath.toFile());
+            pb.redirectErrorStream(true);
+
+            Process process = pb.start();
+            StringBuilder output = new StringBuilder();
+
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    output.append(line).append("\n");
+                    logger.debug("pdflatex output: {}", line);
+                }
+
+                int exitCode = process.waitFor();
+                if (exitCode != 0) {
+                    logger.error("pdflatex failed with exit code: {}. Output:\n{}", exitCode, output);
+                    throw new IOException("pdflatex failed with exit code: " + exitCode);
+                }
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw new IOException("PDF generation process interrupted", e);
+            }
         }
-    }
 
-    private String saveTempFile(String content, String processId) throws IOException {
-        String texFilePath = Paths.get(outputPath, processId + ".tex").toString();
-        Files.write(Paths.get(texFilePath), content.getBytes());
-        logger.info("Archivo temporal guardado en: {}", texFilePath);
-        return texFilePath;
-    }
-
-    private String compileLaTeX(String texFilePath) throws IOException, InterruptedException {
-        File texFile = new File(texFilePath);
-        File workingDir = texFile.getParentFile();
-
-        logger.info("Compilando LaTeX en directorio: {}", workingDir);
-        executeLatexCommand(workingDir, texFile.getName());
-        executeLatexCommand(workingDir, texFile.getName());
-
-        String pdfPath = texFilePath.replace(".tex", ".pdf");
-        if (!new File(pdfPath).exists()) {
+        Path pdfFile = tempDirPath.resolve(texFile.getFileName().toString().replace(".tex", ".pdf"));
+        if (!Files.exists(pdfFile)) {
             throw new IOException("PDF file was not generated");
         }
-
-        return pdfPath;
-    }
-
-    private void executeLatexCommand(File workingDir, String texFileName) throws IOException, InterruptedException {
-        ProcessBuilder pb = new ProcessBuilder(
-                "pdflatex",
-                "-interaction=nonstopmode",
-                "-halt-on-error",
-                texFileName
-        );
-        pb.directory(workingDir);
-
-        File logFile = new File(workingDir, texFileName.replace(".tex", ".log"));
-        pb.redirectError(logFile);
-        pb.redirectOutput(logFile);
-
-        logger.info("Ejecutando comando pdflatex para: {}", texFileName);
-        Process process = pb.start();
-        int exitCode = process.waitFor();
-
-        if (exitCode != 0) {
-            String errorLog = new String(Files.readAllBytes(logFile.toPath()));
-            logger.error("Error en compilación LaTeX: {}", errorLog);
-            throw new IOException("LaTeX compilation failed. Check log for details: " + errorLog);
-        }
-    }
-
-    private void cleanupTempFiles(String processId) {
-        try {
-            String[] extensions = {".tex", ".aux", ".log", ".out"};
-            for (String ext : extensions) {
-                Files.deleteIfExists(Paths.get(outputPath, processId + ext));
-            }
-            logger.info("Archivos temporales limpiados para processId: {}", processId);
-        } catch (IOException e) {
-            logger.warn("Error cleaning up temp files: ", e);
-        }
+        return pdfFile;
     }
 }

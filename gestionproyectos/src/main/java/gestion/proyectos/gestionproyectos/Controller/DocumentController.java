@@ -28,7 +28,7 @@ public class DocumentController {
     private ChangeRequestDocumentService changeRequestService;
 
     @PostMapping("/generate")
-    public ResponseEntity<?> generateDocument(
+    public ResponseEntity<?> generateDocument(@RequestParam Long idExit,
             @RequestParam String type,
             @RequestBody Map<String, String> requestData) {
         try {
@@ -39,11 +39,11 @@ public class DocumentController {
 
             switch (type.toLowerCase()) {
                 case "assumptions":
-                    pdfContent = assumptionsService.generateDocument(requestData);
+                    pdfContent = assumptionsService.generateDocument(requestData,idExit);
                     filename = generateFilename("registro_de_supuestos");
                     break;
                 case "change-request":
-                    pdfContent = changeRequestService.generateDocument(requestData);
+                    pdfContent = changeRequestService.generateDocument(requestData,idExit);
                     filename = generateFilename("solicitud_cambio");
                     break;
                 default:
