@@ -1,6 +1,8 @@
 package gestion.proyectos.gestionproyectos.Entity;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -27,8 +29,21 @@ public class Management {
 
     @ManyToOne
     @JoinColumn(name = "id_proyecto")
+    @JsonIgnore // Ignorar la serialización directa del proyecto
     private Proyect proyect;
 
+    @JsonProperty("idProyecto") // Exponer idProyect para serialización
+    public Long getIdProyect() {
+        return proyect != null ? proyect.getIdProyecto() : null; // Obtener el id del Proyect relacionado
+    }
+
+    @JsonProperty("idProyecto") // Permitir seteo durante la deserialización
+    public void setIdProyect(Long idProyect) {
+        if (idProyect != null) {
+            this.proyect = new Proyect();
+            this.proyect.setIdProyecto(idProyect); // Asociar solo el id del proyecto
+        }
+    }
 
     @Column(name = "name_management")
     private String nameManagement;
