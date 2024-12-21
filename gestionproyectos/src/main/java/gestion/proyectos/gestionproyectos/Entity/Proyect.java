@@ -1,6 +1,8 @@
 package gestion.proyectos.gestionproyectos.Entity;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -25,9 +27,23 @@ public class Proyect {
     @Column(name = "id_proyecto")
     private Long idProyecto;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "id_usuario")
+    @JsonIgnore
     private User user;
+
+    @JsonProperty("idUsuario")
+    public Long getIdUsuario() {
+        return user != null ? user.getIdUsuario() : null;
+    }
+
+    @JsonProperty("idUsuario")
+    public void setIdUsuario(Long idUsuario) {
+        if (idUsuario != null) {
+            this.user = new User();
+            this.user.setIdUsuario(idUsuario); // Solo asignar el id del usuario
+        }
+    }
 
     @Column(name = "name_proyect")
     private String nameProyect;
