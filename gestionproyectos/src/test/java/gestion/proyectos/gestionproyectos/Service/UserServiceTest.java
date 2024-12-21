@@ -57,7 +57,7 @@ class UserServiceTest {
         when(userRepository.save(any(User.class))).thenReturn(testUser1);
 
         // Act
-        User savedUser = userService.saveUser(testUser1);
+        User savedUser = userService.create(testUser1);
 
         // Assert
         assertNotNull(savedUser);
@@ -75,7 +75,7 @@ class UserServiceTest {
         when(userRepository.findAll()).thenReturn(userList);
 
         // Act
-        List<User> result = userService.getUsers();
+        List<User> result = userService.getAll();
 
         // Assert
         assertNotNull(result);
@@ -92,7 +92,7 @@ class UserServiceTest {
         when(userRepository.findById(1L)).thenReturn(Optional.of(testUser1));
 
         // Act
-        User found = userService.getUserById(1L);
+        User found = userService.getById(1L);
 
         // Assert
         assertNotNull(found);
@@ -108,7 +108,7 @@ class UserServiceTest {
         when(userRepository.findById(999L)).thenReturn(Optional.empty());
 
         // Act
-        User result = userService.getUserById(999L);
+        User result = userService.getById(999L);
 
         // Assert
         assertNull(result);
@@ -124,7 +124,7 @@ class UserServiceTest {
         when(userRepository.save(any(User.class))).thenReturn(userToUpdate);
 
         // Act
-        User updated = userService.updateUser(userToUpdate);
+        User updated = userService.update(userToUpdate.getIdUsuario(), userToUpdate);
 
         // Assert
         assertNotNull(updated);
@@ -141,7 +141,7 @@ class UserServiceTest {
         doNothing().when(userRepository).deleteById(userId);
 
         // Act
-        userService.deleteUser(userId);
+        userService.delete(userId);
 
         // Assert
         verify(userRepository, times(1)).deleteById(userId);
