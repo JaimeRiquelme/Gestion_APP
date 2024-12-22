@@ -89,12 +89,12 @@ public class ProyectService {
     @Transactional
     public void delete(Long id) {
         // Primero verificamos si existe el proyecto
-        Proyect proyect = proyectRepository.findById(id)
+        proyectRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("No se encontró el proyecto con ID: " + id));
 
         try {
             String[] queries = {
-                    "DELETE FROM management WHERE id_proyecto = :id",
+                    "DELETE FROM management WHERE id_proyect = :id",
                     "DELETE FROM incident WHERE id_proyect = :id",
                     "DELETE FROM lessons WHERE id_proyect = :id",
                     "DELETE FROM proyects WHERE id_proyecto = :id"
