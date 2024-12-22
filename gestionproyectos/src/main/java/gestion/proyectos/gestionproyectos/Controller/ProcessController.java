@@ -1,45 +1,65 @@
 package gestion.proyectos.gestionproyectos.Controller;
 
-import gestion.proyectos.gestionproyectos.Entity.Process; // Agregar esta importación
+import gestion.proyectos.gestionproyectos.Entity.Process;
 import gestion.proyectos.gestionproyectos.Service.ProcessService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@Controller
+@RestController
 @RequestMapping("/api/v1/process")
 public class ProcessController {
-    @Autowired
-    private ProcessService processService;
 
-    @PostMapping("/saveProcess")
-    public ResponseEntity<Process> saveProcess(@RequestBody Process process) {
-        Process savedProcess = processService.saveProcess(process);
-        return new ResponseEntity<>(savedProcess, HttpStatus.CREATED);
+    private final ProcessService processService;
+
+    public ProcessController(ProcessService processService) {
+        this.processService = processService;
     }
 
-    @GetMapping("/getAllProcess")
-    public ResponseEntity<List<Process>> getAllProcess() {
-        List<Process> processes = processService.getProcesses();
-        return new ResponseEntity<>(processes, HttpStatus.OK);
+    // Crear un proceso
+    @PostMapping("/create")
+    public ResponseEntity<Process> create(@RequestBody Process process) {
+        return new ResponseEntity<>(processService.create(process), HttpStatus.CREATED);
     }
 
-    @GetMapping("/getProcess/{id}")
-    public ResponseEntity<Process> getProcess(@PathVariable long id) {
-        Process process = processService.getProcess(id);
-        if (process != null) {
+    // Obtener todos los procesos
+    @GetMapping("/getAll")
+    public ResponseEntity<List<Process>> getAll() {
+        return new ResponseEntity<>(processService.getAll(), HttpStatus.OK);
+    }
+
+    // Obtener proceso por ID
+    @GetMapping("/getById/{id}")
+    public ResponseEntity<Process> getById(@PathVariable Long id) {
+        try {
+            Process process = processService.getById(id);
             return new ResponseEntity<>(process, HttpStatus.OK);
+        } catch (RuntimeException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
-    @DeleteMapping("/deleteProcess/{id}")
-    public ResponseEntity<Void> deleteProcess(@PathVariable long id) {
-        processService.deleteProcess(id);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    // Actualizar un proceso
+    @PutMapping("/update/{id}")
+    public ResponseEntity<Process> update(@PathVariable Long id, @RequestBody Process process) {
+        try {
+            Process updatedProcess = processService.update(id, process);
+            return new ResponseEntity<>(updatedProcess, HttpStatus.OK);
+        } catch (RuntimeException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
+    // Eliminar un proceso
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        try {
+            processService.delete(id);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } catch (RuntimeException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
     }
 }

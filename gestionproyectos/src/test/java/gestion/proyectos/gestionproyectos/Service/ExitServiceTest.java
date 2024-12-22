@@ -45,7 +45,7 @@ public class ExitServiceTest {
         when(exitRepository.save(any(Exit.class))).thenReturn(testExit);
 
         // When
-        Exit savedExit = exitService.save(testExit);
+        Exit savedExit = exitService.create(testExit);
 
         // Then
         assertNotNull(savedExit);
@@ -103,7 +103,7 @@ public class ExitServiceTest {
         when(exitRepository.save(any(Exit.class))).thenReturn(exitToUpdate);
 
         // When
-        Exit updatedExit = exitService.update(exitToUpdate);
+        Exit updatedExit = exitService.update(exitToUpdate.getIdProcess(), exitToUpdate);
 
         // Then
         assertNotNull(updatedExit);
@@ -118,10 +118,9 @@ public class ExitServiceTest {
         doNothing().when(exitRepository).deleteById(1L);
 
         // When
-        boolean result = exitService.delete(1L);
+        exitService.delete(1L);
 
         // Then
-        assertTrue(result);
         verify(exitRepository).findById(1L);
         verify(exitRepository).deleteById(1L);
     }

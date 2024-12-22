@@ -68,7 +68,7 @@ public class IncidentServiceTest {
         when(incidentRepository.save(any(Incident.class))).thenReturn(testIncident);
 
         // When
-        Incident savedIncident = incidentService.saveIncident(testIncident);
+        Incident savedIncident = incidentService.create(testIncident);
 
         // Then
         assertNotNull(savedIncident);
@@ -85,7 +85,7 @@ public class IncidentServiceTest {
         when(incidentRepository.findById(1L)).thenReturn(Optional.of(testIncident));
 
         // When
-        Incident foundIncident = incidentService.getIncidentById(1L);
+        Incident foundIncident = incidentService.getById(1L);
 
         // Then
         assertNotNull(foundIncident);
@@ -100,7 +100,7 @@ public class IncidentServiceTest {
         when(incidentRepository.findById(99L)).thenReturn(Optional.empty());
 
         // When
-        Incident foundIncident = incidentService.getIncidentById(99L);
+        Incident foundIncident = incidentService.getById(99L);
 
         // Then
         assertNull(foundIncident);
@@ -114,7 +114,7 @@ public class IncidentServiceTest {
         when(incidentRepository.findAll()).thenReturn(incidents);
 
         // When
-        List<Incident> foundIncidents = incidentService.getIncidents();
+        List<Incident> foundIncidents = incidentService.getAll();
 
         // Then
         assertNotNull(foundIncidents);
@@ -135,7 +135,7 @@ public class IncidentServiceTest {
         when(incidentRepository.save(any(Incident.class))).thenReturn(testIncident);
 
         // When
-        Incident updatedIncident = incidentService.updateIncident(testIncident);
+        Incident updatedIncident = incidentService.update(testIncident.getIdIncident(), testIncident);
 
         // Then
         assertNotNull(updatedIncident);
@@ -151,7 +151,7 @@ public class IncidentServiceTest {
         doNothing().when(incidentRepository).deleteById(id);
 
         // When
-        incidentService.deleteIncident(id);
+        incidentService.delete(id);
 
         // Then
         verify(incidentRepository).deleteById(id);
@@ -164,7 +164,7 @@ public class IncidentServiceTest {
         when(incidentRepository.save(any(Incident.class))).thenReturn(testIncident);
 
         // When
-        Incident savedIncident = incidentService.saveIncident(testIncident);
+        Incident savedIncident = incidentService.create(testIncident);
 
         // Then
         assertNotNull(savedIncident);
@@ -179,7 +179,7 @@ public class IncidentServiceTest {
         when(incidentRepository.save(any(Incident.class))).thenReturn(testIncident);
 
         // When
-        Incident savedIncident = incidentService.saveIncident(testIncident);
+        Incident savedIncident = incidentService.create(testIncident);
 
         // Then
         assertNotNull(savedIncident);
@@ -196,7 +196,7 @@ public class IncidentServiceTest {
         when(incidentRepository.save(any(Incident.class))).thenReturn(testIncident);
 
         // When
-        Incident updatedIncident = incidentService.updateIncident(testIncident);
+        Incident updatedIncident = incidentService.update(testIncident.getIdIncident(), testIncident);
 
         // Then
         assertNotNull(updatedIncident);

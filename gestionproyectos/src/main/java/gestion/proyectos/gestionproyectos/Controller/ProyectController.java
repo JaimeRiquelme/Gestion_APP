@@ -1,47 +1,71 @@
 package gestion.proyectos.gestionproyectos.Controller;
 
-
 import gestion.proyectos.gestionproyectos.Entity.Proyect;
 import gestion.proyectos.gestionproyectos.Service.ProyectService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
-@RequestMapping("/api/v1/proyects")
+@RequestMapping("/api/v1/proyect")
 public class ProyectController {
 
-    @Autowired
-    private ProyectService proyectService;
+    private final ProyectService proyectService;
 
-    @PostMapping
-    public ResponseEntity<Proyect> createProyect(@RequestBody Proyect proyect) {
-        return new ResponseEntity<>(proyectService.saveProyect(proyect), HttpStatus.CREATED);
+    public ProyectController(ProyectService proyectService) {
+        this.proyectService = proyectService;
     }
 
-    @GetMapping
-    public ResponseEntity<Iterable<Proyect>> getAllProyects() {
-        return new ResponseEntity<>(proyectService.getProyects(), HttpStatus.OK);
+    // Crear un proyecto
+    @PostMapping("/create")
+    public ResponseEntity<Proyect> create(@RequestBody Proyect proyect) {
+        try {
+            Proyect newProyect = proyectService.create(proyect);
+            return new ResponseEntity<>(newProyect, HttpStatus.CREATED);
+        } catch (RuntimeException e) {
+            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+        }
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<Proyect> getProyectById(@PathVariable Long id) {
-        Proyect proyect = proyectService.getProyectById(id);
-        return proyect != null ?
-                new ResponseEntity<>(proyect, HttpStatus.OK) :
-                new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    // Obtener todos los proyectos
+    @GetMapping("/getAll")
+    public ResponseEntity<List<Proyect>> getAll() {
+        List<Proyect> proyects = proyectService.getAll();
+        return new ResponseEntity<>(proyects, HttpStatus.OK);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<Proyect> updateProyect(@PathVariable Long id, @RequestBody Proyect proyect) {
-        proyect.setIdProyecto(id);
-        return new ResponseEntity<>(proyectService.updateProyect(proyect), HttpStatus.OK);
+    // Obtener proyecto por ID
+    @GetMapping("/getById/{id}")
+    public ResponseEntity<Proyect> getById(@PathVariable Long id) {
+        try {
+            Proyect proyect = proyectService.getById(id);
+            return new ResponseEntity<>(proyect, HttpStatus.OK);
+        } catch (RuntimeException e) {
+            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+        }
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteProyect(@PathVariable Long id) {
-        proyectService.deleteProyect(id);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    // Actualizar un proyecto
+    @PutMapping("/update/{id}")
+    public ResponseEntity<Proyect> update(@PathVariable Long id, @RequestBody Proyect proyectDetails) {
+        try {
+            Proyect updatedProyect = proyectService.update(id, proyectDetails);
+            return new ResponseEntity<>(updatedProyect, HttpStatus.OK);
+        } catch (RuntimeException e) {
+            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+        }
+    }
+
+    // Eliminar un proyecto
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        try {
+            proyectService.delete(id);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } catch (RuntimeException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
     }
 }
