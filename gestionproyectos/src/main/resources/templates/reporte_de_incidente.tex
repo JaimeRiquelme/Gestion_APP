@@ -1,0 +1,100 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
+\usepackage{geometry}
+\usepackage{titlesec}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\geometry{margin=1in}
+
+% Custom section formatting
+\titleformat{\section}{\bfseries\Large}{\thesection.}{1em}{}
+\titleformat{\subsection}{\bfseries\large}{\thesubsection.}{1em}{}
+
+% Document title and author
+\title{\textbf{Reporte de Incidente}}
+\author{}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+\tableofcontents
+\newpage
+
+\section{Resumen del incidente}
+{{incidentSummary}}
+
+\section{Precedentes}
+{{incidentLeadup}}
+
+\section{Falla}
+{{incidentFault}}
+
+\section{Impacto}
+{{incidentImpact}}
+
+\section{Detección}
+\begin{itemize}
+    \item \textbf{¿Cómo y cuándo se detectó el incidente?}
+    \newline
+    {{incidentDetection}}
+
+    \item \textbf{¿Cómo se podría mejorar el tiempo de detección?}
+    \newline
+    {{detectionImprovement}}
+    
+\end{itemize}
+
+\section{Respuesta}
+{{incidentResponse}}
+
+\section{Cronología}
+\begin{itemize}
+    \item \textbf{Circunstancias previas.}
+    \newline
+    {{timelineLeadup}}
+
+    \item \textbf{Inicio del impacto.}
+    \newline
+    {{timelineStartImpact}}
+
+    \item \textbf{Momento de detección.}
+    \newline
+    {{timelineDetection}}
+
+    \item \textbf{Escalaciones, decisiones y cambios.}
+    \newline
+    {{timelineEscalations}}
+
+    \item Fin del impacto.
+    \newline
+    {{timelineEndImpact}}
+\end{itemize}
+
+\section{Revisión de tareas pendientes}
+{{backlogCheck}}
+
+\section{Lecciones aprendidas}
+\begin{itemize}
+    \item \textbf{¿Qué hemos aprendido?}
+    \newline
+    {{lessonsLearned}}
+
+    \item \textbf{¿Qué salió bien?}
+    \newline
+    {{whatWentWell}}
+
+    \item \textbf{¿Qué podría haber salido mejor?}
+    \newline
+    {{whatCouldBeBetter}}
+
+    \item \textbf{¿Dónde tuvimos suerte?}
+    \newline
+    {{whereWeGotLucky}}
+\end{itemize}
+
+\section{Acciones correctivas}
+{{correctiveActions}}
+
+\end{document}
