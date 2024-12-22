@@ -28,9 +28,8 @@ public class Management {
     @Column(name = "id_management")
     private Long idManagement;
 
-    @ManyToOne
-    @JoinColumn(name = "id_proyecto")
-    @JsonIgnore // Ignorar la serialización directa del proyecto
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_proyect")
     private Proyect proyect;
 
     @JsonProperty("idProyecto") // Exponer idProyect para serialización

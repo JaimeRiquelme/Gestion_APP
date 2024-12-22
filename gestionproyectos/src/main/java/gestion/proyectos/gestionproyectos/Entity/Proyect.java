@@ -9,6 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -64,14 +65,14 @@ public class Proyect {
     private String realEstimatedEndDate;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "proyect", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "proyect", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Management> managements;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "proyect", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "proyect", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Incident> incidents;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "proyect", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "proyect", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Lessons> lessons;
 }

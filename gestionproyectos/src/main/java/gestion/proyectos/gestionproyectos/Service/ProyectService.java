@@ -4,6 +4,9 @@ import gestion.proyectos.gestionproyectos.Entity.Proyect;
 import gestion.proyectos.gestionproyectos.Entity.User;
 import gestion.proyectos.gestionproyectos.Repository.ProyectRepository;
 import gestion.proyectos.gestionproyectos.Repository.UserRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.transaction.Transactional;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -13,7 +16,11 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@Transactional
 public class ProyectService {
+
+    @Autowired
+    private EntityManager entityManager;
 
     private final ProyectRepository proyectRepository;
     private final UserRepository userRepository;
@@ -79,12 +86,35 @@ public class ProyectService {
     }
 
     // Delete
+    @Transactional
     public void delete(Long id) {
-        Optional<Proyect> proyect = proyectRepository.findById(id);
-        if (proyect.isPresent()) {
-            proyectRepository.deleteById(id);
-        } else {
-            throw new RuntimeException("Proyect not found with id " + id);
+        // Primero verificamos si existe el proyecto
+        Proyect proyect = proyectRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("No se encontró el proyecto con ID: " + id));
+
+        try {
+            String[] queries = {
+                    "DELETE FROM management WHERE id_proyecto = :id",
+                    "DELETE FROM incident WHERE id_proyect = :id",
+                    "DELETE FROM lessons WHERE id_proyect = :id",
+                    "DELETE FROM proyects WHERE id_proyecto = :id"
+            };
+
+            for (String sql : queries) {
+                int rowsAffected = entityManager.createNativeQuery(sql)
+                        .setParameter("id", id)
+                        .executeUpdate();
+
+                // Log para saber qué se está eliminando
+                System.out.println("Ejecutando query: " + sql);
+                System.out.println("Filas afectadas: " + rowsAffected);
+            }
+
+            System.out.println("Proyecto y sus relaciones eliminadas exitosamente");
+
+        } catch (Exception e) {
+            System.err.println("Error al eliminar el proyecto: " + e.getMessage());
+            throw new RuntimeException("Error al eliminar el proyecto y sus relaciones: " + e.getMessage());
         }
     }
 

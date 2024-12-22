@@ -25,9 +25,8 @@ public class Lessons {
     @Column(name = "id_lesson")
     private Long idLesson;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_proyect")
-    @JsonIgnore // Ignorar la serialización directa del proyecto
     private Proyect proyect;
 
     @JsonProperty("idProyecto") // Exponer idProyect para serialización
