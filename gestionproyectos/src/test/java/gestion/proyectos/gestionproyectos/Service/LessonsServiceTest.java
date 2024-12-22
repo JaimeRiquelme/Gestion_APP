@@ -55,7 +55,7 @@ public class LessonsServiceTest {
         when(lessonsRepository.save(any(Lessons.class))).thenReturn(testLessons);
 
         // When
-        Lessons savedLessons = lessonsService.saveLessons(testLessons);
+        Lessons savedLessons = lessonsService.create(testLessons);
 
         // Then
         assertNotNull(savedLessons);
@@ -72,7 +72,7 @@ public class LessonsServiceTest {
         when(lessonsRepository.findById(1L)).thenReturn(Optional.of(testLessons));
 
         // When
-        Lessons foundLessons = lessonsService.getLessonsById(1L);
+        Lessons foundLessons = lessonsService.getById(1L);
 
         // Then
         assertNotNull(foundLessons);
@@ -87,7 +87,7 @@ public class LessonsServiceTest {
         when(lessonsRepository.findById(99L)).thenReturn(Optional.empty());
 
         // When
-        Lessons foundLessons = lessonsService.getLessonsById(99L);
+        Lessons foundLessons = lessonsService.getById(99L);
 
         // Then
         assertNull(foundLessons);
@@ -105,7 +105,7 @@ public class LessonsServiceTest {
         when(lessonsRepository.save(any(Lessons.class))).thenReturn(testLessons);
 
         // When
-        Lessons updatedLessons = lessonsService.updateLessons(testLessons);
+        Lessons updatedLessons = lessonsService.update(testLessons.getIdLesson(), testLessons);
 
         // Then
         assertNotNull(updatedLessons);
@@ -121,7 +121,7 @@ public class LessonsServiceTest {
         doNothing().when(lessonsRepository).deleteById(id);
 
         // When
-        lessonsService.deleteLessons(id);
+        lessonsService.delete(id);
 
         // Then
         verify(lessonsRepository).deleteById(id);
@@ -134,7 +134,7 @@ public class LessonsServiceTest {
         when(lessonsRepository.save(any(Lessons.class))).thenReturn(testLessons);
 
         // When
-        Lessons savedLessons = lessonsService.saveLessons(testLessons);
+        Lessons savedLessons = lessonsService.create(testLessons);
 
         // Then
         assertNotNull(savedLessons);
@@ -151,7 +151,7 @@ public class LessonsServiceTest {
         when(lessonsRepository.save(any(Lessons.class))).thenReturn(testLessons);
 
         // When
-        Lessons updatedLessons = lessonsService.updateLessons(testLessons);
+        Lessons updatedLessons = lessonsService.update(testLessons.getIdLesson(), testLessons);
 
         // Then
         assertNotNull(updatedLessons);
@@ -168,7 +168,7 @@ public class LessonsServiceTest {
         when(lessonsRepository.save(any(Lessons.class))).thenReturn(testLessons);
 
         // When
-        Lessons updatedLessons = lessonsService.updateLessons(testLessons);
+        Lessons updatedLessons = lessonsService.update(testLessons.getIdLesson(), testLessons);
 
         // Then
         assertNotNull(updatedLessons);

@@ -66,7 +66,7 @@ class ProyectServiceTest {
         when(proyectRepository.save(any(Proyect.class))).thenReturn(testProyect1);
 
         // Act
-        Proyect savedProyect = proyectService.saveProyect(testProyect1);
+        Proyect savedProyect = proyectService.create(testProyect1);
 
         // Assert
         assertNotNull(savedProyect);
@@ -84,7 +84,7 @@ class ProyectServiceTest {
         when(proyectRepository.findAll()).thenReturn(proyectList);
 
         // Act
-        Iterable<Proyect> result = proyectService.getProyects();
+        Iterable<Proyect> result = proyectService.getAll();
         List<Proyect> resultList = (List<Proyect>) result;
 
         // Assert
@@ -102,7 +102,7 @@ class ProyectServiceTest {
         when(proyectRepository.findById(1L)).thenReturn(Optional.of(testProyect1));
 
         // Act
-        Proyect found = proyectService.getProyectById(1L);
+        Proyect found = proyectService.getById(1L);
 
         // Assert
         assertNotNull(found);
@@ -118,7 +118,7 @@ class ProyectServiceTest {
         when(proyectRepository.findById(999L)).thenReturn(Optional.empty());
 
         // Act
-        Proyect result = proyectService.getProyectById(999L);
+        Proyect result = proyectService.getById(999L);
 
         // Assert
         assertNull(result);
@@ -134,7 +134,7 @@ class ProyectServiceTest {
         when(proyectRepository.save(any(Proyect.class))).thenReturn(proyectToUpdate);
 
         // Act
-        Proyect updated = proyectService.updateProyect(proyectToUpdate);
+        Proyect updated = proyectService.update(proyectToUpdate.getIdProyecto(), proyectToUpdate);
 
         // Assert
         assertNotNull(updated);
@@ -151,7 +151,7 @@ class ProyectServiceTest {
         doNothing().when(proyectRepository).deleteById(proyectId);
 
         // Act
-        proyectService.deleteProyect(proyectId);
+        proyectService.delete(proyectId);
 
         // Assert
         verify(proyectRepository, times(1)).deleteById(proyectId);

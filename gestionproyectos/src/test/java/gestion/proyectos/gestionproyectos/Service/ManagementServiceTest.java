@@ -60,7 +60,7 @@ class ManagementServiceTest {
         when(managementRepository.save(any(Management.class))).thenReturn(testManagement1);
 
         // Act
-        Management savedManagement = managementService.save(testManagement1);
+        Management savedManagement = managementService.create(testManagement1);
 
         // Assert
         assertNotNull(savedManagement);
@@ -113,7 +113,7 @@ class ManagementServiceTest {
         when(managementRepository.save(any(Management.class))).thenReturn(managementToUpdate);
 
         // Act
-        Management updated = managementService.update(managementToUpdate);
+        Management updated = managementService.update(managementToUpdate.getIdManagement(), managementToUpdate);
 
         // Assert
         assertNotNull(updated);
@@ -131,10 +131,9 @@ class ManagementServiceTest {
         doNothing().when(managementRepository).deleteById(managementId);
 
         // Act
-        boolean result = managementService.delete(managementId);
+        managementService.delete(managementId);
 
         // Assert
-        assertTrue(result);
         verify(managementRepository).findById(managementId);
         verify(managementRepository).deleteById(managementId);
     }

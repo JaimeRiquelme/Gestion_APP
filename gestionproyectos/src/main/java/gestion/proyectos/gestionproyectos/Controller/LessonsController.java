@@ -1,47 +1,65 @@
 package gestion.proyectos.gestionproyectos.Controller;
 
-
 import gestion.proyectos.gestionproyectos.Entity.Lessons;
 import gestion.proyectos.gestionproyectos.Service.LessonsService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/lessons")
 public class LessonsController {
 
-    @Autowired
-    private LessonsService lessonsService;
+    private final LessonsService lessonsService;
 
-    @PostMapping("/CreateLessons")
-    public ResponseEntity<Lessons> createLessons(@RequestBody Lessons lessons) {
-        return new ResponseEntity<>(lessonsService.saveLessons(lessons), HttpStatus.CREATED);
+    public LessonsController(LessonsService lessonsService) {
+        this.lessonsService = lessonsService;
     }
 
-    @PostMapping("/GetLessonsById")
-    public ResponseEntity<Lessons> getLessonsById(@RequestBody Long id) {
-        Lessons lessons = lessonsService.getLessonsById(id);
-        return lessons != null ?
-                new ResponseEntity<>(lessons, HttpStatus.OK) :
-                new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    // Crear lección
+    @PostMapping("/create")
+    public ResponseEntity<Lessons> create(@RequestBody Lessons lessons) {
+        return new ResponseEntity<>(lessonsService.create(lessons), HttpStatus.CREATED);
     }
 
-    @PostMapping("/DeleteLessons")
-    public ResponseEntity<Void> deleteLessons(@RequestBody Long id) {
-        lessonsService.deleteLessons(id);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    // Obtener todas las lecciones
+    @GetMapping("/getAll")
+    public ResponseEntity<List<Lessons>> getAll() {
+        return new ResponseEntity<>(lessonsService.getAll(), HttpStatus.OK);
     }
 
-    @PostMapping("/UpdateLessons")
-    public ResponseEntity<Lessons> updateLessons(@RequestBody Lessons lessons) {
-        return new ResponseEntity<>(lessonsService.updateLessons(lessons), HttpStatus.OK);
+    // Obtener lección por ID
+    @GetMapping("/getById/{id}")
+    public ResponseEntity<Lessons> getById(@PathVariable Long id) {
+        try {
+            Lessons lessons = lessonsService.getById(id);
+            return new ResponseEntity<>(lessons, HttpStatus.OK);
+        } catch (RuntimeException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
     }
 
+    // Actualizar lección
+    @PutMapping("/update/{id}")
+    public ResponseEntity<Lessons> update(@PathVariable Long id, @RequestBody Lessons lessons) {
+        try {
+            Lessons updatedLesson = lessonsService.update(id, lessons);
+            return new ResponseEntity<>(updatedLesson, HttpStatus.OK);
+        } catch (RuntimeException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
 
-
+    // Eliminar lección
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        try {
+            lessonsService.delete(id);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } catch (RuntimeException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
 }

@@ -52,7 +52,7 @@ public class ParameterServiceTest {
         when(parameterRepository.save(any(Parameter.class))).thenReturn(testParameter);
 
         // When
-        Parameter savedParameter = parameterService.save(testParameter);
+        Parameter savedParameter = parameterService.create(testParameter);
 
         // Then
         assertNotNull(savedParameter);
@@ -114,7 +114,7 @@ public class ParameterServiceTest {
         when(parameterRepository.save(any(Parameter.class))).thenReturn(parameterToUpdate);
 
         // When
-        Parameter updatedParameter = parameterService.update(parameterToUpdate);
+        Parameter updatedParameter = parameterService.update(parameterToUpdate.getIdParameter(), parameterToUpdate);
 
         // Then
         assertNotNull(updatedParameter);
@@ -129,10 +129,9 @@ public class ParameterServiceTest {
         doNothing().when(parameterRepository).deleteById(1L);
 
         // When
-        boolean result = parameterService.delete(1L);
+        parameterService.delete(1L);
 
         // Then
-        assertTrue(result);
         verify(parameterRepository).findById(1L);
         verify(parameterRepository).deleteById(1L);
     }
@@ -158,7 +157,7 @@ public class ParameterServiceTest {
         when(parameterRepository.save(any(Parameter.class))).thenReturn(testParameter);
 
         // When
-        Parameter savedParameter = parameterService.save(testParameter);
+        Parameter savedParameter = parameterService.create(testParameter);
 
         // Then
         assertNotNull(savedParameter);

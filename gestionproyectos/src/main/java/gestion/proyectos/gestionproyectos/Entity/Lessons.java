@@ -1,6 +1,8 @@
 package gestion.proyectos.gestionproyectos.Entity;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -23,9 +25,23 @@ public class Lessons {
     @Column(name = "id_lesson")
     private Long idLesson;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_proyect")
+    @JsonIgnore
     private Proyect proyect;
+
+    @JsonProperty("idProyecto") // Exponer idProyect para serialización
+    public Long getIdProyect() {
+        return proyect != null ? proyect.getIdProyecto() : null; // Obtener el id del Proyect relacionado
+    }
+
+    @JsonProperty("idProyecto") // Permitir seteo durante la deserialización
+    public void setIdProyect(Long idProyect) {
+        if (idProyect != null) {
+            this.proyect = new Proyect();
+            this.proyect.setIdProyecto(idProyect); // Asociar solo el id del proyecto
+        }
+    }
 
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;

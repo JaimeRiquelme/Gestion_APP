@@ -2,52 +2,64 @@ package gestion.proyectos.gestionproyectos.Controller;
 
 import gestion.proyectos.gestionproyectos.Entity.Management;
 import gestion.proyectos.gestionproyectos.Service.ManagementService;
-
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@Controller
+@RestController
 @RequestMapping("/api/v1/management")
 public class ManagementController {
-    @Autowired
-	ManagementService managementService;
 
-    @PostMapping("/saveManagement")
-	public ResponseEntity<Management> saveManagement(@RequestBody Management management) {
-		Management newManagement = managementService.save(management);
-		return ResponseEntity.ok(newManagement);
+	private final ManagementService managementService;
+
+	public ManagementController(ManagementService managementService) {
+		this.managementService = managementService;
 	}
 
-    @GetMapping("/getAllManagement")
-	public ResponseEntity<List<Management>> listManagements() {
-    	List<Management> managements = managementService.getAll();
-		return ResponseEntity.ok(managements);
+	// Crear Management
+	@PostMapping("/create")
+	public ResponseEntity<Management> create(@RequestBody Management management) {
+		return new ResponseEntity<>(managementService.create(management), HttpStatus.CREATED);
 	}
 
-	@GetMapping("/GetManagement/{id}")
-	public ResponseEntity<Management> getManagementById(@PathVariable Long id) {
-		Management management = managementService.getById(id);
-		return ResponseEntity.ok(management);
+	// Obtener todos los Managements
+	@GetMapping("/getAll")
+	public ResponseEntity<List<Management>> getAll() {
+		return new ResponseEntity<>(managementService.getAll(), HttpStatus.OK);
 	}
 
-	@PostMapping("/updateManagement")
-	public ResponseEntity<Management> updateManagement(@RequestBody Management management){
-		Management updatedManagement = managementService.update(management);
-		return ResponseEntity.ok(updatedManagement);
+	// Obtener Management por ID
+	@GetMapping("/getById/{id}")
+	public ResponseEntity<Management> getById(@PathVariable Long id) {
+		try {
+			Management management = managementService.getById(id);
+			return new ResponseEntity<>(management, HttpStatus.OK);
+		} catch (RuntimeException e) {
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+		}
 	}
 
-	@DeleteMapping("/DeleteManagement/{id}")
-	public ResponseEntity<Boolean> deleteManagementById(@PathVariable Long id) throws Exception {
-		managementService.delete(id);
-		return ResponseEntity.noContent().build();
+	// Actualizar Management
+	@PutMapping("/update/{id}")
+	public ResponseEntity<Management> update(@PathVariable Long id, @RequestBody Management management) {
+		try {
+			Management updatedManagement = managementService.update(id, management);
+			return new ResponseEntity<>(updatedManagement, HttpStatus.OK);
+		} catch (RuntimeException e) {
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+		}
+	}
+
+	// Eliminar Management
+	@DeleteMapping("/delete/{id}")
+	public ResponseEntity<Void> delete(@PathVariable Long id) {
+		try {
+			managementService.delete(id);
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		} catch (RuntimeException e) {
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+		}
 	}
 }
