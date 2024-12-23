@@ -1,5 +1,8 @@
 package gestion.proyectos.gestionproyectos.Service;
 
+import gestion.proyectos.gestionproyectos.exception.DocumentGenerationException;
+import gestion.proyectos.gestionproyectos.exception.MissingFieldException;
+import gestion.proyectos.gestionproyectos.exception.TemplateNotFoundException;
 import gestion.proyectos.gestionproyectos.util.TemplatePathResolver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -52,20 +55,27 @@ public class ActInstitutionDocumentService {
 
     public byte[] generateDocumentACT(Map<String, String> data, Long idExit) throws IOException {
         validateDataACT(data);
-        String templatePath = pathResolver.resolve("acta_de_constitucion.tex");
 
-        byte[] Documento = latexService.generateDocument(templatePath, data);
+        String templatePath;
+        try {
+            templatePath = pathResolver.resolve("acta_de_constitucion.tex");
+        } catch (Exception e) {
+            throw new TemplateNotFoundException("The template 'acta_de_constitucion.tex' was not found.");
+        }
 
-        exitService.updateAssumptionsDocument(idExit, Documento);
-        parameterService.saveParameters(data, idExit);
-
-        return Documento;
+        try {
+            byte[] documento = latexService.generateDocument(templatePath, data);
+            exitService.updateAssumptionsDocument(idExit, documento);
+            parameterService.saveParameters(data, idExit);
+            return documento;
+        } catch (IOException e) {
+            throw new DocumentGenerationException("Error occurred while generating the PDF document.", e);
+        }
     }
-
 
     public void validateDataACT(Map<String, String> data) {
         if (data == null) {
-            throw new IllegalArgumentException("Data cannot be null");
+            throw new MissingFieldException("Provided data is null.");
         }
 
         Set<String> missingFields = new HashSet<>();
@@ -76,8 +86,7 @@ public class ActInstitutionDocumentService {
         }
 
         if (!missingFields.isEmpty()) {
-            throw new IllegalArgumentException("Missing required fields: " + missingFields);
+            throw new MissingFieldException("The following required fields are missing or empty: " + missingFields);
         }
     }
-
 }

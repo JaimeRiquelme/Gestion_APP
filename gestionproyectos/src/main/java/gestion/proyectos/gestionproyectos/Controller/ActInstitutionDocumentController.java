@@ -3,6 +3,9 @@ package gestion.proyectos.gestionproyectos.Controller;
 
 import gestion.proyectos.gestionproyectos.Service.ActInstitutionDocumentService;
 import gestion.proyectos.gestionproyectos.Service.AssumptionsDocumentService;
+import gestion.proyectos.gestionproyectos.exception.DocumentGenerationException;
+import gestion.proyectos.gestionproyectos.exception.MissingFieldException;
+import gestion.proyectos.gestionproyectos.exception.TemplateNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,11 +24,8 @@ import java.util.Map;
 @CrossOrigin("*")
 public class ActInstitutionDocumentController {
 
-
-    private static final Logger logger = LoggerFactory.getLogger(ActInstitutionDocumentController.class);
-
     @Autowired
-    private ActInstitutionDocumentService ActInstitutionService;
+    private ActInstitutionDocumentService actInstitutionService;
 
     @PostMapping("/generate")
     public ResponseEntity<?> generateAssumptionsDocument(
@@ -33,32 +33,29 @@ public class ActInstitutionDocumentController {
             @RequestBody Map<String, String> requestData) {
 
         try {
-            logger.info("Generating assumptions document with data: {}", requestData);
-
-            byte[] pdfContent = ActInstitutionService.generateDocumentACT(requestData, idExit);
+            byte[] pdfContent = actInstitutionService.generateDocumentACT(requestData, idExit);
             String filename = generateFilename("acta_de_constitucion");
 
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_PDF);
             headers.setContentDispositionFormData("filename", filename);
 
-            logger.info("Successfully generated assumptions document: {}", filename);
             return ResponseEntity.ok()
                     .headers(headers)
                     .body(pdfContent);
 
-        } catch (IllegalArgumentException e) {
-            logger.error("Validation error while generating assumptions document", e);
+        } catch (MissingFieldException e) {
             return ResponseEntity.badRequest()
-                    .body("Error de validación: " + e.getMessage());
-        } catch (IOException e) {
-            logger.error("Error generating assumptions document", e);
+                    .body("Validation error: Missing or invalid fields: " + e.getMessage());
+        } catch (TemplateNotFoundException e) {
+            return ResponseEntity.status(404)
+                    .body("Error: The template for generating the document was not found. Details: " + e.getMessage());
+        } catch (DocumentGenerationException e) {
             return ResponseEntity.internalServerError()
-                    .body("Error generando el documento: " + e.getMessage());
+                    .body("Error while generating the PDF document. Details: " + e.getMessage());
         } catch (Exception e) {
-            logger.error("Unexpected error while generating assumptions document", e);
             return ResponseEntity.internalServerError()
-                    .body("Error inesperado: " + e.getMessage());
+                    .body("An unexpected error occurred: " + e.getMessage());
         }
     }
 
