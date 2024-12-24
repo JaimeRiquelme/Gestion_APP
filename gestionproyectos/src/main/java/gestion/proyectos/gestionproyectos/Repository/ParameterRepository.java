@@ -12,5 +12,6 @@ public interface ParameterRepository extends JpaRepository<Parameter, Long> {
     @Query("SELECT p FROM Parameter p")
     List<Parameter> findAllParameters();
 
-    Parameter findByNameParameter(String nameParameter);
+    @Query("SELECT p FROM Parameter p WHERE p.nameParameter = ?1 AND p.exit.idExit = ?2")
+    Parameter findByNameParameteraAndIdExit(String nameParameter, Long idExit);
 }
