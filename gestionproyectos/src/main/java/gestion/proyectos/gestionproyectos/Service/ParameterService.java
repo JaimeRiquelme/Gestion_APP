@@ -99,8 +99,8 @@ public class ParameterService {
         for (Map.Entry<String, String> entry : data.entrySet()) {
             System.out.println("Clave = " + entry.getKey() + ", Valor = " + entry.getValue());
 
-            // Buscar el parámetro existente por su nombre
-            Parameter existingParameter = parameterRepository.findByNameParameter(entry.getKey());
+            // Buscar el parámetro existente por su nombre y por el id de salida.
+            Parameter existingParameter = parameterRepository.findByNameParameteraAndIdExit(entry.getKey(), idExit);
 
             if (existingParameter == null) {
                 // Crear un nuevo parámetro si no existe
