@@ -53,6 +53,11 @@ public class ProyectService {
         return proyectRepository.findById(id).orElse(null);
     }
 
+    // Read by User
+    public List<Proyect> getProyectsByUser(User user) {
+        return proyectRepository.findByUser_IdUsuario(user.getIdUsuario());
+    }
+
     // Update
     public Proyect update(Long id, Proyect proyectDetails) {
         Optional<Proyect> optionalProyect = proyectRepository.findById(id);
@@ -119,11 +124,13 @@ public class ProyectService {
     }
 
     private void validateDate(String date) {
-        try {
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-            LocalDate.parse(date, formatter);
-        } catch (DateTimeParseException e) {
-            throw new IllegalArgumentException("La fecha debe estar en el formato AAAA-MM-DD y ser una fecha válida. Ejemplo de fecha válida: 2024-12-31");
+        if (date != null) {
+            try {
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+                LocalDate.parse(date, formatter);
+            } catch (DateTimeParseException e) {
+                throw new IllegalArgumentException("La fecha debe estar en el formato AAAA-MM-DD y ser una fecha válida. Ejemplo de fecha válida: 2024-12-31");
+            }
         }
     }
 }

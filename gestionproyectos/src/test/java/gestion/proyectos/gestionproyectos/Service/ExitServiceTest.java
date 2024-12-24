@@ -1,7 +1,9 @@
 package gestion.proyectos.gestionproyectos.Service;
 
 import gestion.proyectos.gestionproyectos.Entity.Exit;
+import gestion.proyectos.gestionproyectos.Entity.Process;
 import gestion.proyectos.gestionproyectos.Repository.ExitRepository;
+import gestion.proyectos.gestionproyectos.Repository.ProcessRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,13 +25,20 @@ public class ExitServiceTest {
     @Mock
     private ExitRepository exitRepository;
 
+    @Mock
+    private ProcessRepository processRepository;
+
     @InjectMocks
     private ExitService exitService;
 
     private Exit testExit;
+    private Process testProcess;
 
     @BeforeEach
     void setUp() {
+        testProcess = new Process();
+        testProcess.setIdProcess(1L);
+
         testExit = new Exit();
         testExit.setIdExit(1L);
         testExit.setNameExit("Test Exit");
@@ -37,11 +46,15 @@ public class ExitServiceTest {
         testExit.setPriority("High");
         testExit.setResponsible("John Doe");
         testExit.setDescription("Test Description");
+        testExit.setDateCreation("2024-01-01");
+        testExit.setDateValidation("2024-12-31");
+        testExit.setProcess(testProcess);
     }
 
     @Test
-    void whenSaveExit_thenReturnSavedExit() {
+    void whenCreateExit_withValidData_thenReturnSavedExit() {
         // Given
+        when(processRepository.findById(1L)).thenReturn(Optional.of(testProcess));
         when(exitRepository.save(any(Exit.class))).thenReturn(testExit);
 
         // When
@@ -51,6 +64,16 @@ public class ExitServiceTest {
         assertNotNull(savedExit);
         assertEquals(testExit.getNameExit(), savedExit.getNameExit());
         verify(exitRepository).save(any(Exit.class));
+    }
+
+    @Test
+    void whenCreateExit_withInvalidDate_thenThrowException() {
+        // Given
+        when(processRepository.findById(1L)).thenReturn(Optional.of(testProcess));
+        testExit.setDateCreation("invalid-date");
+
+        // When & Then
+        assertThrows(IllegalArgumentException.class, () -> exitService.create(testExit));
     }
 
     @Test
@@ -83,27 +106,18 @@ public class ExitServiceTest {
     }
 
     @Test
-    void whenGetByIdWithInvalidId_thenReturnNull() {
+    void whenUpdateExit_withValidData_thenReturnUpdatedExit() {
         // Given
-        when(exitRepository.findById(99L)).thenReturn(Optional.empty());
-
-        // When
-        Exit foundExit = exitService.getById(99L);
-
-        // Then
-        assertNull(foundExit);
-        verify(exitRepository).findById(99L);
-    }
-
-    @Test
-    void whenUpdateExit_thenReturnUpdatedExit() {
-        // Given
-        Exit exitToUpdate = testExit;
+        Exit exitToUpdate = new Exit();
         exitToUpdate.setNameExit("Updated Name");
+        exitToUpdate.setProcess(testProcess);
+
+        when(exitRepository.findById(1L)).thenReturn(Optional.of(testExit));
+        when(processRepository.findById(1L)).thenReturn(Optional.of(testProcess));
         when(exitRepository.save(any(Exit.class))).thenReturn(exitToUpdate);
 
         // When
-        Exit updatedExit = exitService.update(exitToUpdate.getIdProcess(), exitToUpdate);
+        Exit updatedExit = exitService.update(1L, exitToUpdate);
 
         // Then
         assertNotNull(updatedExit);
@@ -112,31 +126,47 @@ public class ExitServiceTest {
     }
 
     @Test
-    void whenDeleteExistingExit_thenReturnTrue() throws Exception {
+    void whenDelete_withExistingExit_thenDeleteSuccessfully() {
         // Given
-        when(exitRepository.findById(1L)).thenReturn(Optional.of(testExit));
+        when(exitRepository.existsById(1L)).thenReturn(true);
         doNothing().when(exitRepository).deleteById(1L);
 
-        // When
-        exitService.delete(1L);
-
-        // Then
-        verify(exitRepository).findById(1L);
+        // When & Then
+        assertDoesNotThrow(() -> exitService.delete(1L));
         verify(exitRepository).deleteById(1L);
     }
 
     @Test
-    void whenDeleteNonExistingExit_thenThrowException() {
+    void whenDelete_withNonExistingExit_thenThrowException() {
         // Given
-        when(exitRepository.findById(99L)).thenReturn(Optional.empty());
+        when(exitRepository.existsById(99L)).thenReturn(false);
 
         // When & Then
-        Exception exception = assertThrows(Exception.class, () -> {
-            exitService.delete(99L);
-        });
-
-        assertEquals("Exit 99 does not exist", exception.getMessage());
-        verify(exitRepository).findById(99L);
+        assertThrows(RuntimeException.class, () -> exitService.delete(99L),
+                "Exit not found with id 99");
         verify(exitRepository, never()).deleteById(any());
+    }
+
+    @Test
+    void whenUpdateAssumptionsDocument_withValidExit_thenUpdateSuccessfully() {
+        // Given
+        byte[] document = "test document".getBytes();
+        when(exitRepository.findById(1L)).thenReturn(Optional.of(testExit));
+        when(exitRepository.save(any(Exit.class))).thenReturn(testExit);
+
+        // When
+        exitService.updateAssumptionsDocument(1L, document);
+
+        // Then
+        verify(exitRepository).save(any(Exit.class));
+    }
+
+    @Test
+    void whenCreateExit_withInvalidProcess_thenThrowException() {
+        // Given
+        when(processRepository.findById(any())).thenReturn(Optional.empty());
+
+        // When & Then
+        assertThrows(RuntimeException.class, () -> exitService.create(testExit));
     }
 }

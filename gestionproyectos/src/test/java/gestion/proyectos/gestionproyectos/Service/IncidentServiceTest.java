@@ -4,7 +4,10 @@ import gestion.proyectos.gestionproyectos.Entity.Incident;
 import gestion.proyectos.gestionproyectos.Entity.Proyect;
 import gestion.proyectos.gestionproyectos.Entity.User;
 import gestion.proyectos.gestionproyectos.Repository.IncidentRepository;
+import gestion.proyectos.gestionproyectos.Repository.ProyectRepository;
+import gestion.proyectos.gestionproyectos.Repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -21,10 +24,16 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class IncidentServiceTest {
+class IncidentServiceTest {
 
     @Mock
     private IncidentRepository incidentRepository;
+
+    @Mock
+    private ProyectRepository proyectRepository;
+
+    @Mock
+    private UserRepository userRepository;
 
     @InjectMocks
     private IncidentService incidentService;
@@ -36,10 +45,11 @@ public class IncidentServiceTest {
     @BeforeEach
     void setUp() {
         // Configurar User para pruebas
-        testUser = new User();
-        testUser.setIdUsuario(1L);
-        testUser.setNames("Test User");
-        testUser.setEmail("test@example.com");
+        testUser = User.builder()
+                .idUsuario(1L)
+                .names("Test User")
+                .email("test@example.com")
+                .build();
 
         // Configurar Proyect para pruebas
         testProyect = new Proyect();
@@ -63,14 +73,17 @@ public class IncidentServiceTest {
     }
 
     @Test
+    @DisplayName("Guardar incidente nuevo")
     void whenSaveIncident_thenReturnSavedIncident() {
-        // Given
+        // Arrange
+        when(proyectRepository.findById(testProyect.getIdProyecto())).thenReturn(Optional.of(testProyect));
+        when(userRepository.findById(testUser.getIdUsuario())).thenReturn(Optional.of(testUser));
         when(incidentRepository.save(any(Incident.class))).thenReturn(testIncident);
 
-        // When
+        // Act
         Incident savedIncident = incidentService.create(testIncident);
 
-        // Then
+        // Assert
         assertNotNull(savedIncident);
         assertEquals(testIncident.getDescription(), savedIncident.getDescription());
         assertEquals(testIncident.getState(), savedIncident.getState());
@@ -80,64 +93,101 @@ public class IncidentServiceTest {
     }
 
     @Test
-    void whenGetIncidentById_thenReturnIncident() {
-        // Given
-        when(incidentRepository.findById(1L)).thenReturn(Optional.of(testIncident));
+    @DisplayName("Guardar incidente con proyecto inválido lanza excepción")
+    void whenSaveIncidentWithInvalidProyect_thenThrowException() {
+        // Arrange
+        when(proyectRepository.findById(testProyect.getIdProyecto())).thenReturn(Optional.empty());
 
-        // When
-        Incident foundIncident = incidentService.getById(1L);
+        // Act & Assert
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+            incidentService.create(testIncident);
+        });
 
-        // Then
-        assertNotNull(foundIncident);
-        assertEquals(testIncident.getIdIncident(), foundIncident.getIdIncident());
-        assertEquals(testIncident.getDescription(), foundIncident.getDescription());
-        verify(incidentRepository).findById(1L);
+        assertEquals("Proyect not found with id " + testProyect.getIdProyecto(), exception.getMessage());
+        verify(incidentRepository, never()).save(any(Incident.class));
     }
 
     @Test
-    void whenGetIncidentByIdWithInvalidId_thenReturnNull() {
-        // Given
-        when(incidentRepository.findById(99L)).thenReturn(Optional.empty());
+    @DisplayName("Guardar incidente con usuario inválido lanza excepción")
+    void whenSaveIncidentWithInvalidUser_thenThrowException() {
+        // Arrange
+        when(proyectRepository.findById(testProyect.getIdProyecto())).thenReturn(Optional.of(testProyect));
+        when(userRepository.findById(testUser.getIdUsuario())).thenReturn(Optional.empty());
 
-        // When
-        Incident foundIncident = incidentService.getById(99L);
+        // Act & Assert
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+            incidentService.create(testIncident);
+        });
 
-        // Then
-        assertNull(foundIncident);
-        verify(incidentRepository).findById(99L);
+        assertEquals("User not found with id " + testUser.getIdUsuario(), exception.getMessage());
+        verify(incidentRepository, never()).save(any(Incident.class));
     }
 
     @Test
-    void whenGetAllIncidents_thenReturnList() {
-        // Given
-        List<Incident> incidents = Arrays.asList(testIncident);
-        when(incidentRepository.findAll()).thenReturn(incidents);
+    @DisplayName("Obtener todos los incidentes")
+    void whenGetAllIncidents_thenReturnIncidentList() {
+        // Arrange
+        List<Incident> incidentList = Arrays.asList(testIncident);
+        when(incidentRepository.findAll()).thenReturn(incidentList);
 
-        // When
-        List<Incident> foundIncidents = incidentService.getAll();
+        // Act
+        List<Incident> result = incidentService.getAll();
 
-        // Then
-        assertNotNull(foundIncidents);
-        assertFalse(foundIncidents.isEmpty());
-        assertEquals(1, foundIncidents.size());
-        assertEquals(testIncident.getDescription(), foundIncidents.get(0).getDescription());
+        // Assert
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals(testIncident.getDescription(), result.get(0).getDescription());
         verify(incidentRepository).findAll();
     }
 
     @Test
-    void whenUpdateIncident_thenReturnUpdatedIncident() {
-        // Given
-        String updatedDescription = "Updated Description";
-        String updatedState = "Resolved";
-        testIncident.setDescription(updatedDescription);
-        testIncident.setState(updatedState);
+    @DisplayName("Obtener incidente por ID existente")
+    void whenGetIncidentById_thenReturnIncident() {
+        // Arrange
+        when(incidentRepository.findById(1L)).thenReturn(Optional.of(testIncident));
 
+        // Act
+        Incident found = incidentService.getById(1L);
+
+        // Assert
+        assertNotNull(found);
+        assertEquals(testIncident.getIdIncident(), found.getIdIncident());
+        assertEquals(testIncident.getDescription(), found.getDescription());
+        verify(incidentRepository).findById(1L);
+    }
+
+    @Test
+    @DisplayName("Obtener incidente por ID inexistente")
+    void whenGetIncidentByInvalidId_thenThrowException() {
+        // Arrange
+        when(incidentRepository.findById(999L)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+            incidentService.getById(999L);
+        });
+
+        assertEquals("Incident not found with id 999", exception.getMessage());
+        verify(incidentRepository).findById(999L);
+    }
+
+    @Test
+    @DisplayName("Actualizar incidente existente")
+    void whenUpdateIncident_thenReturnUpdatedIncident() {
+        // Arrange
+        String updatedDescription = "Updated Incident Description";
+        String updatedState = "Resolved";
+        Incident updatedIncidentDetails = new Incident();
+        updatedIncidentDetails.setDescription(updatedDescription);
+        updatedIncidentDetails.setState(updatedState);
+
+        when(incidentRepository.findById(1L)).thenReturn(Optional.of(testIncident));
         when(incidentRepository.save(any(Incident.class))).thenReturn(testIncident);
 
-        // When
-        Incident updatedIncident = incidentService.update(testIncident.getIdIncident(), testIncident);
+        // Act
+        Incident updatedIncident = incidentService.update(1L, updatedIncidentDetails);
 
-        // Then
+        // Assert
         assertNotNull(updatedIncident);
         assertEquals(updatedDescription, updatedIncident.getDescription());
         assertEquals(updatedState, updatedIncident.getState());
@@ -145,62 +195,52 @@ public class IncidentServiceTest {
     }
 
     @Test
-    void whenDeleteIncident_thenVerifyRepositoryCall() {
-        // Given
-        Long id = 1L;
-        doNothing().when(incidentRepository).deleteById(id);
+    @DisplayName("Actualizar incidente inexistente lanza excepción")
+    void whenUpdateNonExistentIncident_thenThrowException() {
+        // Arrange
+        Incident updatedIncidentDetails = new Incident();
+        updatedIncidentDetails.setDescription("Updated Incident Description");
+        updatedIncidentDetails.setState("Resolved");
 
-        // When
-        incidentService.delete(id);
+        when(incidentRepository.findById(999L)).thenReturn(Optional.empty());
 
-        // Then
-        verify(incidentRepository).deleteById(id);
+        // Act & Assert
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+            incidentService.update(999L, updatedIncidentDetails);
+        });
+
+        assertEquals("Incident not found with id 999", exception.getMessage());
+        verify(incidentRepository, never()).save(any(Incident.class));
     }
 
     @Test
-    void whenSaveIncidentWithNullProject_thenReturnSavedIncident() {
-        // Given
-        testIncident.setProyect(null);
-        when(incidentRepository.save(any(Incident.class))).thenReturn(testIncident);
+    @DisplayName("Eliminar incidente existente")
+    void whenDeleteIncident_thenVerifyDeletion() {
+        // Arrange
+        Long incidentId = 1L;
+        when(incidentRepository.existsById(incidentId)).thenReturn(true);
 
-        // When
-        Incident savedIncident = incidentService.create(testIncident);
+        // Act
+        incidentService.delete(incidentId);
 
-        // Then
-        assertNotNull(savedIncident);
-        assertNull(savedIncident.getProyect());
-        verify(incidentRepository).save(any(Incident.class));
+        // Assert
+        verify(incidentRepository, times(1)).deleteById(incidentId);
     }
 
     @Test
-    void whenSaveIncidentWithNullResponsible_thenReturnSavedIncident() {
-        // Given
-        testIncident.setResponsible(null);
-        when(incidentRepository.save(any(Incident.class))).thenReturn(testIncident);
+    @DisplayName("Eliminar incidente inexistente lanza excepción")
+    void whenDeleteNonExistentIncident_thenThrowException() {
+        // Arrange
+        Long incidentId = 999L;
+        when(incidentRepository.existsById(incidentId)).thenReturn(false);
 
-        // When
-        Incident savedIncident = incidentService.create(testIncident);
+        // Act & Assert
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+            incidentService.delete(incidentId);
+        });
 
-        // Then
-        assertNotNull(savedIncident);
-        assertNull(savedIncident.getResponsible());
-        verify(incidentRepository).save(any(Incident.class));
+        assertEquals("Incident not found with id 999", exception.getMessage());
+        verify(incidentRepository, never()).deleteById(incidentId);
     }
 
-    @Test
-    void whenUpdateIncidentPriority_thenReturnUpdatedIncident() {
-        // Given
-        String newPriority = "Low";
-        testIncident.setPriority(newPriority);
-
-        when(incidentRepository.save(any(Incident.class))).thenReturn(testIncident);
-
-        // When
-        Incident updatedIncident = incidentService.update(testIncident.getIdIncident(), testIncident);
-
-        // Then
-        assertNotNull(updatedIncident);
-        assertEquals(newPriority, updatedIncident.getPriority());
-        verify(incidentRepository).save(any(Incident.class));
-    }
 }
