@@ -37,7 +37,7 @@ public class Parameter {
         }
     }
 
-    @Column(name = "name_parameter", unique = true)
+    @Column(name = "name_parameter")
     private String nameParameter;
 
     @Column(name = "content", columnDefinition = "TEXT")
