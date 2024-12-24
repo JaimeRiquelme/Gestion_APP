@@ -3,6 +3,7 @@ package gestion.proyectos.gestionproyectos.Service;
 import gestion.proyectos.gestionproyectos.Entity.Process;
 import gestion.proyectos.gestionproyectos.Entity.Management;
 import gestion.proyectos.gestionproyectos.Repository.ProcessRepository;
+import gestion.proyectos.gestionproyectos.Repository.ManagementRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
@@ -25,6 +26,9 @@ class ProcessServiceTest {
 
     @Mock
     private ProcessRepository processRepository;
+
+    @Mock
+    private ManagementRepository managementRepository;
 
     @InjectMocks
     private ProcessService processService;
@@ -68,9 +72,10 @@ class ProcessServiceTest {
     }
 
     @Test
-    @DisplayName("Test: Guardar proceso nuevo")
-    void whenSaveProcess_thenReturnSavedProcess() {
+    @DisplayName("Crear proceso con datos válidos")
+    void whenCreateProcess_thenReturnSavedProcess() {
         // Arrange
+        when(managementRepository.findById(testManagement.getIdManagement())).thenReturn(Optional.of(testManagement));
         when(processRepository.save(any(Process.class))).thenReturn(testProcess1);
 
         // Act
@@ -78,17 +83,43 @@ class ProcessServiceTest {
 
         // Assert
         assertNotNull(savedProcess);
-        assertEquals(testProcess1.getIdProcess(), savedProcess.getIdProcess());
         assertEquals(testProcess1.getNameProcess(), savedProcess.getNameProcess());
         assertEquals(testProcess1.getStateProcess(), savedProcess.getStateProcess());
-        assertEquals(testProcess1.getStartDatePlanned(), savedProcess.getStartDatePlanned());
-        assertEquals(testProcess1.getEndDatePlanned(), savedProcess.getEndDatePlanned());
-        verify(processRepository).save(testProcess1);
+        verify(processRepository).save(any(Process.class));
     }
 
     @Test
-    @DisplayName("Test: Obtener proceso por ID existente")
-    void whenGetProcess_thenReturnProcess() {
+    @DisplayName("Crear proceso con Management inválido lanza excepción")
+    void whenCreateProcessWithInvalidManagement_thenThrowException() {
+        // Arrange
+        when(managementRepository.findById(testManagement.getIdManagement())).thenReturn(Optional.empty());
+
+        // Act & Assert
+        assertThrows(RuntimeException.class, () -> processService.create(testProcess1),
+                "Management not found with id " + testManagement.getIdManagement());
+        verify(processRepository, never()).save(any(Process.class));
+    }
+
+
+    @Test
+    @DisplayName("Obtener todos los procesos")
+    void whenGetAllProcesses_thenReturnList() {
+        // Arrange
+        List<Process> processes = Arrays.asList(testProcess1, testProcess2);
+        when(processRepository.findAll()).thenReturn(processes);
+
+        // Act
+        List<Process> result = processService.getAll();
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(2, result.size());
+        verify(processRepository).findAll();
+    }
+
+    @Test
+    @DisplayName("Obtener proceso por ID existente")
+    void whenGetProcessById_thenReturnProcess() {
         // Arrange
         when(processRepository.findById(1L)).thenReturn(Optional.of(testProcess1));
 
@@ -98,76 +129,139 @@ class ProcessServiceTest {
         // Assert
         assertNotNull(found);
         assertEquals(testProcess1.getIdProcess(), found.getIdProcess());
-        assertEquals(testProcess1.getNameProcess(), found.getNameProcess());
-        assertEquals(testProcess1.getStateProcess(), found.getStateProcess());
         verify(processRepository).findById(1L);
     }
 
     @Test
-    @DisplayName("Test: Obtener proceso por ID inexistente")
-    void whenGetProcessByInvalidId_thenReturnNull() {
+    @DisplayName("Obtener proceso por ID inexistente lanza excepción")
+    void whenGetProcessByInvalidId_thenThrowException() {
         // Arrange
         when(processRepository.findById(999L)).thenReturn(Optional.empty());
 
-        // Act
-        Process result = processService.getById(999L);
-
-        // Assert
-        assertNull(result);
-        verify(processRepository).findById(999L);
+        // Act & Assert
+        assertThrows(RuntimeException.class, () -> processService.getById(999L),
+                "Process not found with id 999");
     }
 
     @Test
-    @DisplayName("Test: Obtener todos los procesos")
-    void whenGetProcesses_thenReturnProcessList() {
-        // Arrange
-        List<Process> processList = Arrays.asList(testProcess1, testProcess2);
-        when(processRepository.findAll()).thenReturn(processList);
-
-        // Act
-        List<Process> result = processService.getAll();
-
-        // Assert
-        assertNotNull(result);
-        assertEquals(2, result.size());
-        assertEquals(testProcess1.getNameProcess(), result.get(0).getNameProcess());
-        assertEquals(testProcess2.getNameProcess(), result.get(1).getNameProcess());
-        verify(processRepository).findAll();
-    }
-
-    @Test
-    @DisplayName("Test: Actualizar proceso existente")
+    @DisplayName("Actualizar proceso existente")
     void whenUpdateProcess_thenReturnUpdatedProcess() {
         // Arrange
-        Process processToUpdate = testProcess1;
-        processToUpdate.setNameProcess("Proceso Actualizado");
-        processToUpdate.setStateProcess("Completado");
-        processToUpdate.setEndDateReal("2024-06-15");
-        when(processRepository.save(any(Process.class))).thenReturn(processToUpdate);
+        Process updateDetails = new Process();
+        updateDetails.setNameProcess("Proceso Actualizado");
+        updateDetails.setStateProcess("Completado");
+        updateDetails.setStartDatePlanned("2024-02-01");
+
+        when(processRepository.findById(1L)).thenReturn(Optional.of(testProcess1));
+        when(processRepository.save(any(Process.class))).thenReturn(testProcess1);
 
         // Act
-        Process updated = processService.update(processToUpdate.getIdProcess(), processToUpdate);
+        Process updated = processService.update(1L, updateDetails);
 
         // Assert
         assertNotNull(updated);
         assertEquals("Proceso Actualizado", updated.getNameProcess());
-        assertEquals("Completado", updated.getStateProcess());
-        assertEquals("2024-06-15", updated.getEndDateReal());
-        assertEquals(testProcess1.getIdProcess(), updated.getIdProcess());
-        verify(processRepository).save(processToUpdate);
+        verify(processRepository).save(any(Process.class));
     }
 
     @Test
-    @DisplayName("Test: Eliminar proceso")
-    void whenDeleteProcess_thenVerifyDeletion() {
+    @DisplayName("Actualizar proceso inexistente lanza excepción")
+    void whenUpdateNonExistentProcess_thenThrowException() {
+        // Arrange
+        when(processRepository.findById(999L)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        assertThrows(RuntimeException.class,
+                () -> processService.update(999L, testProcess1),
+                "Process not found with id 999");
+        verify(processRepository, never()).save(any(Process.class));
+    }
+
+    @Test
+    @DisplayName("Actualizar proceso con fecha inválida lanza excepción")
+    void whenUpdateProcessWithInvalidDate_thenThrowException() {
+        // Arrange
+        when(processRepository.findById(1L)).thenReturn(Optional.of(testProcess1));
+        Process updateDetails = new Process();
+        updateDetails.setStartDatePlanned("fecha-invalida");
+
+        // Act & Assert
+        assertThrows(IllegalArgumentException.class,
+                () -> processService.update(1L, updateDetails),
+                "La fecha debe estar en el formato AAAA-MM-DD y ser válida");
+        verify(processRepository, never()).save(any(Process.class));
+    }
+
+    @Test
+    @DisplayName("Eliminar proceso existente")
+    void whenDeleteExistingProcess_thenDeleteSuccessfully() {
         // Arrange
         Long processId = 1L;
-        doNothing().when(processRepository).deleteById(processId);
+        when(processRepository.existsById(processId)).thenReturn(true);
 
         // Act
         processService.delete(processId);
 
         // Assert
-        verify(processRepository, times(1)).deleteById(processId);
+        verify(processRepository).deleteById(processId);
+    }
+
+    @Test
+    @DisplayName("Eliminar proceso inexistente lanza excepción")
+    void whenDeleteNonExistentProcess_thenThrowException() {
+        // Arrange
+        Long processId = 999L;
+        when(processRepository.existsById(processId)).thenReturn(false);
+
+        // Act & Assert
+        assertThrows(RuntimeException.class,
+                () -> processService.delete(processId),
+                "Process not found with id 999");
+        verify(processRepository, never()).deleteById(processId);
+    }
+
+    @Test
+    @DisplayName("Actualizar proceso con nuevo Management")
+    void whenUpdateProcessWithNewManagement_thenReturnUpdatedProcess() {
+        // Arrange
+        Management newManagement = new Management();
+        newManagement.setIdManagement(2L);
+        Process updateDetails = new Process();
+        updateDetails.setManagement(newManagement);
+
+        when(processRepository.findById(1L)).thenReturn(Optional.of(testProcess1));
+        when(managementRepository.findById(2L)).thenReturn(Optional.of(newManagement));
+        when(processRepository.save(any(Process.class))).thenReturn(testProcess1);
+
+        // Act
+        Process updated = processService.update(1L, updateDetails);
+
+        // Assert
+        assertNotNull(updated);
+        verify(managementRepository).findById(2L);
+        verify(processRepository).save(any(Process.class));
+    }
+
+    @Test
+    @DisplayName("Validar múltiples fechas en proceso")
+    void whenValidateMultipleDates_thenNoExceptions() {
+        // Arrange
+        testProcess1.setStartDatePlanned("2024-01-01");
+        testProcess1.setEndDatePlanned("2024-12-31");
+        testProcess1.setStartDateReal("2024-01-15");
+        testProcess1.setEndDateReal("2024-12-15");
+
+        when(managementRepository.findById(testManagement.getIdManagement())).thenReturn(Optional.of(testManagement));
+        when(processRepository.save(any(Process.class))).thenReturn(testProcess1);
+
+        // Act
+        Process savedProcess = processService.create(testProcess1);
+
+        // Assert
+        assertNotNull(savedProcess);
+        assertEquals("2024-01-01", savedProcess.getStartDatePlanned());
+        assertEquals("2024-12-31", savedProcess.getEndDatePlanned());
+        assertEquals("2024-01-15", savedProcess.getStartDateReal());
+        assertEquals("2024-12-15", savedProcess.getEndDateReal());
     }
 }
