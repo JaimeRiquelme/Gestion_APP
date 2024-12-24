@@ -1,5 +1,8 @@
 package gestion.proyectos.gestionproyectos.Service;
 
+import gestion.proyectos.gestionproyectos.exception.DocumentGenerationException;
+import gestion.proyectos.gestionproyectos.exception.MissingFieldException;
+import gestion.proyectos.gestionproyectos.exception.TemplateNotFoundException;
 import gestion.proyectos.gestionproyectos.util.TemplatePathResolver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -40,31 +43,38 @@ public class RegistroLeccionesAprendidasDocumentService implements DocumentServi
     @Override
     public byte[] generateDocument(Map<String, String> data, Long idExit) throws IOException {
         validateData(data);
-        String templatePath = pathResolver.resolve("registro_de_lecciones_aprendidas.tex");
+        String templatePath;
+        try {
+            templatePath = pathResolver.resolve("registro_de_lecciones_aprendidas.tex");
+        } catch (Exception e) {
+            throw new TemplateNotFoundException("The template 'registro_de_lecciones_aprendidas.tex' was not found.");
+        }
 
-        byte[] documento = latexService.generateDocument(templatePath, data);
-
-        exitService.updateAssumptionsDocument(idExit, documento);
-        parameterService.saveParameters(data, idExit);
-
-        return documento;
+        try {
+            byte[] documento = latexService.generateDocument(templatePath, data);
+            exitService.updateAssumptionsDocument(idExit, documento);
+            parameterService.saveParameters(data, idExit);
+            return documento;
+        } catch (IOException e) {
+            throw new DocumentGenerationException("Error occurred while generating the PDF document.", e);
+        }
     }
 
     @Override
     public void validateData(Map<String, String> data) {
         if (data == null) {
-            throw new IllegalArgumentException("Los datos no pueden ser nulos");
+            throw new MissingFieldException("Provided data is null.");
         }
 
-        Set<String> camposFaltantes = new HashSet<>();
-        for (String campo : REQUIRED_FIELDS) {
-            if (!data.containsKey(campo) || data.get(campo) == null || data.get(campo).trim().isEmpty()) {
-                camposFaltantes.add(campo);
+        Set<String> missingFields = new HashSet<>();
+        for (String field : REQUIRED_FIELDS) {
+            if (!data.containsKey(field) || data.get(field) == null || data.get(field).trim().isEmpty()) {
+                missingFields.add(field);
             }
         }
 
-        if (!camposFaltantes.isEmpty()) {
-            throw new IllegalArgumentException("Faltan campos requeridos: " + camposFaltantes);
+        if (!missingFields.isEmpty()) {
+            throw new IllegalArgumentException("The following required fields are missing or empty: " + missingFields);
         }
     }
 }

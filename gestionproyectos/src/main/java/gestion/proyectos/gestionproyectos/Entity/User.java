@@ -37,10 +37,11 @@ public class User implements UserDetails {
     @Column(name = "second_names")
     private String secondNames;
 
-    @Column(unique = true)
+    @Column(unique = true, nullable = false)
     private String email;
 
     @JsonIgnore
+    @Column(nullable = false)
     private String password;
 
     @Column(name = "phone_number")
