@@ -1,5 +1,8 @@
 package gestion.proyectos.gestionproyectos.Service;
 
+import gestion.proyectos.gestionproyectos.exception.DocumentGenerationException;
+import gestion.proyectos.gestionproyectos.exception.MissingFieldException;
+import gestion.proyectos.gestionproyectos.exception.TemplateNotFoundException;
 import gestion.proyectos.gestionproyectos.util.TemplatePathResolver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -49,20 +52,28 @@ public class AssumptionsDocumentService implements DocumentService {
     @Override
     public byte[] generateDocument(Map<String, String> data, Long idExit) throws IOException {
         validateData(data);
-        String templatePath = pathResolver.resolve("registro_de_supuestos.tex");
 
-        byte[] Documento = latexService.generateDocument(templatePath, data);
+        String templatePath;
+        try {
+            templatePath = pathResolver.resolve("registro_de_supuestos.tex");
+        } catch (Exception e) {
+            throw new TemplateNotFoundException("The template 'registro_de_supuestos.tex' was not found.");
+        }
 
-        exitService.updateAssumptionsDocument(idExit, Documento);
-        parameterService.saveParameters(data, idExit);
-
-        return Documento;
+        try {
+            byte[] documento = latexService.generateDocument(templatePath, data);
+            exitService.updateAssumptionsDocument(idExit, documento);
+            parameterService.saveParameters(data, idExit);
+            return documento;
+        } catch (IOException e) {
+            throw new DocumentGenerationException("Error occurred while generating the PDF document.", e);
+        }
     }
 
     @Override
     public void validateData(Map<String, String> data) {
         if (data == null) {
-            throw new IllegalArgumentException("Data cannot be null");
+            throw new MissingFieldException("Provided data is null.");
         }
 
         Set<String> missingFields = new HashSet<>();
@@ -73,7 +84,7 @@ public class AssumptionsDocumentService implements DocumentService {
         }
 
         if (!missingFields.isEmpty()) {
-            throw new IllegalArgumentException("Missing required fields: " + missingFields);
+            throw new IllegalArgumentException("The following required fields are missing or empty: " + missingFields);
         }
     }
 }

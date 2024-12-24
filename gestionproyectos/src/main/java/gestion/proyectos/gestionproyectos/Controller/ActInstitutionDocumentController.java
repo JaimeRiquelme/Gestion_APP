@@ -2,19 +2,15 @@ package gestion.proyectos.gestionproyectos.Controller;
 
 
 import gestion.proyectos.gestionproyectos.Service.ActInstitutionDocumentService;
-import gestion.proyectos.gestionproyectos.Service.AssumptionsDocumentService;
 import gestion.proyectos.gestionproyectos.exception.DocumentGenerationException;
 import gestion.proyectos.gestionproyectos.exception.MissingFieldException;
 import gestion.proyectos.gestionproyectos.exception.TemplateNotFoundException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
@@ -33,7 +29,7 @@ public class ActInstitutionDocumentController {
             @RequestBody Map<String, String> requestData) {
 
         try {
-            byte[] pdfContent = actInstitutionService.generateDocumentACT(requestData, idExit);
+            byte[] pdfContent = actInstitutionService.generateDocument(requestData, idExit);
             String filename = generateFilename("acta_de_constitucion");
 
             HttpHeaders headers = new HttpHeaders();

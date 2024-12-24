@@ -14,7 +14,8 @@ import java.util.Map;
 import java.util.Set;
 
 @Service
-public class ActInstitutionDocumentService {
+public class ActInstitutionDocumentService implements DocumentService {
+
     @Autowired
     private LatexService latexService;
 
@@ -26,6 +27,7 @@ public class ActInstitutionDocumentService {
 
     @Autowired
     private ParameterService parameterService;
+
     private static final Set<String> REQUIRED_FIELDS = new HashSet<>(Arrays.asList(
             "proyectName",
             "idProyect",
@@ -52,9 +54,9 @@ public class ActInstitutionDocumentService {
             "nonFunctionalRequirements"
     ));
 
-
-    public byte[] generateDocumentACT(Map<String, String> data, Long idExit) throws IOException {
-        validateDataACT(data);
+    @Override
+    public byte[] generateDocument(Map<String, String> data, Long idExit) throws IOException {
+        validateData(data);
 
         String templatePath;
         try {
@@ -73,7 +75,8 @@ public class ActInstitutionDocumentService {
         }
     }
 
-    public void validateDataACT(Map<String, String> data) {
+    @Override
+    public void validateData(Map<String, String> data) {
         if (data == null) {
             throw new MissingFieldException("Provided data is null.");
         }

@@ -1,6 +1,9 @@
 package gestion.proyectos.gestionproyectos.Controller;
 
 import gestion.proyectos.gestionproyectos.Service.AssumptionsDocumentService;
+import gestion.proyectos.gestionproyectos.exception.DocumentGenerationException;
+import gestion.proyectos.gestionproyectos.exception.MissingFieldException;
+import gestion.proyectos.gestionproyectos.exception.TemplateNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,18 +47,18 @@ public class AssumptionsDocumentController {
                     .headers(headers)
                     .body(pdfContent);
 
-        } catch (IllegalArgumentException e) {
-            logger.error("Validation error while generating assumptions document", e);
+        } catch (MissingFieldException e) {
             return ResponseEntity.badRequest()
-                    .body("Error de validación: " + e.getMessage());
-        } catch (IOException e) {
-            logger.error("Error generating assumptions document", e);
+                    .body("Validation error: Missing or invalid fields: " + e.getMessage());
+        } catch (TemplateNotFoundException e) {
+            return ResponseEntity.status(404)
+                    .body("Error: The template for generating the document was not found. Details: " + e.getMessage());
+        } catch (DocumentGenerationException e) {
             return ResponseEntity.internalServerError()
-                    .body("Error generando el documento: " + e.getMessage());
+                    .body("Error while generating the PDF document. Details: " + e.getMessage());
         } catch (Exception e) {
-            logger.error("Unexpected error while generating assumptions document", e);
             return ResponseEntity.internalServerError()
-                    .body("Error inesperado: " + e.getMessage());
+                    .body("An unexpected error occurred: " + e.getMessage());
         }
     }
 
