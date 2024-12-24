@@ -3,27 +3,35 @@ package gestion.proyectos.gestionproyectos.Service;
 import gestion.proyectos.gestionproyectos.Entity.Proyect;
 import gestion.proyectos.gestionproyectos.Entity.User;
 import gestion.proyectos.gestionproyectos.Repository.ProyectRepository;
+import gestion.proyectos.gestionproyectos.Repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import jakarta.persistence.EntityManager;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
-import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
 class ProyectServiceTest {
 
     @Mock
     private ProyectRepository proyectRepository;
+
+    @Mock
+    private UserRepository userRepository;
+
+    @Mock
+    private EntityManager entityManager;
 
     @InjectMocks
     private ProyectService proyectService;
@@ -63,6 +71,7 @@ class ProyectServiceTest {
     @DisplayName("Test: Guardar proyecto nuevo")
     void whenSaveProyect_thenReturnSavedProyect() {
         // Arrange
+        when(userRepository.findById(testUser.getIdUsuario())).thenReturn(Optional.of(testUser));
         when(proyectRepository.save(any(Proyect.class))).thenReturn(testProyect1);
 
         // Act
@@ -77,21 +86,35 @@ class ProyectServiceTest {
     }
 
     @Test
+    @DisplayName("Test: Guardar proyecto con usuario inválido lanza excepción")
+    void whenSaveProyectWithInvalidUser_thenThrowException() {
+        // Arrange
+        when(userRepository.findById(testUser.getIdUsuario())).thenReturn(Optional.empty());
+
+        // Act & Assert
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+            proyectService.create(testProyect1);
+        });
+
+        assertEquals("User not found with id " + testUser.getIdUsuario(), exception.getMessage());
+        verify(proyectRepository, never()).save(any(Proyect.class));
+    }
+
+    @Test
     @DisplayName("Test: Obtener todos los proyectos")
-    void whenGetProyects_thenReturnProyectList() {
+    void whenGetAll_thenReturnProyectList() {
         // Arrange
         List<Proyect> proyectList = Arrays.asList(testProyect1, testProyect2);
         when(proyectRepository.findAll()).thenReturn(proyectList);
 
         // Act
-        Iterable<Proyect> result = proyectService.getAll();
-        List<Proyect> resultList = (List<Proyect>) result;
+        List<Proyect> result = proyectService.getAll();
 
         // Assert
-        assertNotNull(resultList);
-        assertEquals(2, resultList.size());
-        assertEquals(testProyect1.getNameProyect(), resultList.get(0).getNameProyect());
-        assertEquals(testProyect2.getNameProyect(), resultList.get(1).getNameProyect());
+        assertNotNull(result);
+        assertEquals(2, result.size());
+        assertEquals(testProyect1.getNameProyect(), result.get(0).getNameProyect());
+        assertEquals(testProyect2.getNameProyect(), result.get(1).getNameProyect());
         verify(proyectRepository).findAll();
     }
 
@@ -129,31 +152,40 @@ class ProyectServiceTest {
     @DisplayName("Test: Actualizar proyecto existente")
     void whenUpdateProyect_thenReturnUpdatedProyect() {
         // Arrange
-        Proyect proyectToUpdate = testProyect1;
-        proyectToUpdate.setNameProyect("Proyecto Actualizado");
-        when(proyectRepository.save(any(Proyect.class))).thenReturn(proyectToUpdate);
+        when(proyectRepository.findById(1L)).thenReturn(Optional.of(testProyect1));
+        when(proyectRepository.save(any(Proyect.class))).thenReturn(testProyect1);
+
+        Proyect updatedDetails = new Proyect();
+        updatedDetails.setNameProyect("Proyecto Actualizado");
+        updatedDetails.setDescription("Descripción actualizada");
 
         // Act
-        Proyect updated = proyectService.update(proyectToUpdate.getIdProyecto(), proyectToUpdate);
+        Proyect updated = proyectService.update(1L, updatedDetails);
 
         // Assert
         assertNotNull(updated);
         assertEquals("Proyecto Actualizado", updated.getNameProyect());
-        assertEquals(testProyect1.getIdProyecto(), updated.getIdProyecto());
-        verify(proyectRepository).save(proyectToUpdate);
+        assertEquals("Descripción actualizada", updated.getDescription());
+        verify(proyectRepository).save(any(Proyect.class));
     }
+
+
 
     @Test
-    @DisplayName("Test: Eliminar proyecto")
-    void whenDeleteProyect_thenVerifyDeletion() {
+    @DisplayName("Test: Eliminar proyecto inexistente lanza excepción")
+    void whenDeleteNonExistentProyect_thenThrowException() {
         // Arrange
-        Long proyectId = 1L;
-        doNothing().when(proyectRepository).deleteById(proyectId);
+        when(proyectRepository.findById(999L)).thenReturn(Optional.empty());
 
-        // Act
-        proyectService.delete(proyectId);
+        // Act & Assert
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+            proyectService.delete(999L);
+        });
 
-        // Assert
-        verify(proyectRepository, times(1)).deleteById(proyectId);
+        assertEquals("No se encontró el proyecto con ID: 999", exception.getMessage());
+        verify(proyectRepository, never()).deleteById(999L);
     }
+
+
+
 }

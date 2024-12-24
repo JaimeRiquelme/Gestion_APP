@@ -3,6 +3,7 @@ package gestion.proyectos.gestionproyectos.Service;
 import gestion.proyectos.gestionproyectos.Entity.Lessons;
 import gestion.proyectos.gestionproyectos.Entity.Proyect;
 import gestion.proyectos.gestionproyectos.Repository.LessonsRepository;
+import gestion.proyectos.gestionproyectos.Repository.ProyectRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,6 +26,9 @@ public class LessonsServiceTest {
     @Mock
     private LessonsRepository lessonsRepository;
 
+    @Mock
+    private ProyectRepository proyectRepository;
+
     @InjectMocks
     private LessonsService lessonsService;
 
@@ -33,12 +37,12 @@ public class LessonsServiceTest {
 
     @BeforeEach
     void setUp() {
-        // Configurar Proyect para pruebas
+        // Configure a Proyect for testing
         testProyect = new Proyect();
         testProyect.setIdProyecto(1L);
         testProyect.setNameProyect("Test Project");
 
-        // Configurar Lessons para pruebas
+        // Configure a Lessons object for testing
         testLessons = new Lessons();
         testLessons.setIdLesson(1L);
         testLessons.setDescription("Test Lesson Description");
@@ -52,6 +56,7 @@ public class LessonsServiceTest {
     @Test
     void whenSaveLessons_thenReturnSavedLessons() {
         // Given
+        when(proyectRepository.findById(1L)).thenReturn(Optional.of(testProyect));
         when(lessonsRepository.save(any(Lessons.class))).thenReturn(testLessons);
 
         // When
@@ -63,6 +68,7 @@ public class LessonsServiceTest {
         assertEquals(testLessons.getRecommendations(), savedLessons.getRecommendations());
         assertEquals(testLessons.getCategory(), savedLessons.getCategory());
         assertEquals(testLessons.getImpact(), savedLessons.getImpact());
+        verify(proyectRepository).findById(1L);
         verify(lessonsRepository).save(any(Lessons.class));
     }
 
@@ -82,30 +88,32 @@ public class LessonsServiceTest {
     }
 
     @Test
-    void whenGetLessonsByIdWithInvalidId_thenReturnNull() {
+    void whenGetLessonsByIdWithInvalidId_thenThrowRuntimeException() {
         // Given
         when(lessonsRepository.findById(99L)).thenReturn(Optional.empty());
 
-        // When
-        Lessons foundLessons = lessonsService.getById(99L);
-
-        // Then
-        assertNull(foundLessons);
+        // When & Then
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> lessonsService.getById(99L));
+        assertTrue(exception.getMessage().contains("Lesson not found with id 99"));
         verify(lessonsRepository).findById(99L);
     }
 
     @Test
     void whenUpdateLessons_thenReturnUpdatedLessons() {
         // Given
+        when(lessonsRepository.findById(1L)).thenReturn(Optional.of(testLessons));
         String updatedDescription = "Updated Description";
         String updatedRecommendations = "Updated Recommendations";
-        testLessons.setDescription(updatedDescription);
-        testLessons.setRecommendations(updatedRecommendations);
+
+        // New details for the update
+        Lessons updatedDetails = new Lessons();
+        updatedDetails.setDescription(updatedDescription);
+        updatedDetails.setRecommendations(updatedRecommendations);
 
         when(lessonsRepository.save(any(Lessons.class))).thenReturn(testLessons);
 
         // When
-        Lessons updatedLessons = lessonsService.update(testLessons.getIdLesson(), testLessons);
+        Lessons updatedLessons = lessonsService.update(testLessons.getIdLesson(), updatedDetails);
 
         // Then
         assertNotNull(updatedLessons);
@@ -115,16 +123,31 @@ public class LessonsServiceTest {
     }
 
     @Test
-    void whenDeleteLessons_thenVerifyRepositoryCall() {
+    void whenDeleteLessons_withValidId_thenVerifyRepositoryCall() {
         // Given
         Long id = 1L;
+        when(lessonsRepository.existsById(id)).thenReturn(true);
         doNothing().when(lessonsRepository).deleteById(id);
 
         // When
         lessonsService.delete(id);
 
         // Then
+        verify(lessonsRepository).existsById(id);
         verify(lessonsRepository).deleteById(id);
+    }
+
+    @Test
+    void whenDeleteLessons_withInvalidId_thenThrowRuntimeException() {
+        // Given
+        Long nonExistingId = 99L;
+        when(lessonsRepository.existsById(nonExistingId)).thenReturn(false);
+
+        // When & Then
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> lessonsService.delete(nonExistingId));
+        assertTrue(exception.getMessage().contains("Lesson not found with id 99"));
+        verify(lessonsRepository).existsById(nonExistingId);
+        verify(lessonsRepository, never()).deleteById(anyLong());
     }
 
     @Test
@@ -145,13 +168,16 @@ public class LessonsServiceTest {
     @Test
     void whenUpdateLessonsWithNewCategory_thenReturnUpdatedLessons() {
         // Given
+        when(lessonsRepository.findById(1L)).thenReturn(Optional.of(testLessons));
         String newCategory = "Technical";
-        testLessons.setCategory(newCategory);
+
+        Lessons updatedDetails = new Lessons();
+        updatedDetails.setCategory(newCategory);
 
         when(lessonsRepository.save(any(Lessons.class))).thenReturn(testLessons);
 
         // When
-        Lessons updatedLessons = lessonsService.update(testLessons.getIdLesson(), testLessons);
+        Lessons updatedLessons = lessonsService.update(testLessons.getIdLesson(), updatedDetails);
 
         // Then
         assertNotNull(updatedLessons);
@@ -162,17 +188,59 @@ public class LessonsServiceTest {
     @Test
     void whenUpdateLessonsWithNewImpact_thenReturnUpdatedLessons() {
         // Given
+        when(lessonsRepository.findById(1L)).thenReturn(Optional.of(testLessons));
         String newImpact = "Low";
-        testLessons.setImpact(newImpact);
+
+        Lessons updatedDetails = new Lessons();
+        updatedDetails.setImpact(newImpact);
 
         when(lessonsRepository.save(any(Lessons.class))).thenReturn(testLessons);
 
         // When
-        Lessons updatedLessons = lessonsService.update(testLessons.getIdLesson(), testLessons);
+        Lessons updatedLessons = lessonsService.update(testLessons.getIdLesson(), updatedDetails);
 
         // Then
         assertNotNull(updatedLessons);
         assertEquals(newImpact, updatedLessons.getImpact());
         verify(lessonsRepository).save(any(Lessons.class));
+    }
+
+    @Test
+    void whenCreateLessons_withInvalidDate_thenThrowException() {
+        // Given
+        when(proyectRepository.findById(1L)).thenReturn(Optional.of(testProyect));
+        testLessons.setRegistrationDate("invalid-date");
+
+        // When & Then
+        assertThrows(IllegalArgumentException.class, () -> lessonsService.create(testLessons));
+        verify(lessonsRepository, never()).save(any(Lessons.class));
+    }
+
+    @Test
+    void whenCreateLessons_withInvalidProject_thenThrowException() {
+        // Given
+        // The project ID is set to 1, but we mock an empty result
+        when(proyectRepository.findById(1L)).thenReturn(Optional.empty());
+
+        // When & Then
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> lessonsService.create(testLessons));
+        assertTrue(exception.getMessage().contains("Proyect not found with id 1"));
+        verify(lessonsRepository, never()).save(any(Lessons.class));
+    }
+
+    @Test
+    void whenUpdateLessonsWithInvalidDate_thenThrowIllegalArgumentException() {
+        // Given
+        when(lessonsRepository.findById(1L)).thenReturn(Optional.of(testLessons));
+
+        // Prepare updated lesson details with an invalid date
+        Lessons updatedLessonDetails = new Lessons();
+        updatedLessonDetails.setRegistrationDate("invalid-date");
+
+        // When & Then
+        assertThrows(IllegalArgumentException.class, () ->
+                lessonsService.update(testLessons.getIdLesson(), updatedLessonDetails)
+        );
+        verify(lessonsRepository, never()).save(any(Lessons.class));
     }
 }
