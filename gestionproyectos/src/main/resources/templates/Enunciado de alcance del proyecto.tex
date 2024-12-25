@@ -1,10 +1,9 @@
 \documentclass{article}
-\usepackage[table]{xcolor} % Para colorear celdas
-\usepackage{tabularx} % Para tablas ajustables al ancho
-\usepackage{geometry} % Para ajustar márgenes
-\geometry{margin=1.5cm} % Márgenes pequeños
+\usepackage[table]{xcolor}
+\usepackage{tabularx}
+\usepackage{geometry}
+\geometry{margin=1.5cm}
 
-% Definir nuevos tipos de columnas
 \newcolumntype{Y}{>{\raggedright\arraybackslash}X}
 \newcolumntype{L}{>{\raggedright\arraybackslash\hsize=0.8\hsize}X}
 \newcolumntype{R}{>{\raggedright\arraybackslash\hsize=1.2\hsize}X}
@@ -12,21 +11,24 @@
 \begin{document}
 
     \begin{center}
-    {\huge\textbf{Plan de Gestión de Requisitos}}\\[1cm]
+    {\huge\textbf{Plan de Gestión de Requisitos}}
     \end{center}
+
+    \vfill
 
     \renewcommand{\arraystretch}{1.5}
 
-    % Primera tabla - Información del proyecto
     \noindent
-    \begin{tabularx}{\textwidth}{|>{\columncolor{gray!40}}X|>{\columncolor{gray!40}}X|>{\columncolor{gray!40}}X|>{\columncolor{gray!40}}X|}
+    \begin{tabularx}{0.6\textwidth}{|>{\columncolor{gray!40}}L|>{\columncolor{white}}R|}
         \hline
-        \rowcolor{gray!40}\multicolumn{2}{|>{\columncolor{gray!40}}l|}{\textbf{NOMBRE DEL PROYECTO}} &
-        \textbf{ID DEL PROYECTO} & \textbf{FECHA DEL PROYECTO} \\
+        \textbf{NOMBRE DEL PROYECTO:} & {{proyectName}} \\
         \hline
-        \rowcolor{white}\multicolumn{2}{|l|}{{{proyectName}}} & {{idProyect}} & {{elaborationDate}} \\
+        \textbf{ID DEL PROYECTO:} & {{idProyect}} \\
+        \hline
+        \textbf{FECHA DEL PROYECTO:} & {{elaborationDate}} \\
         \hline
     \end{tabularx}
+
 
     \newpage
     
