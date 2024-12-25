@@ -1,7 +1,7 @@
 package gestion.proyectos.gestionproyectos.Controller;
 
 
-import gestion.proyectos.gestionproyectos.Service.projectScopeStatementService;
+import gestion.proyectos.gestionproyectos.Service.ScopeBaselineService;
 import gestion.proyectos.gestionproyectos.exception.DocumentGenerationException;
 import gestion.proyectos.gestionproyectos.exception.MissingFieldException;
 import gestion.proyectos.gestionproyectos.exception.TemplateNotFoundException;
@@ -18,14 +18,14 @@ import java.time.format.DateTimeFormatter;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/documents/project-scope-statement")
+@RequestMapping("/api/documents/ScopeBaseline")
 @CrossOrigin("*")
-public class projectScopeStatementController {
+public class ScopeBaselineController {
 
-    private static final Logger logger = LoggerFactory.getLogger(projectScopeStatementController.class);
+    private static final Logger logger = LoggerFactory.getLogger(ScopeBaselineController.class);
 
     @Autowired
-    private projectScopeStatementService projectScopeStatementService;
+    private ScopeBaselineService projectScopeStatementService;
 
     @PostMapping("/generate")
     public ResponseEntity<?> generateProjectScopeStatementDocument(
@@ -36,7 +36,7 @@ public class projectScopeStatementController {
             logger.info("Generating project-scope-statement document with data: {}", requestData);
 
             byte[] pdfContent = projectScopeStatementService.generateDocument(requestData, idExit);
-            String filename = generateFilename("project_scope_statement");
+            String filename = generateFilename("Scope_Baseline");
 
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_PDF);

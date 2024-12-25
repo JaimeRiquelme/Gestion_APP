@@ -14,7 +14,7 @@ import java.util.Map;
 import java.util.Set;
 
 @Service
-public class projectScopeStatementService implements DocumentService {
+public class ScopeBaselineService implements DocumentService {
 
     @Autowired
     private LatexService latexService;
