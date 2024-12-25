@@ -1,27 +1,108 @@
-\documentclass[10pt]{article}
+\documentclass[11pt]{article}
 \usepackage[utf8]{inputenc}
 \usepackage[spanish]{babel}
 \usepackage[table]{xcolor}
 \usepackage{tabularx}
 \usepackage{array}
 \usepackage{geometry}
-\geometry{margin=1.5cm}
+\usepackage{forest}
+\usepackage{hyperref}
+\usepackage{sectsty}
+
+% Configuración de geometría
+\geometry{
+    top=2.5cm,
+    bottom=2.5cm,
+    left=2.5cm,
+    right=2.5cm
+}
+
+% Configuración de colores
+\definecolor{titlecolor}{RGB}{0, 51, 102}
+\definecolor{sectioncolor}{RGB}{0, 71, 142}
+
+% Configuración de hyperref
+\hypersetup{
+    colorlinks=true,
+    linkcolor=sectioncolor,
+    filecolor=sectioncolor,
+    urlcolor=sectioncolor
+}
+
+% Configuración de forest para EDT - Ajustada para mejor escala
+\forestset{
+    default preamble={
+        for tree={
+            grow=east,
+            draw,
+            rounded corners=3pt,
+            node options={
+                align=center,
+                minimum width=2cm,    % Reducido de 2.5cm
+                minimum height=1cm,    % Reducido de 1.2cm
+                inner sep=2pt,         % Reducido de 4pt
+                font=\small\sffamily   % Añadido \small para texto más pequeño
+            },
+            edge={-latex},            % Removido 'thick' para líneas más finas
+            l sep+=8pt,               % Reducido de 15pt
+            s sep+=8pt,               % Reducido de 15pt
+            fill=white,
+            draw=sectioncolor
+        },
+        fit=band,                    % Ajusta automáticamente para caber en la página
+        before drawing tree={
+            sort by=y,
+            for tree={
+                edge path={
+                    \noexpand\path[\forestoption{edge}]
+                    (!u.parent anchor) -- (.child anchor)\forestoption{edge label};
+                }
+            }
+        }
+    }
+}
+
+% Estilo de secciones usando sectsty
+\sectionfont{\color{sectioncolor}\Large\bfseries}
 
 \begin{document}
 
+    % Portada
     \begin{center}
-    {\huge\textbf{Línea base del alcance}}\\[1cm]
-    \end{center}
+        \color{titlecolor}
+        {\Huge\textbf{Gestión de Proyectos}}\\[1cm]
+        {\large\textbf{Línea base del alcance}}\\[0.5cm]
+        \rule{\textwidth}{1pt}\\[1.5cm]
 
+        % Información del proyecto
+        \begin{tabular}{>{\bfseries}ll}
+            \textcolor{sectioncolor}{Nombre del proyecto:} & {{proyectName}} \\[0.4cm]
+            \textcolor{sectioncolor}{Identificador del proyecto:} & {{idProyect}} \\[0.4cm]
+            \textcolor{sectioncolor}{Empresa encargada:} & {{company}} \\[0.4cm]
+            \textcolor{sectioncolor}{Promotor del Proyecto:} & {{proyectPromotor}} \\[0.4cm]
+            \textcolor{sectioncolor}{Líder del proyecto:} & {{proyectLeader}} \\[0.4cm]
+            \textcolor{sectioncolor}{Fecha elaboración:} & {{elaborationDate}} \\
+        \end{tabular}
+    \end{center}
+    \thispagestyle{empty}
     \newpage
-    
+
+    % Tabla de contenidos
     \tableofcontents
+    \thispagestyle{empty}
     \newpage
-    
+
+    % Contenido principal
     \section{Enunciado de alcance del proyecto}
+    \large
     {{projectScopeStatement}}
-    
-    \section{EDT/WBS}
-    {{edtWbs}}
+    \normalsize
+
+    \section{EDT/WBS (Estructura de Desglose del Trabajo)}
+    \begin{center}
+        \scalebox{0.9}{  % Escala todo el árbol al 90% del tamaño original
+                {{edtWbs}}
+        }
+    \end{center}
 
 \end{document}
