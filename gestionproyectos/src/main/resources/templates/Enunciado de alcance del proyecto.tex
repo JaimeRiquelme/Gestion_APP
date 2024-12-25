@@ -1,0 +1,77 @@
+\documentclass{article}
+\usepackage[table]{xcolor}
+\usepackage{tabularx}
+\usepackage{geometry}
+\geometry{margin=1.5cm}
+
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+\newcolumntype{L}{>{\raggedright\arraybackslash\hsize=0.8\hsize}X}
+\newcolumntype{R}{>{\raggedright\arraybackslash\hsize=1.2\hsize}X}
+
+\begin{document}
+
+    \begin{center}
+    {\huge\textbf{Plan de Gestión de Requisitos}}
+    \end{center}
+
+    \vfill
+
+    \renewcommand{\arraystretch}{1.5}
+
+    \noindent
+    \begin{tabularx}{0.6\textwidth}{|>{\columncolor{gray!40}}L|>{\columncolor{white}}R|}
+        \hline
+        \textbf{NOMBRE DEL PROYECTO:} & {{proyectName}} \\
+        \hline
+        \textbf{ID DEL PROYECTO:} & {{idProyect}} \\
+        \hline
+        \textbf{FECHA DEL PROYECTO:} & {{elaborationDate}} \\
+        \hline
+    \end{tabularx}
+
+
+    \newpage
+    
+    \tableofcontents
+    \newpage
+    
+    \section{Propósito y Justificación del Proyecto}
+    {{purposeJustificationProject}}
+    
+    \section{Descripción del Alcance}
+    {{scopeDescription}}
+    
+    \section{Requisitos de Alto Nivel}
+    {{highLevelRequirements}}
+    
+    \section{Límites}
+    {{boundaries}}
+    
+    \section{Estrategia}
+    {{strategy}}
+    
+    \section{Entregables}
+    {{deliverables}}
+
+    \section{Criterios de Aceptación}
+    {{acceptanceCriteria}}
+
+    \section{Restricciones}
+    {{restrictions}}
+
+    \section{Estimación de Costos}
+    {{costEstimation}}
+
+    \section{Análisis Costo-Beneficio}
+    {{costBenefitAnalysis}}
+
+    \vspace{2.5cm}
+
+    \begin{tabular}{@{}p{.5in}p{4in}@{}}
+    Aprobado: & \hrulefill \\
+    \rowcolor{white} & {{proyectPromotor}} \\
+    \rowcolor{white} & {{proyectPromotorTitle}}\\
+    \end{tabular}
+
+    
+\end{document}
