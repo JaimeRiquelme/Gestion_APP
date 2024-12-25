@@ -1,0 +1,58 @@
+\documentclass{article}
+\usepackage[table]{xcolor} % Para colorear celdas
+\usepackage{tabularx} % Para tablas ajustables al ancho
+\usepackage{geometry} % Para ajustar márgenes
+\geometry{margin=1.5cm} % Márgenes pequeños
+
+% Definir nuevos tipos de columnas
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+\newcolumntype{L}{>{\raggedright\arraybackslash\hsize=0.8\hsize}X}
+\newcolumntype{R}{>{\raggedright\arraybackslash\hsize=1.2\hsize}X}
+
+\begin{document}
+
+    \begin{center}
+    {\huge\textbf{Plan de Gestión de Requisitos}}\\[1cm]
+    \end{center}
+
+    \renewcommand{\arraystretch}{1.5}
+
+    \begin{tabular}{|ll|} \hline
+    \rowcolor{gray!10}\textbf{Nombre del proyecto:} & {{proyectName}} \\[0.3cm]
+    \textbf{Identificador del proyecto:} & {{idProyect}} \\[0.3cm]
+    \textbf{Lider del proyecto:} & {{proyectLeader}} \\[0.3cm]
+    \textbf{Lider de QA:} & {{qaLeader}} \\[0.3cm]
+    \textbf{Fecha elaboración:} & {{elaborationDate}} \\ \hline
+    \end{tabular}
+
+    \newpage
+    
+    \tableofcontents
+    \newpage
+    
+    \section{Enfoque de Gestión de Requisitos}
+    \subsection{Identificación de Requisitos}
+    {{requirementsIdentification}}
+    \subsection{Análisis de Requisitos}
+    {{requirementsAnalysis}}
+    \subsection{Documentación de Requisitos}
+    {{requirementsDocumentation}}
+    \subsection{Gestión Continua de Requisitos}
+    {{continuousRequirements}}
+    
+    \section{Gestión de la Configuración}
+    \subsection{Control de cambios}
+    {{changeControl}}
+    
+    \section{Proceso de Priorización de Requisitos}
+    {{requirementsPrioritization}}
+    
+    \section{Métricas del Producto}
+    \subsection{Costo}
+    {{cost}}
+    \subsection{Calidad}
+    {{quality}}
+    \subsection{Rendimiento}
+    {{performance}}
+
+\end{document}
