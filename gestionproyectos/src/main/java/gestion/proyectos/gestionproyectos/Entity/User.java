@@ -47,6 +47,7 @@ public class User implements UserDetails {
     @Column(name = "phone_number")
     private String phoneNumber;
 
+
     @JsonIgnore
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<Proyect> proyects;
@@ -82,6 +83,15 @@ public class User implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return true;
+        return this.active;  // Usamos el campo active para determinar si está habilitado
     }
+
+    // Método adicional por claridad
+    public boolean isActive() {
+        return this.active;
+    }
+
+    @Column(nullable = false)
+    private boolean active = true;
+
 }
