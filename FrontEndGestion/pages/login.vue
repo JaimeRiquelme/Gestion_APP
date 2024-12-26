@@ -27,6 +27,7 @@
             Ingresar
           </button>
         </form>
+        <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
 
         <div class="register-prompt">
           <span>¿No tienes una cuenta en esta aplicación?</span><br>
@@ -47,12 +48,16 @@ const formData = reactive({
   password: '',
 });
 
+const errorMessage = ref('');
+
 const router = useRouter();
 
 const handleSubmit = async () => {
   try {
+    errorMessage.value = '';
+
     console.log('Form submitted:', formData);
-    const response = await fetch('http://localhost:8080/api/auth/login', {
+    const response = await fetch('http://localhost:8080/api/v1/auth/login', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -65,18 +70,20 @@ const handleSubmit = async () => {
     }
 
     const data = await response.json();
+    const token = data.accessToken;
 
     const tokenCookie = useCookie('authToken');
     tokenCookie.value = token;
 
-    console.log();
+    console.log('Token: ', token);
     console.log();
     
     // TODO: Incluir la dirección correcta
     router.push('/menu');
 
   } catch (error) {
-    console.error('Login error:', error)
+    console.error('Login error:', error);
+    errorMessage.value = error.message;
   }
 }
 
@@ -183,5 +190,11 @@ html, body {
 
 .register-link:hover {
   text-decoration: underline;
+}
+
+.error-message {
+  color: red;
+  text-align: center;
+  margin-top: 10px;
 }
 </style>
