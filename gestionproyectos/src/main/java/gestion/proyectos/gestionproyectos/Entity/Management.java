@@ -53,7 +53,7 @@ public class Management {
 
     @JsonIgnore
     @OneToMany(mappedBy = "management", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private List<Process> processes = new ArrayList<>();
+    private List<Process> processes;
 
     // Métodos para sincronizar la relación bidireccional
     public void addProcess(Process process) {

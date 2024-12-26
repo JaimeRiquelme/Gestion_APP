@@ -1,6 +1,7 @@
 package gestion.proyectos.gestionproyectos.Controller;
 
 import gestion.proyectos.gestionproyectos.Entity.Management;
+import gestion.proyectos.gestionproyectos.Entity.Process;
 import gestion.proyectos.gestionproyectos.Service.ManagementService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -60,6 +61,18 @@ public class ManagementController {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} catch (RuntimeException e) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+		}
+	}
+
+	// Obtener lista de Process por ID de Management
+	@GetMapping("/{id}/processes")
+	public ResponseEntity<List<Process>> getProcessesByManagementId(@PathVariable Long id) {
+		try {
+			// Llamamos al servicio para obtener los procesos asociados al Management
+			List<Process> processes = managementService.getProcessesByManagementId(id);
+			return new ResponseEntity<>(processes, HttpStatus.OK); // Retornamos la lista con estado 200
+		} catch (RuntimeException e) {
+			return new ResponseEntity<>(null, HttpStatus.NOT_FOUND); // Retornamos 404 si no se encuentra el Management
 		}
 	}
 }

@@ -1,5 +1,8 @@
 package gestion.proyectos.gestionproyectos.Controller;
 
+import gestion.proyectos.gestionproyectos.Entity.Incident;
+import gestion.proyectos.gestionproyectos.Entity.Lessons;
+import gestion.proyectos.gestionproyectos.Entity.Management;
 import gestion.proyectos.gestionproyectos.Entity.Proyect;
 import gestion.proyectos.gestionproyectos.Service.ProyectService;
 import org.springframework.http.HttpStatus;
@@ -66,6 +69,39 @@ public class ProyectController {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } catch (RuntimeException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
+    // Obtener lista de Managements por ID de proyecto
+    @GetMapping("/{id}/managements")
+    public ResponseEntity<List<Management>> getManagementsByProyectId(@PathVariable Long id) {
+        try {
+            List<Management> managements = proyectService.managementsByIdProyect(id); // Reutilizando el servicio
+            return new ResponseEntity<>(managements, HttpStatus.OK);
+        } catch (RuntimeException e) {
+            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+        }
+    }
+
+    // Obtener lista de Incident por ID de proyecto
+    @GetMapping("/{id}/incidents")
+    public ResponseEntity<List<Incident>> getIncidentsByProyectId(@PathVariable Long id) {
+        try {
+            List<Incident> incidents = proyectService.getIncidentsByProyectId(id);
+            return new ResponseEntity<>(incidents, HttpStatus.OK);
+        } catch (RuntimeException e) {
+            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+        }
+    }
+
+    // Obtener lista de Lessons por ID de proyecto
+    @GetMapping("/{id}/lessons")
+    public ResponseEntity<List<Lessons>> getLessonsByProyectId(@PathVariable Long id) {
+        try {
+            List<Lessons> lessons = proyectService.getLessonsByProyectId(id);
+            return new ResponseEntity<>(lessons, HttpStatus.OK);
+        } catch (RuntimeException e) {
+            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
         }
     }
 }

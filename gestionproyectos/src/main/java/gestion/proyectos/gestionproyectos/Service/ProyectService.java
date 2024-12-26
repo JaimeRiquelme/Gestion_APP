@@ -1,7 +1,6 @@
 package gestion.proyectos.gestionproyectos.Service;
 
-import gestion.proyectos.gestionproyectos.Entity.Proyect;
-import gestion.proyectos.gestionproyectos.Entity.User;
+import gestion.proyectos.gestionproyectos.Entity.*;
 import gestion.proyectos.gestionproyectos.Repository.ProyectRepository;
 import gestion.proyectos.gestionproyectos.Repository.UserRepository;
 import jakarta.persistence.EntityManager;
@@ -50,7 +49,8 @@ public class ProyectService {
     }
 
     public Proyect getById(Long id) {
-        return proyectRepository.findById(id).orElse(null);
+        return proyectRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Proyect not found with id " + id));
     }
 
     // Read by User
@@ -132,5 +132,20 @@ public class ProyectService {
                 throw new IllegalArgumentException("La fecha debe estar en el formato AAAA-MM-DD y ser una fecha válida. Ejemplo de fecha válida: 2024-12-31");
             }
         }
+    }
+
+    public List<Management> managementsByIdProyect(Long idProyect) {
+        Proyect proyect = getById(idProyect);
+        return proyect.getManagements();
+    }
+
+    public List<Incident> getIncidentsByProyectId(Long idProyect) {
+        Proyect proyect = getById(idProyect);
+        return proyect.getIncidents();
+    }
+
+    public List<Lessons> getLessonsByProyectId(Long idProyect) {
+        Proyect proyect = getById(idProyect);
+        return proyect.getLessons();
     }
 }
