@@ -1,5 +1,6 @@
 package gestion.proyectos.gestionproyectos.Service;
 
+import gestion.proyectos.gestionproyectos.Entity.Proyect;
 import gestion.proyectos.gestionproyectos.Entity.User;
 import gestion.proyectos.gestionproyectos.Repository.UserRepository;
 import org.springframework.stereotype.Service;
@@ -27,7 +28,8 @@ public class UserService {
     }
 
     public User getById(Long id) {
-        return userRepository.findById(id).orElse(null);
+        return userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found with id " + id));
     }
 
     // Update
@@ -62,5 +64,11 @@ public class UserService {
     // Delete
     public void delete(Long id) {
         userRepository.deleteById(id);
+    }
+
+    public List<Proyect> getProyectsByUserId(Long userId) {
+        // Usar el método mejorado getById para garantizar que lanzamos excepción si el usuario no existe
+        User user = getById(userId);
+        return user.getProyects(); // Retornar lista de proyectos asociados al usuario
     }
 }
