@@ -38,21 +38,48 @@
 </template>
 
 <script setup>
-import { reactive } from 'vue'
+import { reactive } from 'vue';
+import { useRouter } from 'vue-router';
+import { useCookie } from 'nuxt/app';
 
 const formData = reactive({
   email: '',
-  password: ''
-})
+  password: '',
+});
+
+const router = useRouter();
 
 const handleSubmit = async () => {
   try {
-    console.log('Form submitted:', formData)
-    // Add your login logic here
+    console.log('Form submitted:', formData);
+    const response = await fetch('http://localhost:8080/api/auth/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(formData),
+    });
+
+    if (!response.ok) {
+      throw new Error('Error al iniciar sesión: Verifica tus credenciales.');
+    }
+
+    const data = await response.json();
+
+    const tokenCookie = useCookie('authToken');
+    tokenCookie.value = token;
+
+    console.log();
+    console.log();
+    
+    // TODO: Incluir la dirección correcta
+    router.push('/menu');
+
   } catch (error) {
     console.error('Login error:', error)
   }
 }
+
 </script>
 
 <style scoped>
