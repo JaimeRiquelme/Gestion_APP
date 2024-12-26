@@ -28,11 +28,11 @@ public class LatexService {
             throw new FileNotFoundException("Template not found: " + templateFilePath);
         }
 
-        // Read and populate the template
+        // Leer y poblar la plantilla
         String template = Files.readString(templateFilePath);
         String document = replaceTemplateVariables(template, data);
 
-        // Generate PDF
+        // Generar PDF
         Path tempDirPath = createTempDirectory();
         try {
             // Escribir el contenido del documento en el directorio temporal
@@ -71,11 +71,16 @@ public class LatexService {
         for (Map.Entry<String, String> entry : data.entrySet()) {
             String value = entry.getValue() != null ? entry.getValue() : "";
 
-            // Si detectamos al menos un '&', procesamos como tabla
-            if (isTableFormat(value)) {
+            if (value.contains("{") && value.contains("}")) {
+                // Procesamos el EDT y las descripciones
+                Map<String, String> edtResults = processEDTContentWithDescriptions(value);
+                value = edtResults.get("forest"); // El diagrama EDT
+
+                // Reemplazar la marca de posición de las descripciones de tareas
+                result = result.replace("{{taskDescriptions}}", edtResults.get("descriptions"));
+            } else if (isTableFormat(value)) {
                 value = processTableContent(value);
             } else {
-                // De lo contrario, se escapan caracteres especiales de LaTeX
                 value = escapeLatexSpecialChars(value);
             }
 
@@ -86,13 +91,101 @@ public class LatexService {
         return result;
     }
 
+    private Map<String, String> processEDTContentWithDescriptions(String edtContent) {
+        StringBuilder forest = new StringBuilder();
+        StringBuilder descriptions = new StringBuilder();
+
+        // Iniciar el entorno forest como antes
+        forest.append("\\begin{forest}\n")
+                .append("for tree={\n")
+                .append("    grow=east,\n")
+                .append("    draw,\n")
+                .append("    rounded corners,\n")
+                .append("    node options={align=center},\n")
+                .append("    edge={-latex},\n")
+                .append("    l sep+=10pt,\n")
+                .append("    s sep+=10pt\n")
+                .append("}\n")
+                .append("[Proyecto\n");  // Nodo raíz
+
+        // Dividir el contenido en fases
+        String[] phases = edtContent.split("\\|");
+
+        for (String phase : phases) {
+            phase = phase.trim();
+            if (phase.isEmpty()) continue;
+
+            int openBraceIndex = phase.indexOf("{");
+            int closeBraceIndex = phase.lastIndexOf("}");
+
+            if (openBraceIndex == -1 || closeBraceIndex == -1) continue;
+
+            // Procesar nombre de la fase
+            String phaseName = phase.substring(0, openBraceIndex).trim();
+            if (phaseName.isEmpty()) continue;
+
+            // Añadir fase al diagrama forest
+            forest.append("    [").append(escapeLatexSpecialChars(phaseName)).append("\n");
+
+            // Procesar tareas
+            String tasksContent = phase.substring(openBraceIndex + 1, closeBraceIndex);
+            String[] tasks = tasksContent.split(",");
+
+            for (String task : tasks) {
+                task = task.trim();
+                if (task.isEmpty()) continue;
+
+                // Separar nombre y descripción de la tarea
+                String taskName, taskDesc;
+                if (task.contains(";")) {
+                    String[] parts = task.split(";", 2);
+                    taskName = parts[0].trim();
+                    taskDesc = parts[1].trim();
+
+                    // Añadir al diagrama forest solo el nombre
+                    forest.append("        [")
+                            .append(escapeLatexSpecialChars(taskName))
+                            .append("]\n");
+
+                    // Añadir a la sección de descripciones
+                    descriptions.append("    \\item[")
+                            .append(escapeLatexSpecialChars(phaseName))
+                            .append(" - ")
+                            .append(escapeLatexSpecialChars(taskName))
+                            .append("] ")
+                            .append(escapeLatexSpecialChars(taskDesc))
+                            .append("\n\n");
+                } else {
+                    // Si no hay descripción, usar solo el nombre
+                    forest.append("        [")
+                            .append(escapeLatexSpecialChars(task))
+                            .append("]\n");
+                }
+            }
+
+            forest.append("    ]\n");
+        }
+
+        // Cerrar el entorno forest
+        forest.append("]\n")
+                .append("\\end{forest}\n");
+
+        // Devolver tanto el diagrama como las descripciones
+        return Map.of(
+                "forest", forest.toString(),
+                "descriptions", descriptions.toString()
+        );
+    }
+
+
+
     private String processTableContent(String content) {
         // Si no es formato de tabla, retornar el texto escapado
         if (!isTableFormat(content)) {
             return escapeLatexSpecialChars(content);
         }
 
-        // Remover los & del inicio y final
+        // Remover los & del inicio y final (en caso de que los uses así)
         content = content.substring(1, content.length() - 1);
 
         StringBuilder tableContent = new StringBuilder();
@@ -100,14 +193,11 @@ public class LatexService {
 
         // Determinar el número de columnas basado en la primera fila
         String[] firstRow = rows[0].split(",");
-        int numColumns = firstRow.length - 1; // -1 porque el primer elemento es el número
+        int numColumns = firstRow.length - 1; // -1 porque el primer elemento suele ser un índice
 
         // Crear el formato de la tabla
-        // Agregamos \begin{center} para centrar la tabla
         tableContent.append("\\begin{center}\n");
-        // Usamos tabularx con ancho total (\textwidth)
         tableContent.append("\\begin{tabularx}{\\textwidth}{|c|");
-        // Usamos X para columnas que se ajustan automáticamente
         for (int i = 0; i < numColumns; i++) {
             tableContent.append("X|");
         }
@@ -119,12 +209,13 @@ public class LatexService {
 
             String[] columns = row.split(",");
             if (columns.length > 1) {
-                // Añadir el número con formato
+                // Añadir el número/índice
                 tableContent.append(columns[0].trim());
 
                 // Añadir el resto de columnas
                 for (int i = 1; i < columns.length; i++) {
-                    tableContent.append(" & ").append(escapeLatexSpecialChars(columns[i].trim()));
+                    tableContent.append(" & ")
+                            .append(escapeLatexSpecialChars(columns[i].trim()));
                 }
                 tableContent.append(" \\\\ \\hline\n");
             }
@@ -198,5 +289,23 @@ public class LatexService {
             throw new IOException("PDF file was not generated");
         }
         return pdfFile;
+    }
+
+    private String cleanLatexText(String input) {
+        if (input == null) return "";
+        return input
+                .replace("\\", "\\textbackslash{}")
+                .replace("$", "\\$")
+                .replace("%", "\\%")
+                .replace("&", "\\&")
+                .replace("#", "\\#")
+                .replace("_", "\\_")
+                .replace("{", "\\{")
+                .replace("}", "\\}")
+                .replace("~", "\\textasciitilde{}")
+                .replace("^", "\\textasciicircum{}")
+                .replace(">", "\\textgreater{}")
+                .replace("<", "\\textless{}")
+                .trim();
     }
 }
