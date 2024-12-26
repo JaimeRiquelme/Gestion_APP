@@ -1,5 +1,6 @@
 package gestion.proyectos.gestionproyectos.Service;
 
+import gestion.proyectos.gestionproyectos.Entity.Exit;
 import gestion.proyectos.gestionproyectos.Entity.Process;
 import gestion.proyectos.gestionproyectos.Entity.Management;
 import gestion.proyectos.gestionproyectos.Repository.ProcessRepository;
@@ -125,5 +126,10 @@ public class ProcessService {
                 throw new IllegalArgumentException("La fecha debe estar en el formato AAAA-MM-DD y ser válida. Ejemplo de fecha válida: 2024-01-01");
             }
         }
+    }
+
+    public List<Exit> getExitsByProcessId(Long processId) {
+        Process process = getById(processId);
+        return process.getExits();
     }
 }
