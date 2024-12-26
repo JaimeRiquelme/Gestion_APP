@@ -71,15 +71,16 @@ public class LatexService {
         for (Map.Entry<String, String> entry : data.entrySet()) {
             String value = entry.getValue() != null ? entry.getValue() : "";
 
-            // Verificamos si el contenido es parte del EDT (contiene '#')
             if (value.contains("{") && value.contains("}")) {
-                value = processEDTContent(value);
-            }
-            // Si detectamos al menos un '&', procesamos como tabla
-            else if (isTableFormat(value)) {
+                // Procesamos el EDT y las descripciones
+                Map<String, String> edtResults = processEDTContentWithDescriptions(value);
+                value = edtResults.get("forest"); // El diagrama EDT
+
+                // Reemplazar la marca de posición de las descripciones de tareas
+                result = result.replace("{{taskDescriptions}}", edtResults.get("descriptions"));
+            } else if (isTableFormat(value)) {
                 value = processTableContent(value);
             } else {
-                // De lo contrario, se escapan caracteres especiales de LaTeX
                 value = escapeLatexSpecialChars(value);
             }
 
@@ -90,12 +91,11 @@ public class LatexService {
         return result;
     }
 
-    /**
-     * Procesa el contenido EDT/WBS dado el formato:
-     * #Fase,##Tarea,##Tarea;Descripción#OtraFase,##Tarea ...
-     */
-    private String processEDTContent(String edtContent) {
+    private Map<String, String> processEDTContentWithDescriptions(String edtContent) {
         StringBuilder forest = new StringBuilder();
+        StringBuilder descriptions = new StringBuilder();
+
+        // Iniciar el entorno forest como antes
         forest.append("\\begin{forest}\n")
                 .append("for tree={\n")
                 .append("    grow=east,\n")
@@ -108,28 +108,26 @@ public class LatexService {
                 .append("}\n")
                 .append("[Proyecto\n");  // Nodo raíz
 
-        // Dividir el contenido en fases usando el separador |
+        // Dividir el contenido en fases
         String[] phases = edtContent.split("\\|");
 
         for (String phase : phases) {
             phase = phase.trim();
             if (phase.isEmpty()) continue;
 
-            // Extraer el nombre de la fase y sus tareas
-            // El formato es: NombreFase{Tarea1,Tarea2,Tarea3}
             int openBraceIndex = phase.indexOf("{");
             int closeBraceIndex = phase.lastIndexOf("}");
 
             if (openBraceIndex == -1 || closeBraceIndex == -1) continue;
 
-            // Obtener el nombre de la fase
+            // Procesar nombre de la fase
             String phaseName = phase.substring(0, openBraceIndex).trim();
             if (phaseName.isEmpty()) continue;
 
-            // Abrir el nodo de la fase
+            // Añadir fase al diagrama forest
             forest.append("    [").append(escapeLatexSpecialChars(phaseName)).append("\n");
 
-            // Obtener y procesar las tareas
+            // Procesar tareas
             String tasksContent = phase.substring(openBraceIndex + 1, closeBraceIndex);
             String[] tasks = tasksContent.split(",");
 
@@ -137,33 +135,46 @@ public class LatexService {
                 task = task.trim();
                 if (task.isEmpty()) continue;
 
-                // Verificar si la tarea tiene descripción
+                // Separar nombre y descripción de la tarea
+                String taskName, taskDesc;
                 if (task.contains(";")) {
-                    String[] taskParts = task.split(";", 2);
-                    String taskName = taskParts[0].trim();
-                    String taskDesc = taskParts[1].trim();
+                    String[] parts = task.split(";", 2);
+                    taskName = parts[0].trim();
+                    taskDesc = parts[1].trim();
 
+                    // Añadir al diagrama forest solo el nombre
                     forest.append("        [")
                             .append(escapeLatexSpecialChars(taskName))
-                            .append("\\\\")  // Salto de línea en LaTeX
-                            .append(escapeLatexSpecialChars(taskDesc))
                             .append("]\n");
+
+                    // Añadir a la sección de descripciones
+                    descriptions.append("    \\item[")
+                            .append(escapeLatexSpecialChars(phaseName))
+                            .append(" - ")
+                            .append(escapeLatexSpecialChars(taskName))
+                            .append("] ")
+                            .append(escapeLatexSpecialChars(taskDesc))
+                            .append("\n\n");
                 } else {
+                    // Si no hay descripción, usar solo el nombre
                     forest.append("        [")
                             .append(escapeLatexSpecialChars(task))
                             .append("]\n");
                 }
             }
 
-            // Cerrar el nodo de la fase
             forest.append("    ]\n");
         }
 
-        // Cerrar el nodo raíz y el entorno forest
+        // Cerrar el entorno forest
         forest.append("]\n")
                 .append("\\end{forest}\n");
 
-        return forest.toString();
+        // Devolver tanto el diagrama como las descripciones
+        return Map.of(
+                "forest", forest.toString(),
+                "descriptions", descriptions.toString()
+        );
     }
 
 

@@ -1,108 +1,74 @@
-\documentclass[11pt]{article}
+\documentclass[12pt]{article}
+\usepackage[spanish,es-tabla]{babel}
 \usepackage[utf8]{inputenc}
-\usepackage[spanish]{babel}
-\usepackage[table]{xcolor}
+\usepackage{graphicx}
 \usepackage{tabularx}
-\usepackage{array}
-\usepackage{geometry}
-\usepackage{forest}
 \usepackage{hyperref}
-\usepackage{sectsty}
-
-% Configuración de geometría
-\geometry{
-    top=2.5cm,
-    bottom=2.5cm,
-    left=2.5cm,
-    right=2.5cm
-}
-
-% Configuración de colores
-\definecolor{titlecolor}{RGB}{0, 51, 102}
-\definecolor{sectioncolor}{RGB}{0, 71, 142}
-
-% Configuración de hyperref
-\hypersetup{
-    colorlinks=true,
-    linkcolor=sectioncolor,
-    filecolor=sectioncolor,
-    urlcolor=sectioncolor
-}
-
-% Configuración de forest para EDT - Ajustada para mejor escala
-\forestset{
-    default preamble={
-        for tree={
-            grow=east,
-            draw,
-            rounded corners=3pt,
-            node options={
-                align=center,
-                minimum width=2cm,    % Reducido de 2.5cm
-                minimum height=1cm,    % Reducido de 1.2cm
-                inner sep=2pt,         % Reducido de 4pt
-                font=\small\sffamily   % Añadido \small para texto más pequeño
-            },
-            edge={-latex},            % Removido 'thick' para líneas más finas
-            l sep+=8pt,               % Reducido de 15pt
-            s sep+=8pt,               % Reducido de 15pt
-            fill=white,
-            draw=sectioncolor
-        },
-        fit=band,                    % Ajusta automáticamente para caber en la página
-        before drawing tree={
-            sort by=y,
-            for tree={
-                edge path={
-                    \noexpand\path[\forestoption{edge}]
-                    (!u.parent anchor) -- (.child anchor)\forestoption{edge label};
-                }
-            }
-        }
-    }
-}
-
-% Estilo de secciones usando sectsty
-\sectionfont{\color{sectioncolor}\Large\bfseries}
+\usepackage{fancyhdr}
 
 \begin{document}
 
-    % Portada
+%% Título principal
     \begin{center}
-        \color{titlecolor}
-        {\Huge\textbf{Gestión de Proyectos}}\\[1cm]
-        {\large\textbf{Línea base del alcance}}\\[0.5cm]
-        \rule{\textwidth}{1pt}\\[1.5cm]
-
-        % Información del proyecto
-        \begin{tabular}{>{\bfseries}ll}
-            \textcolor{sectioncolor}{Nombre del proyecto:} & {{proyectName}} \\[0.4cm]
-            \textcolor{sectioncolor}{Identificador del proyecto:} & {{idProyect}} \\[0.4cm]
-            \textcolor{sectioncolor}{Empresa encargada:} & {{company}} \\[0.4cm]
-            \textcolor{sectioncolor}{Promotor del Proyecto:} & {{proyectPromotor}} \\[0.4cm]
-            \textcolor{sectioncolor}{Líder del proyecto:} & {{proyectLeader}} \\[0.4cm]
-            \textcolor{sectioncolor}{Fecha elaboración:} & {{elaborationDate}} \\
-        \end{tabular}
+    {\huge\textbf{Acta de Constitución}}\\[13cm]
     \end{center}
-    \thispagestyle{empty}
+
+    \begin{tabular}{ll}
+        \textbf{Nombre del proyecto:} & {{proyectName}} \\[0.3cm]
+        \textbf{Identificador del proyecto:} & {{idProyect}} \\[0.3cm]
+        \textbf{Empresa encargada:} & {{company}} \\[0.3cm]
+        \textbf{Promotor del Proyecto:} & {{proyectPromotor}} \\[0.3cm]
+        \textbf{Lider del proyecto:} & {{proyectLeader}} \\[0.3cm]
+        \textbf{Fecha elaboración:} & {{elaborationDate}} \\
+    \end{tabular}
     \newpage
 
-    % Tabla de contenidos
     \tableofcontents
-    \thispagestyle{empty}
     \newpage
 
-    % Contenido principal
-    \section{Enunciado de alcance del proyecto}
-    \large
-    {{projectScopeStatement}}
-    \normalsize
+    \section{Propósito del Proyecto}
+    {{proyectPurpouse}}
 
-    \section{EDT/WBS (Estructura de Desglose del Trabajo)}
-    \begin{center}
-        \scalebox{0.9}{
-                {{edtWbs}}
-        }
-    \end{center}
+    \section{Descripción de alto nivel del Proyecto}
+    {{proyectDescription}}
+
+    \section{Interesados del Proyecto}
+    {{proyectStakeholders}}
+
+    \section{Alcance Preliminar}
+    {{preliminaryScope}}
+
+    \section{Objetivos}
+    {{descriptionObjectives}}
+    \subsection{Misión}
+    {{objectivesMission}}
+    \subsection{Visión}
+    {{objectivesVision}}
+    \subsection{Valores}
+    {{objectivesValues}}
+    \subsection{Objetivos Específicos}
+    {{objectivesSpecific}}
+
+    \section{Criterios de Éxito del Proyecto}
+    {{successCriteria}}
+
+    \section{Entregables}
+    {{deliverables}}
+
+    \section{Riesgos Preliminares}
+    {{preliminaryRisks}}
+
+    \section{Hitos Principales}
+    {{milestones}}
+
+    \section{Roles y responsabilidades}
+    {{rolesAndResponsabilities}}
+
+    \section{Requisitos Principales}
+    {{descriptionRequirements}}
+    \subsection{Requisitos Funcionales}
+    {{functionalRequirements}}
+    \subsection{Requisitos No Funcionales}
+    {{nonFunctionalRequirements}}
 
 \end{document}
