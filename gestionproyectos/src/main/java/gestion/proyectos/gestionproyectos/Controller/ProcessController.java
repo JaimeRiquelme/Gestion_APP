@@ -1,5 +1,6 @@
 package gestion.proyectos.gestionproyectos.Controller;
 
+import gestion.proyectos.gestionproyectos.Entity.Exit;
 import gestion.proyectos.gestionproyectos.Entity.Process;
 import gestion.proyectos.gestionproyectos.Service.ProcessService;
 import org.springframework.http.HttpStatus;
@@ -60,6 +61,17 @@ public class ProcessController {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } catch (RuntimeException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
+    // Obtener lista de Exit por ID de Process
+    @GetMapping("/{id}/exits")
+    public ResponseEntity<List<Exit>> getExitsByProcessId(@PathVariable Long id) {
+        try {
+            List<Exit> exits = processService.getExitsByProcessId(id);
+            return new ResponseEntity<>(exits, HttpStatus.OK);
+        } catch (RuntimeException e) {
+            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
         }
     }
 }

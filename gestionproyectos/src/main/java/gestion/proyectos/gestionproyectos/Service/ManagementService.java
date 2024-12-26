@@ -1,5 +1,6 @@
 package gestion.proyectos.gestionproyectos.Service;
 
+import gestion.proyectos.gestionproyectos.Entity.Process;
 import gestion.proyectos.gestionproyectos.Entity.Management;
 import gestion.proyectos.gestionproyectos.Entity.Proyect;
 import gestion.proyectos.gestionproyectos.Repository.ManagementRepository;
@@ -80,5 +81,10 @@ public class ManagementService {
         } else {
             throw new RuntimeException("Management not found with id " + id);
         }
+    }
+
+    public List<Process> getProcessesByManagementId(Long managementId) {
+        Management management = getById(managementId);
+        return management.getProcesses();
     }
 }
