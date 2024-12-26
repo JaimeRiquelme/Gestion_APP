@@ -1,5 +1,8 @@
 package gestion.proyectos.gestionproyectos.Service;
 
+import gestion.proyectos.gestionproyectos.exception.DocumentGenerationException;
+import gestion.proyectos.gestionproyectos.exception.MissingFieldException;
+import gestion.proyectos.gestionproyectos.exception.TemplateNotFoundException;
 import gestion.proyectos.gestionproyectos.util.TemplatePathResolver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -54,14 +57,21 @@ public class WorkPerformanceReviewDocumentService implements DocumentService {
     @Override
     public byte[] generateDocument(Map<String, String> data, Long idExit) throws IOException {
         validateData(data);
-        String templatePath = pathResolver.resolve("revision_desempeno_de_trabajo.tex");
+        String templatePath;
+        try {
+            templatePath = pathResolver.resolve("revision_desempeno_de_trabajo.tex");
+        } catch (Exception e) {
+            throw new TemplateNotFoundException("The template 'revision_desempeno_de_trabajo.tex' was not found.");
+        }
 
-        byte[] document = latexService.generateDocument(templatePath, data);
-
-        exitService.updateAssumptionsDocument(idExit, document);
-        parameterService.saveParameters(data, idExit);
-
-        return document;
+        try {
+            byte[] documento = latexService.generateDocument(templatePath, data);
+            exitService.updateAssumptionsDocument(idExit, documento);
+            parameterService.saveParameters(data, idExit);
+            return documento;
+        } catch (IOException e) {
+            throw new DocumentGenerationException("Error occurred while generating the PDF document.", e);
+        }
     }
 
     /**
@@ -73,7 +83,7 @@ public class WorkPerformanceReviewDocumentService implements DocumentService {
     @Override
     public void validateData(Map<String, String> data) {
         if (data == null) {
-            throw new IllegalArgumentException("Data cannot be null");
+            throw new MissingFieldException("Provided data is null.");
         }
 
         Set<String> missingFields = new HashSet<>();
@@ -84,7 +94,7 @@ public class WorkPerformanceReviewDocumentService implements DocumentService {
         }
 
         if (!missingFields.isEmpty()) {
-            throw new IllegalArgumentException("Missing required fields: " + missingFields);
+            throw new IllegalArgumentException("The following required fields are missing or empty: " + missingFields);
         }
     }
 }

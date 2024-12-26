@@ -6,6 +6,7 @@ import gestion.proyectos.gestionproyectos.exception.TemplateNotFoundException;
 import gestion.proyectos.gestionproyectos.util.TemplatePathResolver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -13,7 +14,7 @@ import java.util.Map;
 import java.util.Set;
 
 @Service
-public class RegistroLeccionesAprendidasDocumentService implements DocumentService {
+public class ScopeAndTraceabilityMatrixService {
 
     @Autowired
     private LatexService latexService;
@@ -28,26 +29,24 @@ public class RegistroLeccionesAprendidasDocumentService implements DocumentServi
     private ParameterService parameterService;
 
     private static final Set<String> REQUIRED_FIELDS = new HashSet<>(Arrays.asList(
-            "projectName",
-            "idProject",
-            "lessonArea",
-            "lessonType",
-            "lessonNumber",
-            "lessonTitle",
-            "situationDescription",
-            "objectivesImpact",
-            "implementedActions",
-            "lessonRecommendation"
+            "proyectName",
+            "idProyect",
+            "proyectLeader",
+            "qaLeader",
+            "elaborationDate",
+            "requirementsDocumentation",
+            "requirementsTraceabilityMatrix"
     ));
 
-    @Override
-    public byte[] generateDocument(Map<String, String> data, Long idExit) throws IOException {
-        validateData(data);
+
+    public byte[] generateDocument1(Map<String, String> data, Long idExit) throws IOException {
+        validateData1(data);
+
         String templatePath;
         try {
-            templatePath = pathResolver.resolve("registro_de_lecciones_aprendidas.tex");
+            templatePath = pathResolver.resolve("Documento de requisitos y Matriz de trazabilidad.tex");
         } catch (Exception e) {
-            throw new TemplateNotFoundException("The template 'registro_de_lecciones_aprendidas.tex' was not found.");
+            throw new TemplateNotFoundException("The template 'Documento de requisitos y Matriz de trazabilidad.tex' was not found.");
         }
 
         try {
@@ -60,8 +59,8 @@ public class RegistroLeccionesAprendidasDocumentService implements DocumentServi
         }
     }
 
-    @Override
-    public void validateData(Map<String, String> data) {
+
+    public void validateData1(Map<String, String> data) {
         if (data == null) {
             throw new MissingFieldException("Provided data is null.");
         }
@@ -74,7 +73,7 @@ public class RegistroLeccionesAprendidasDocumentService implements DocumentServi
         }
 
         if (!missingFields.isEmpty()) {
-            throw new IllegalArgumentException("The following required fields are missing or empty: " + missingFields);
+            throw new MissingFieldException("The following required fields are missing or empty: " + missingFields);
         }
     }
 }

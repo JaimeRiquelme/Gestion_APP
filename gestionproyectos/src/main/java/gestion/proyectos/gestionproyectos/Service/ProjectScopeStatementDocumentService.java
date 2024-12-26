@@ -6,6 +6,7 @@ import gestion.proyectos.gestionproyectos.exception.TemplateNotFoundException;
 import gestion.proyectos.gestionproyectos.util.TemplatePathResolver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -13,7 +14,7 @@ import java.util.Map;
 import java.util.Set;
 
 @Service
-public class RegistroLeccionesAprendidasDocumentService implements DocumentService {
+public class ProjectScopeStatementDocumentService implements DocumentService {
 
     @Autowired
     private LatexService latexService;
@@ -28,33 +29,42 @@ public class RegistroLeccionesAprendidasDocumentService implements DocumentServi
     private ParameterService parameterService;
 
     private static final Set<String> REQUIRED_FIELDS = new HashSet<>(Arrays.asList(
-            "projectName",
-            "idProject",
-            "lessonArea",
-            "lessonType",
-            "lessonNumber",
-            "lessonTitle",
-            "situationDescription",
-            "objectivesImpact",
-            "implementedActions",
-            "lessonRecommendation"
+            "proyectName",
+            "idProyect",
+            "elaborationDate",
+            "purposeJustificationProject",
+            "scopeDescription",
+            "highLevelRequirements",
+            "boundaries",
+            "strategy",
+            "deliverables",
+            "acceptanceCriteria",
+            "restrictions",
+            "costEstimation",
+            "costBenefitAnalysis",
+            "proyectPromotor",
+            "proyectPromotorTitle"
     ));
 
     @Override
     public byte[] generateDocument(Map<String, String> data, Long idExit) throws IOException {
-        validateData(data);
+        validateData(data); // Validar los campos requeridos
         String templatePath;
+
         try {
-            templatePath = pathResolver.resolve("registro_de_lecciones_aprendidas.tex");
+            templatePath = pathResolver.resolve("enunciado-de-alcance-del-proyecto.tex"); // Ruta de la plantilla
         } catch (Exception e) {
-            throw new TemplateNotFoundException("The template 'registro_de_lecciones_aprendidas.tex' was not found.");
+            throw new TemplateNotFoundException("The template 'enunciado-de-alcance-del-proyecto.tex' was not found.");
         }
 
         try {
-            byte[] documento = latexService.generateDocument(templatePath, data);
-            exitService.updateAssumptionsDocument(idExit, documento);
+            // Generación del documento con LaTeX
+            byte[] document = latexService.generateDocument(templatePath, data);
+            // Actualización del documento generado en la salida
+            exitService.updateAssumptionsDocument(idExit, document);
+            // Guardar los parámetros utilizados
             parameterService.saveParameters(data, idExit);
-            return documento;
+            return document;
         } catch (IOException e) {
             throw new DocumentGenerationException("Error occurred while generating the PDF document.", e);
         }

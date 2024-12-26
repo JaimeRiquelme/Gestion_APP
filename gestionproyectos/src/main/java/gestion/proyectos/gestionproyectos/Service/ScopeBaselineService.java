@@ -6,6 +6,7 @@ import gestion.proyectos.gestionproyectos.exception.TemplateNotFoundException;
 import gestion.proyectos.gestionproyectos.util.TemplatePathResolver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -13,7 +14,7 @@ import java.util.Map;
 import java.util.Set;
 
 @Service
-public class RegistroLeccionesAprendidasDocumentService implements DocumentService {
+public class ScopeBaselineService implements DocumentService {
 
     @Autowired
     private LatexService latexService;
@@ -28,16 +29,14 @@ public class RegistroLeccionesAprendidasDocumentService implements DocumentServi
     private ParameterService parameterService;
 
     private static final Set<String> REQUIRED_FIELDS = new HashSet<>(Arrays.asList(
-            "projectName",
-            "idProject",
-            "lessonArea",
-            "lessonType",
-            "lessonNumber",
-            "lessonTitle",
-            "situationDescription",
-            "objectivesImpact",
-            "implementedActions",
-            "lessonRecommendation"
+            "projectScopeStatement",
+            "edtWbs",
+            "proyectName",
+            "idProyect",
+            "company",
+            "proyectPromotor",
+            "proyectLeader",
+            "elaborationDate"
     ));
 
     @Override
@@ -45,9 +44,9 @@ public class RegistroLeccionesAprendidasDocumentService implements DocumentServi
         validateData(data);
         String templatePath;
         try {
-            templatePath = pathResolver.resolve("registro_de_lecciones_aprendidas.tex");
+            templatePath = pathResolver.resolve("Línea base del alcance.tex");
         } catch (Exception e) {
-            throw new TemplateNotFoundException("The template 'registro_de_lecciones_aprendidas.tex' was not found.");
+            throw new TemplateNotFoundException("The template 'project_scope_statement.tex' was not found.");
         }
 
         try {
@@ -77,4 +76,6 @@ public class RegistroLeccionesAprendidasDocumentService implements DocumentServi
             throw new IllegalArgumentException("The following required fields are missing or empty: " + missingFields);
         }
     }
+
+
 }

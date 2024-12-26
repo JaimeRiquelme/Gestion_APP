@@ -6,6 +6,7 @@ import gestion.proyectos.gestionproyectos.exception.TemplateNotFoundException;
 import gestion.proyectos.gestionproyectos.util.TemplatePathResolver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -13,7 +14,7 @@ import java.util.Map;
 import java.util.Set;
 
 @Service
-public class RegistroLeccionesAprendidasDocumentService implements DocumentService {
+public class RequirementsManagementPlanService implements DocumentService {
 
     @Autowired
     private LatexService latexService;
@@ -28,26 +29,31 @@ public class RegistroLeccionesAprendidasDocumentService implements DocumentServi
     private ParameterService parameterService;
 
     private static final Set<String> REQUIRED_FIELDS = new HashSet<>(Arrays.asList(
-            "projectName",
-            "idProject",
-            "lessonArea",
-            "lessonType",
-            "lessonNumber",
-            "lessonTitle",
-            "situationDescription",
-            "objectivesImpact",
-            "implementedActions",
-            "lessonRecommendation"
+            "proyectName",
+            "idProyect",
+            "proyectLeader",
+            "qaLeader",
+            "elaborationDate",
+            "requirementsIdentification",
+            "requirementsAnalysis",
+            "continuousRequirements",
+            "documentationAndVersionControl",
+            "changeControl",
+            "requirementsPrioritization",
+            "cost",
+            "quality",
+            "performance"
     ));
 
     @Override
     public byte[] generateDocument(Map<String, String> data, Long idExit) throws IOException {
         validateData(data);
+
         String templatePath;
         try {
-            templatePath = pathResolver.resolve("registro_de_lecciones_aprendidas.tex");
+            templatePath = pathResolver.resolve("plan-de-gestion-de-requisitos.tex");
         } catch (Exception e) {
-            throw new TemplateNotFoundException("The template 'registro_de_lecciones_aprendidas.tex' was not found.");
+            throw new TemplateNotFoundException("The template 'plan-de-gestion-de-requisitos.tex' was not found.");
         }
 
         try {
