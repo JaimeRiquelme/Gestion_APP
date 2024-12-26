@@ -1,6 +1,7 @@
 package gestion.proyectos.gestionproyectos.Service;
 
 import gestion.proyectos.gestionproyectos.Entity.Exit;
+import gestion.proyectos.gestionproyectos.Entity.Parameter;
 import gestion.proyectos.gestionproyectos.Entity.Process;
 import gestion.proyectos.gestionproyectos.Repository.ExitRepository;
 import gestion.proyectos.gestionproyectos.Repository.ProcessRepository;
@@ -126,5 +127,10 @@ public class ExitService {
                 throw new IllegalArgumentException("La fecha debe estar en el formato AAAA-MM-DD y ser válida. Ejemplo de fecha válida: 2024-12-31");
             }
         }
+    }
+
+    public List<Parameter> getParametersByExitId(Long exitId) {
+        Exit exit = getById(exitId);
+        return exit.getParameters();
     }
 }

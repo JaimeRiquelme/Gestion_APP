@@ -1,6 +1,7 @@
 package gestion.proyectos.gestionproyectos.Controller;
 
 import gestion.proyectos.gestionproyectos.Entity.Exit;
+import gestion.proyectos.gestionproyectos.Entity.Parameter;
 import gestion.proyectos.gestionproyectos.Service.ExitService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -66,6 +67,18 @@ public class ExitController {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } catch (RuntimeException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
+    // Obtener lista de Parameters por ID de Exit
+    @GetMapping("/{id}/parameters")
+    public ResponseEntity<List<Parameter>> getParametersByExitId(@PathVariable Long id) {
+        try {
+            // Llamamos al servicio para obtener los parámetros asociados al Exit
+            List<Parameter> parameters = exitService.getParametersByExitId(id);
+            return new ResponseEntity<>(parameters, HttpStatus.OK); // Retornamos la lista con estado 200
+        } catch (RuntimeException e) {
+            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND); // Retornamos 404 si no se encuentra el Exit
         }
     }
 }
