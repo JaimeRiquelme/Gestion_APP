@@ -1,5 +1,6 @@
 package gestion.proyectos.gestionproyectos.Controller;
 
+import gestion.proyectos.gestionproyectos.Entity.Proyect;
 import gestion.proyectos.gestionproyectos.Entity.User;
 import gestion.proyectos.gestionproyectos.Service.UserService;
 import org.springframework.http.HttpStatus;
@@ -50,5 +51,17 @@ public class UserController {
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         userService.delete(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    // Obtener lista de Proyectos por ID de Usuario
+    @GetMapping("/{id}/proyects")
+    public ResponseEntity<List<Proyect>> getProyectsByUserId(@PathVariable Long id) {
+        try {
+            // Usamos el servicio para obtener los proyectos asociados al usuario
+            List<Proyect> proyects = userService.getProyectsByUserId(id);
+            return new ResponseEntity<>(proyects, HttpStatus.OK); // Retornamos la lista con status 200
+        } catch (RuntimeException e) {
+            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND); // Retornamos 404 si el usuario no existe
+        }
     }
 }
