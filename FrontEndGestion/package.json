@@ -16,9 +16,10 @@
   "dependencies": {
     "@nuxt/eslint": "^0.7.4",
     "eslint": "^9.17.0",
+    "lucide-vue-next": "^0.469.0",
     "nuxt": "^3.14.1592",
     "vue": "latest",
-    "vue-router": "latest",
+    "vue-router": "^4.5.0",
     "vuetify": "^3.7.3"
   },
   "devDependencies": {
