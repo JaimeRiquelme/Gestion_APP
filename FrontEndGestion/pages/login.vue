@@ -27,7 +27,9 @@
             Ingresar
           </button>
         </form>
-        <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
+        <p v-if="errorMessage" class="error-message" :class="{ 'warning-message': isWarning }">
+          {{ errorMessage }}
+        </p>
 
         <div class="register-prompt">
           <span>¿No tienes una cuenta en esta aplicación?</span><br>
@@ -39,7 +41,7 @@
 </template>
 
 <script setup>
-import { reactive } from 'vue';
+import { reactive, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useCookie } from 'nuxt/app';
 
@@ -49,14 +51,15 @@ const formData = reactive({
 });
 
 const errorMessage = ref('');
+const isWarning = ref(false);
 
 const router = useRouter();
 
 const handleSubmit = async () => {
   try {
     errorMessage.value = '';
+    isWarning.value = false;
 
-    console.log('Form submitted:', formData);
     const response = await fetch('http://localhost:8080/api/v1/auth/login', {
       method: 'POST',
       headers: {
@@ -65,20 +68,35 @@ const handleSubmit = async () => {
       body: JSON.stringify(formData),
     });
 
+    const data = await response.json();
+
     if (!response.ok) {
-      throw new Error('Error al iniciar sesión: Verifica tus credenciales.');
+      isWarning.value = response.status === 423; // Locked status
+      
+      switch (response.status) {
+        case 400: // Bad Request
+          throw new Error(data.message || 'Por favor, verifica los datos ingresados.');
+        case 401: // Unauthorized
+          throw new Error(data.message || 'Credenciales incorrectas.');
+        case 423: // Locked
+          throw new Error(data.message || 'Tu cuenta está temporalmente bloqueada.');
+        case 403: // Forbidden
+          throw new Error(data.message || 'Tu cuenta está desactivada.');
+        default:
+          throw new Error('Error al iniciar sesión. Por favor, intenta más tarde.');
+      }
     }
 
-    const data = await response.json();
     const token = data.accessToken;
-
+    const userId = data.userId;
+    const names = data.names;
     const tokenCookie = useCookie('authToken');
+    const userIdCookie = useCookie('userId');
+    const namesCookie = useCookie('names');
     tokenCookie.value = token;
+    userIdCookie.value = userId;
+    namesCookie.value = names;
 
-    console.log('Token: ', token);
-    console.log();
-    
-    // TODO: Incluir la dirección correcta
     router.push('/menu');
 
   } catch (error) {
@@ -193,8 +211,17 @@ html, body {
 }
 
 .error-message {
-  color: red;
+  color: #dc3545;
   text-align: center;
   margin-top: 10px;
+  padding: 10px;
+  border-radius: 5px;
+  background-color: #ffe6e6;
+}
+
+.warning-message {
+  color: #856404;
+  background-color: #fff3cd;
+  border-color: #ffeeba;
 }
 </style>
