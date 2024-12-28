@@ -23,7 +23,7 @@
           </div>
   
           <button 
-            @click="$router.push('/constitution-form')" 
+            @click="$router.push('/constitutionform')" 
             class="create-button"
           >
             CREAR

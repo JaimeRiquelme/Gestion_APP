@@ -97,7 +97,7 @@ const handleSubmit = async () => {
     userIdCookie.value = userId;
     namesCookie.value = names;
 
-    router.push('/menu');
+    router.push('/ConstitutionNotice');
 
   } catch (error) {
     console.error('Login error:', error);
