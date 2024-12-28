@@ -94,10 +94,13 @@
   
   <script setup>
   import { reactive, ref } from 'vue';
-  import { useCookie } from 'nuxt/app';
+  import { useAuthStore } from '../stores/auth';
+  import { useProjectStore } from '../stores/project';
   
   const loading = ref(false);
   const errorMessage = ref('');
+  const AuthStore = useAuthStore();
+  const ProjectStore = useProjectStore();
   
   const formData = reactive({
     nameProyect: '',
@@ -112,10 +115,11 @@
       loading.value = true;
       errorMessage.value = '';
   
-      const userIdCookie = useCookie('userId');
-      const tokenCookie = useCookie('authToken');
+      const userId = AuthStore.userId;
+      const token = AuthStore.token;
+      const names = AuthStore.names;
   
-      if (!userIdCookie.value || !tokenCookie.value) {
+      if (!userId || !token ) {
         alert('ALERTA: ¡Sesión no iniciada!, redirigiendo a login...')
         await navigateTo('/login')
         return;
@@ -123,13 +127,13 @@
   
       const projectData = {
         ...formData,
-        idUsuario: parseInt(userIdCookie.value),
+        idUsuario: parseInt(userId),
       };
   
       const response = await fetch('http://localhost:8080/api/v1/proyect/create', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${tokenCookie.value}`,
+          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(projectData),
@@ -140,12 +144,12 @@
         throw new Error(errorData.message || 'Error al crear el proyecto');
       }
 
-      //setear la cookie de proyecto
-      const responseCreateProyect = await response.json();
-
-      const projectIdCookie = useCookie('projectId');
-
-      projectIdCookie.value = responseCreateProyect.idProyecto;
+      const project = await response.json();
+      ProjectStore.setProjectData({
+        projectId: project.idProyecto,
+        projectName: project.nameProyect,
+      });
+      
   
       // Redirigir al dashboard después de crear exitosamente
       alert('Proyecto "' + formData.nameProyect + '" creado exitosametente, redirigiendo a Dashboard...');

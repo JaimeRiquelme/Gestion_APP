@@ -287,10 +287,14 @@
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue';
-import { useCookie } from 'nuxt/app';
+import { useAuthStore } from '../stores/auth';
+import { useProjectStore } from '../stores/project';
+
 
 const loading = ref(false);
 const errorMessage = ref('');
+const AuthStore = useAuthStore();
+const ProjectStore = useProjectStore();
 
 const formData = reactive({
     proyectName: '',
@@ -380,21 +384,21 @@ const fetchProjectData = async () => {
         loading.value = true;
         errorMessage.value = '';
 
-        const userIdCookie = useCookie('userId');
-        const tokenCookie = useCookie('authToken');
-        const projectIdCookie = useCookie('projectId');
+        const userId = AuthStore.userId;
+        const token = AuthStore.token;
+        const projectId = ProjectStore.projectId;
 
-        if (!userIdCookie.value || !tokenCookie.value || !projectIdCookie.value) {
+        if (!userId || !token || !projectId) {
             alert('ALERTA: ¡Sesión no iniciada o proyecto no seleccionado!, redirigiendo a login...')
             await navigateTo('/login')
             return;
         }
 
         // Obtener la información del proyecto
-        const respondeProyect = await fetch(`http://localhost:8080/api/v1/proyect/getById/${projectIdCookie.value}`, {
+        const respondeProyect = await fetch(`http://localhost:8080/api/v1/proyect/getById/${projectId}`, {
             method: 'GET',
             headers: {
-                'Authorization': `Bearer ${tokenCookie.value}`,
+                'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json',
             }
         });
@@ -403,10 +407,10 @@ const fetchProjectData = async () => {
         console.log(respondeProyect);
 
         // Obtener la información del usuario
-        const respondeUser = await fetch(`http://localhost:8080/api/v1/user/getById/${userIdCookie.value}`, {
+        const respondeUser = await fetch(`http://localhost:8080/api/v1/user/getById/${userId}`, {
             method: 'GET',
             headers: {
-                'Authorization': `Bearer ${tokenCookie.value}`,
+                'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json',
             }
         });
@@ -446,10 +450,11 @@ const handleSubmit = async () => {
         loading.value = true;
         errorMessage.value = '';
 
-        const userIdCookie = useCookie('userId');
-        const tokenCookie = useCookie('authToken');
+        const userId = AuthStore.userId;
+        const token = AuthStore.token;
+        const projectId = ProjectStore.projectId;
 
-        if (!userIdCookie.value || !tokenCookie.value) {
+        if (!userId || !token || !projectId) {
             alert('ALERTA: ¡Sesión no iniciada!, redirigiendo a login...')
             await navigateTo('/login')
             return;
@@ -462,14 +467,14 @@ const handleSubmit = async () => {
         const respondeProyect = await fetch('http://localhost:8080/api/v1/constitution/create', {
             method: 'POST',
             headers: {
-                'Authorization': `Bearer ${tokenCookie.value}`,
+                'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
                 ...formData,
                 proyectStakeholders: formattedStakeholders,
                 rolesAndResponsabilities: formattedRoles,
-                idUsuario: parseInt(userIdCookie.value),
+                idUsuario: parseInt(userId),
             }),
         });
 
