@@ -254,7 +254,7 @@
                             <button type="button" class="save-button" :disabled="loading" @click="handleSave">
                                 {{ loading ? 'Guardando...' : 'Guardar' }}
                             </button>
-                            <button type="submit" class="submit-button" :disabled="loading">
+                            <button type="submit" class="submit-button" :disabled="loading" @click="handleSubmit">
                                 {{ loading ? 'Creando...' : 'Crear Documento' }}
                             </button>
                         </div>
@@ -280,6 +280,27 @@
                 <div v-if="errorMessage" class="error-message">
                     {{ errorMessage }}
                 </div>
+                <div v-if="pdfUrl" class="pdf-container">
+                    <div class="pdf-header">
+                        <h2 class="pdf-title">Vista previa del documento</h2>
+                        <div class="pdf-actions">
+                            <a :href="pdfUrl" download="ActaConstitucion.pdf" class="pdf-button download-button">
+                                <span class="button-icon">↓</span>
+                                Descargar PDF
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="pdf-viewer">
+                        <iframe :src="pdfUrl" class="pdf-iframe"></iframe>
+                    </div>
+
+                    <div class="pdf-footer">
+                        <button @click="navigateTo('/dashboard')" class="pdf-button return-button">
+                            Volver al Dashboard
+                        </button>
+                    </div>
+                </div>
             </div>
         </main>
     </div>
@@ -289,12 +310,15 @@
 import { ref, reactive, onMounted } from 'vue';
 import { useAuthStore } from '../stores/auth';
 import { useProjectStore } from '../stores/project';
+import { useConstitutionFormStore } from '../stores/ConstitutionForm';
 
 
 const loading = ref(false);
 const errorMessage = ref('');
 const AuthStore = useAuthStore();
 const ProjectStore = useProjectStore();
+const ConstitutionFormStore = useConstitutionFormStore();
+const pdfUrl = ref(null);
 
 const formData = reactive({
     proyectName: '',
@@ -464,7 +488,89 @@ const handleSubmit = async () => {
         const formattedStakeholders = formatStakeholdersToString(formData.proyectStakeholders);
         const formattedRoles = formatRolesToString(formData.rolesAndResponsabilities);
 
-        const respondeProyect = await fetch('http://localhost:8080/api/v1/constitution/create', {
+        // Primero creamos la gestión de integracion. a esta ruta : http://localhost:8080/api/v1/management/create
+
+        const responseManagement = await fetch('http://localhost:8080/api/v1/management/create', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                idProyecto: parseInt(projectId),
+                nameManagement: 'Gestión de Integración',
+                description: 'Gestión de Integración del Proyecto',
+            }),
+        });
+
+        if (!responseManagement.ok) {
+            const errorData = await responseManagement.json();
+            throw new Error(errorData.message || 'Error al crear la gestión de integración');
+        } else {
+            ConstitutionFormStore.idManagement = responseManagement.idManagement;
+        }
+
+        // Luego creamos el proceso de la integracion que es el acta de constitucion del proyecto. http://localhost:8080/api/v1/process/create
+
+        const responseProcess = await fetch('http://localhost:8080/api/v1/process/create', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                idManagement: parseInt(ConstitutionFormStore.idManagement),
+                nameProcess: 'Acta de Constitución del Proyecto',
+                description: 'Acta de Constitución del Proyecto',
+                stateProcess: 'Activo',
+                startDatePlanned: new Date().toISOString().split('T')[0],
+                endDatePlanned: new Date().toISOString().split('T')[0],
+                startDateReal: new Date().toISOString().split('T')[0],
+                endDateReal: new Date().toISOString().split('T')[0],
+            }),
+        });
+
+        if (!responseProcess.ok) {
+            const errorData = await responseProcess.json();
+            throw new Error(errorData.message || 'Error al crear el proceso de integración');
+        } else {
+            ConstitutionFormStore.idProcess = responseProcess.idProcess;
+        }
+
+        // tercero creamos la salida http://localhost:8080/api/v1/exit/create
+
+        const responseExit = await fetch('http://localhost:8080/api/v1/exit/create', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                idProcess: parseInt(ConstitutionFormStore.idProcess),
+                nameExit: 'Acta de Constitución del Proyecto',
+                state: 'Acta de Constitución del Proyecto',
+                dateCreation: new Date().toISOString().split('T')[0],
+                dateValidation: new Date().toISOString().split('T')[0],
+                priority: "Alta",
+                responsible: AuthStore.names,
+                description: 'Acta de Constitución del Proyecto',
+            }),
+        });
+
+        if (!responseExit.ok) {
+            const errorData = await responseExit.json();
+            throw new Error(errorData.message || 'Error al crear la salida');
+        } else {
+            const dataExit = await responseExit.json();
+            ConstitutionFormStore.idExit = dataExit.idExit;
+            console.log(dataExit);
+            console.log(ConstitutionFormStore.idExit);
+        }
+
+        // Finalmente creamos el acta de constitución del proyecto. http://localhost:8080/api/documents/institution/generate?idExit={idExit}
+
+
+        const responseConstitution = await fetch(`http://localhost:8080/api/documents/institution/generate?idExit=${ConstitutionFormStore.idExit}`, {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${token}`,
@@ -474,17 +580,17 @@ const handleSubmit = async () => {
                 ...formData,
                 proyectStakeholders: formattedStakeholders,
                 rolesAndResponsabilities: formattedRoles,
-                idUsuario: parseInt(userId),
             }),
         });
 
-        if (!respondeProyect.ok) {
-            const errorData = await respondeProyect.json();
+        if (!responseConstitution.ok) {
+            const errorData = await responseConstitution.json();
             throw new Error(errorData.message || 'Error al crear el acta de constitución');
+        } else {
+            const pdfBlob = await responseConstitution.blob();
+            pdfUrl.value = URL.createObjectURL(pdfBlob);
         }
 
-        alert('Acta de constitución creada exitosamente, redirigiendo al Dashboard...');
-        await navigateTo('/dashboard')
     } catch (error) {
         console.error('Error creating constitution act:', error);
         errorMessage.value = error.message || 'Error al crear el acta de constitución. Por favor, intenta nuevamente.';
@@ -524,7 +630,7 @@ const handleSave = () => {
     console.log('Datos formateados para envío:', formattedData);
     console.log('Stakeholders formateados:', formattedStakeholders);
     console.log('Roles formateados:', formattedRoles);
-    
+
     // Mostrar el JSON formateado
     console.log('JSON completo:', JSON.stringify(formattedData, null, 2));
 };
@@ -831,6 +937,92 @@ select.form-input option {
 
 .confirm-button:hover {
     background-color: #c82333;
+}
+
+.pdf-container {
+    margin-top: 2rem;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 1.5rem;
+}
+
+.pdf-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #eee;
+}
+
+.pdf-title {
+    font-size: 1.25rem;
+    color: #333;
+    margin: 0;
+}
+
+.pdf-actions {
+    display: flex;
+    gap: 1rem;
+}
+
+.pdf-viewer {
+    background: #f5f5f5;
+    padding: 1rem;
+    border-radius: 4px;
+    margin-bottom: 1rem;
+}
+
+.pdf-iframe {
+    width: 100%;
+    height: 700px;
+    border: none;
+    border-radius: 4px;
+}
+
+.pdf-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #eee;
+}
+
+.pdf-button {
+    padding: 0.75rem 1.5rem;
+    border-radius: 4px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.download-button {
+    background-color: #00B8B0;
+    color: white;
+    text-decoration: none;
+    border: none;
+}
+
+.download-button:hover {
+    background-color: #009B94;
+}
+
+.return-button {
+    background-color: #f5f5f5;
+    color: #666;
+    border: 1px solid #ddd;
+}
+
+.return-button:hover {
+    background-color: #eee;
+}
+
+.button-icon {
+    font-size: 1.2rem;
 }
 
 @media (max-width: 768px) {

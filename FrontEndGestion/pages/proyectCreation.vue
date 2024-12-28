@@ -70,7 +70,7 @@
               <button 
                 type="button" 
                 class="cancel-button"
-                @click="navigateTo('/dashboard')"
+                @click="navigateTo('/principalView')"
               >
                 Cancelar
               </button>
