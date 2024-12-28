@@ -99,7 +99,7 @@
   };
   
   const handleNewProject = () => {
-    router.push('/new-project');
+    router.push('/proyectCreation');
   };
   </script>
   

@@ -399,6 +399,9 @@ const fetchProjectData = async () => {
             }
         });
 
+        //imprimo por consola la informacion del proyecto
+        console.log(respondeProyect);
+
         // Obtener la información del usuario
         const respondeUser = await fetch(`http://localhost:8080/api/v1/user/getById/${userIdCookie.value}`, {
             method: 'GET',
@@ -407,6 +410,9 @@ const fetchProjectData = async () => {
                 'Content-Type': 'application/json',
             }
         });
+
+        //imprimo por consola la informacion del usuario
+        console.log(respondeUser);
 
         if (!respondeProyect.ok || !respondeUser.ok) {
             throw new Error('Error al obtener la información necesaria');

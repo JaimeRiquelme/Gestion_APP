@@ -139,10 +139,17 @@
         const errorData = await response.json();
         throw new Error(errorData.message || 'Error al crear el proyecto');
       }
+
+      //setear la cookie de proyecto
+      const responseCreateProyect = await response.json();
+
+      const projectIdCookie = useCookie('projectId');
+
+      projectIdCookie.value = responseCreateProyect.idProyecto;
   
       // Redirigir al dashboard después de crear exitosamente
       alert('Proyecto "' + formData.nameProyect + '" creado exitosametente, redirigiendo a Dashboard...');
-      await navigateTo('/dashboard')
+      await navigateTo('/ConstitutionNotice')
     } catch (error) {
       console.error('Error creating project:', error);
       errorMessage.value = error.message || 'Error al crear el proyecto. Por favor, intenta nuevamente.';
