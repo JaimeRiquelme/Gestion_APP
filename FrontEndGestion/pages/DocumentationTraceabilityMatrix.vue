@@ -1,7 +1,8 @@
 <template>
     <div class="page-container">
       <div class="form-container">
-        <h1><strong>Generar Documento de Suposiciones</strong></h1>
+        <h1 style="color: black;"><strong>Generar Documento de trazabilidad y sus matrices</strong></h1>
+
         <form @submit.prevent="submitForm">
           <div class="form-group">
             <label for="idExit"><strong>ID de Salida:</strong></label>
