@@ -49,30 +49,28 @@
   <script setup>
   import { ref, onMounted } from 'vue';
   import { useRouter } from 'vue-router';
-  import { useCookie } from 'nuxt/app';
+  import { useAuthStore } from '../stores/auth';
   
   const router = useRouter();
   const projects = ref([]);
   const userName = ref('');
   const loading = ref(true);
   const error = ref(null);
+  const AuthStore = useAuthStore();
   
   onMounted(async () => {
-    const userIdCookie = useCookie('userId');
-    const namesCookie = useCookie('names');
-    const tokenCookie = useCookie('authToken');
     
-    if (!userIdCookie.value || !tokenCookie.value) {
+    if (!AuthStore.token) {
       router.push('/login');
       return;
     }
   
-    userName.value = namesCookie.value || 'usuario';
+    userName.value = AuthStore.names;
     
     try {
-      const response = await fetch(`http://localhost:8080/api/v1/user/${userIdCookie.value}/proyects`, {
+      const response = await fetch(`http://localhost:8080/api/v1/user/${AuthStore.userId}/proyects`, {
         headers: {
-          'Authorization': `Bearer ${tokenCookie.value}`,
+          'Authorization': `Bearer ${AuthStore.token}`,
           'Content-Type': 'application/json',
         },
       });

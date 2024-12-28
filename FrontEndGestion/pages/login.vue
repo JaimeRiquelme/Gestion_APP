@@ -43,7 +43,7 @@
 <script setup>
 import { reactive, ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { useCookie } from 'nuxt/app';
+import { useAuthStore } from '../stores/auth';
 
 const formData = reactive({
   email: '',
@@ -54,6 +54,7 @@ const errorMessage = ref('');
 const isWarning = ref(false);
 
 const router = useRouter();
+const AuthStore = useAuthStore();
 
 const handleSubmit = async () => {
   try {
@@ -87,15 +88,13 @@ const handleSubmit = async () => {
       }
     }
 
-    const token = data.accessToken;
-    const userId = data.userId;
-    const names = data.names;
-    const tokenCookie = useCookie('authToken');
-    const userIdCookie = useCookie('userId');
-    const namesCookie = useCookie('names');
-    tokenCookie.value = token;
-    userIdCookie.value = userId;
-    namesCookie.value = names;
+    // Save user data in the store
+    AuthStore.setAuthData({
+      token: data.accessToken,
+      userId: data.userId,
+      names: data.names,
+      secondNames: data.secondNames,
+    })
 
     router.push('/principalView');
 
