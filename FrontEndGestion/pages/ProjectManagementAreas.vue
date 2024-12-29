@@ -20,11 +20,29 @@
         <button @click="goToPage('/another-page')" class="button-square">
           <span class="button-number">2.</span> Gestión del Alcance
         </button>
-        <button @click="goToPage('/schedule-management')" class="button-square">
+        <button  class="button-square">
           <span class="button-number">3.</span> Gestión del Cronograma
         </button>
-        <button @click="goToPage('/cost-management')" class="button-square">
+        <button  class="button-square">
           <span class="button-number">4.</span> Gestión de los Costos
+        </button>
+        <button  class="button-square">
+          <span class="button-number">5.</span> Gestión de calidad
+        </button>
+        <button  class="button-square">
+          <span class="button-number">6.</span> Gestión de las comunicaciones
+        </button>
+
+        <button  class="button-square">
+          <span class="button-number">7.</span> Gestión de los riesgos
+        </button>
+
+        <button  class="button-square">
+          <span class="button-number">8.</span> Gestión de las adquisiciones
+        </button>
+
+        <button  class="button-square">
+          <span class="button-number">9.</span> Gestión de las comunicaciones
         </button>
         <!-- Agregar más botones según sea necesario -->
       </div>
@@ -39,11 +57,13 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import { AuthStore } from '../stores/auth';
-import { ProjectStore } from '../stores/project';
+import { useAuthStore } from '../stores/auth';
+import { useProjectStore } from '../stores/project';
 
 const router = useRouter();
 const projectName = ref('Cargando...'); // Variable reactiva para el nombre del proyecto
+const AuthStore = useAuthStore();
+const ProjectStore = useProjectStore();
 const loading = ref(false);
 const errorMessage = ref('');
 
