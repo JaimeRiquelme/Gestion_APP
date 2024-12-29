@@ -84,13 +84,15 @@
                                 <div class="form-group">
                                     <label :for="'stakeholderPosition' + index">Cargo *</label>
                                     <input :id="'stakeholderPosition' + index" v-model="stakeholder.position"
-                                        type="text" class="form-input" placeholder="Ingrese el cargo" required />
+                                        type="text" class="form-input" placeholder="Ingrese el cargo" @input="validateNoCommas($event, 'stakeholder', index, 'position')" required />
+                                    <span v-if="hasComma(stakeholder.position)" class="invalid-feedback">No se permiten comas en este campo</span>
                                 </div>
 
                                 <div class="form-group">
                                     <label :for="'stakeholderName' + index">Nombre *</label>
                                     <input :id="'stakeholderName' + index" v-model="stakeholder.name" type="text"
-                                        class="form-input" placeholder="Ingrese el nombre" required />
+                                        class="form-input" placeholder="Ingrese el nombre" @input="validateNoCommas($event, 'stakeholder', index, 'name')" required />
+                                    <span v-if="hasComma(stakeholder.name)" class="invalid-feedback">No se permiten comas en este campo</span>
                                 </div>
                             </div>
 
@@ -215,20 +217,22 @@
                                 <div class="form-group">
                                     <label :for="'roleType' + index">Rol *</label>
                                     <input :id="'roleType' + index" v-model="role.Rol" type="text" class="form-input"
-                                        placeholder="Ingrese el rol" required />
+                                        placeholder="Ingrese el rol" @input="validateNoCommas($event, 'role', index, 'Rol')" required />
+                                    <span v-if="hasComma(role.Rol)" class="invalid-feedback">No se permiten comas en este campo</span>
                                 </div>
 
                                 <div class="form-group">
                                     <label :for="'roleFunction' + index">Función *</label>
                                     <input :id="'roleFunction' + index" v-model="role.Funcion" type="text"
-                                        class="form-input" placeholder="Ingrese la función" required />
+                                        class="form-input" placeholder="Ingrese la función" @input="validateNoCommas($event, 'role', index, 'Funcion')" required />
+                                    <span v-if="hasComma(role.Funcion)" class="invalid-feedback">No se permiten comas en este campo</span>
                                 </div>
 
                                 <div class="form-group">
                                     <label :for="'roleResponsibility' + index">Responsabilidad *</label>
                                     <input :id="'roleResponsibility' + index" v-model="role.Responsabilidades"
-                                        type="text" class="form-input" placeholder="Ingrese la responsabilidad"
-                                        required />
+                                        type="text" class="form-input" placeholder="Ingrese la responsabilidad" @input="validateNoCommas($event, 'role', index, 'Responsabilidades')" required />
+                                    <span v-if="hasComma(role.Responsabilidades)" class="invalid-feedback">No se permiten comas en este campo</span>
                                 </div>
                             </div>
 
@@ -382,6 +386,19 @@ const validateForm = () => {
         }
     });
 
+    // Agregar validación de comas
+    formData.proyectStakeholders.forEach((stakeholder, index) => {
+        if (hasComma(stakeholder.position) || hasComma(stakeholder.name)) {
+            invalidFields.value.add(`stakeholder-${index}`);
+        }
+    });
+
+    formData.rolesAndResponsabilities.forEach((role, index) => {
+        if (hasComma(role.Rol) || hasComma(role.Funcion) || hasComma(role.Responsabilidades)) {
+            invalidFields.value.add(`role-${index}`);
+        }
+    });
+
     return invalidFields.value.size === 0;
 };
 
@@ -519,89 +536,8 @@ const handleSubmit = async () => {
         const formattedStakeholders = formatStakeholdersToString(formData.proyectStakeholders);
         const formattedRoles = formatRolesToString(formData.rolesAndResponsabilities);
 
-        // Primero creamos la gestión de integracion. a esta ruta : http://localhost:8080/api/v1/management/create
-
-        const responseManagement = await fetch('http://localhost:8080/api/v1/management/create', {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                idProyecto: parseInt(projectId),
-                nameManagement: 'Gestión de Integración',
-                description: 'Gestión de Integración del Proyecto',
-            }),
-        });
-
-        if (!responseManagement.ok) {
-            const errorData = await responseManagement.json();
-            throw new Error(errorData.message || 'Error al crear la gestión de integración');
-        } else {
-            ConstitutionFormStore.idManagement = responseManagement.idManagement;
-        }
-
-        // Luego creamos el proceso de la integracion que es el acta de constitucion del proyecto. http://localhost:8080/api/v1/process/create
-
-        const responseProcess = await fetch('http://localhost:8080/api/v1/process/create', {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                idManagement: parseInt(ConstitutionFormStore.idManagement),
-                nameProcess: 'Acta de Constitución del Proyecto',
-                description: 'Acta de Constitución del Proyecto',
-                stateProcess: 'Activo',
-                startDatePlanned: new Date().toISOString().split('T')[0],
-                endDatePlanned: new Date().toISOString().split('T')[0],
-                startDateReal: new Date().toISOString().split('T')[0],
-                endDateReal: new Date().toISOString().split('T')[0],
-            }),
-        });
-
-        if (!responseProcess.ok) {
-            const errorData = await responseProcess.json();
-            throw new Error(errorData.message || 'Error al crear el proceso de integración');
-        } else {
-            ConstitutionFormStore.idProcess = responseProcess.idProcess;
-        }
-
-        // tercero creamos la salida http://localhost:8080/api/v1/exit/create
-
-        const responseExit = await fetch('http://localhost:8080/api/v1/exit/create', {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                idProcess: parseInt(ConstitutionFormStore.idProcess),
-                nameExit: 'Acta de Constitución del Proyecto',
-                state: 'Acta de Constitución del Proyecto',
-                dateCreation: new Date().toISOString().split('T')[0],
-                dateValidation: new Date().toISOString().split('T')[0],
-                priority: "Alta",
-                responsible: AuthStore.names,
-                description: 'Acta de Constitución del Proyecto',
-            }),
-        });
-
-        if (!responseExit.ok) {
-            const errorData = await responseExit.json();
-            throw new Error(errorData.message || 'Error al crear la salida');
-        } else {
-            const dataExit = await responseExit.json();
-            ConstitutionFormStore.idExit = dataExit.idExit;
-            console.log(dataExit);
-            console.log(ConstitutionFormStore.idExit);
-        }
-
-        // Finalmente creamos el acta de constitución del proyecto. http://localhost:8080/api/documents/institution/generate?idExit={idExit}
-
-
-        const responseConstitution = await fetch(`http://localhost:8080/api/documents/institution/generate?idExit=${ConstitutionFormStore.idExit}`, {
+        // Ahora solo necesitamos hacer una única llamada al endpoint actualizado
+        const responseConstitution = await fetch(`http://localhost:8080/api/documents/institution/generate?idProyecto=${projectId}`, {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${token}`,
@@ -617,10 +553,11 @@ const handleSubmit = async () => {
         if (!responseConstitution.ok) {
             const errorData = await responseConstitution.json();
             throw new Error(errorData.message || 'Error al crear el acta de constitución');
-        } else {
-            const pdfBlob = await responseConstitution.blob();
-            pdfUrl.value = URL.createObjectURL(pdfBlob);
         }
+
+        // Procesar la respuesta del PDF
+        const pdfBlob = await responseConstitution.blob();
+        pdfUrl.value = URL.createObjectURL(pdfBlob);
 
     } catch (error) {
         console.error('Error creating constitution act:', error);
@@ -668,6 +605,22 @@ const handleSave = () => {
 
 const isFieldInvalid = (fieldName) => {
     return invalidFields.value.has(fieldName);
+};
+
+const hasComma = (value) => {
+    return value && value.includes(',');
+};
+
+const validateNoCommas = (event, type, index, field) => {
+    const value = event.target.value;
+    if (value.includes(',')) {
+        // Eliminar las comas del valor
+        if (type === 'stakeholder') {
+            formData.proyectStakeholders[index][field] = value.replace(/,/g, '');
+        } else if (type === 'role') {
+            formData.rolesAndResponsabilities[index][field] = value.replace(/,/g, '');
+        }
+    }
 };
 </script>
 
@@ -1173,5 +1126,6 @@ select.form-input option {
     color: #dc3545;
     font-size: 0.875rem;
     margin-top: 0.25rem;
+    display: block;
 }
 </style>
