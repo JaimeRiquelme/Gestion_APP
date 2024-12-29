@@ -212,10 +212,14 @@
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue';
-import { useCookie } from 'nuxt/app';
+import { useAuthStore } from '../stores/auth';
+import { useProjectStore } from '../stores/project';
 
 const loading = ref(false);
 const errorMessage = ref('');
+const AuthStore = useAuthStore();
+const ProjectStore = useProjectStore();
+const pdfUrl = ref(null);
 
 const formData = reactive({
     proyectName: '',
@@ -243,12 +247,13 @@ const formData = reactive({
     edtApproval: ''
 });
 
+const invalidFields = ref(new Set());
 
 const showCancelConfirmation = ref(false);
 
 const handleCancel = () => {
     showCancelConfirmation.value = false;
-    navigateTo('/dashboard');
+    navigateTo('/principalView');
 };
 
 const fetchProjectData = async () => {
@@ -256,41 +261,38 @@ const fetchProjectData = async () => {
         loading.value = true;
         errorMessage.value = '';
 
-        const userIdCookie = useCookie('userId');
-        const tokenCookie = useCookie('authToken');
-        const projectIdCookie = useCookie('projectId');
+        const userId = AuthStore.userId;
+        const token = AuthStore.authToken;
+        const projectId = ProjectStore.projectId;
 
-        // TODO: DESCOMENTAR
-        /*
-        if (!userIdCookie.value || !tokenCookie.value || !projectIdCookie.value) {
+        if (!userId || !token || !projectId) {
             alert('ALERTA: ¡Sesión no iniciada o proyecto no seleccionado!, redirigiendo a login...')
             await navigateTo('/login')
             return;
         }
-        */
 
         // Obtener la información del proyecto
-        const respondeProyect = await fetch(`http://localhost:8080/api/v1/proyect/getById/${projectIdCookie.value}`, {
+        const respondeProyect = await fetch(`http://localhost:8080/api/v1/proyect/getById/${projectId}`, {
             method: 'GET',
             headers: {
-                'Authorization': `Bearer ${tokenCookie.value}`,
+                'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json',
             }
         });
 
-        //imprimo por consola la informacion del proyecto
+        // Imprimo por consola la informacion del proyecto
         console.log(respondeProyect);
 
         // Obtener la información del usuario
-        const respondeUser = await fetch(`http://localhost:8080/api/v1/user/getById/${userIdCookie.value}`, {
+        const respondeUser = await fetch(`http://localhost:8080/api/v1/user/getById/${userId}`, {
             method: 'GET',
             headers: {
-                'Authorization': `Bearer ${tokenCookie.value}`,
+                'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json',
             }
         });
 
-        //imprimo por consola la informacion del usuario
+        // Imprimo por consola la informacion del usuario
         console.log(respondeUser);
 
         if (!respondeProyect.ok || !respondeUser.ok) {
@@ -323,39 +325,39 @@ const handleSubmit = async () => {
         loading.value = true;
         errorMessage.value = '';
 
-        const userIdCookie = useCookie('userId');
-        const tokenCookie = useCookie('authToken');
+        const userId = AuthStore.userId;
+        const token = AuthStore.token;
+        const projectId = ProjectStore.projectId;
 
-        if (!userIdCookie.value || !tokenCookie.value) {
+        if (!userId || !token) {
             alert('ALERTA: ¡Sesión no iniciada!, redirigiendo a login...')
             await navigateTo('/login')
             return;
         }
 
-        const respondeProyect = await fetch('http://localhost:8080/api/documents/scope-management-plan/create', {
+        const respondeScopePlan = await fetch('http://localhost:8080/api/documents/scope-management-plan/generate', {
             method: 'POST',
             headers: {
-                'Authorization': `Bearer ${tokenCookie.value}`,
+                'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
                 ...formData,
-                proyectStakeholders: formattedStakeholders,
-                rolesAndResponsabilities: formattedRoles,
-                idUsuario: parseInt(userIdCookie.value),
             }),
         });
 
-        if (!respondeProyect.ok) {
-            const errorData = await respondeProyect.json();
-            throw new Error(errorData.message || 'Error al crear el acta de constitución');
+        if (!respondeScopePlan.ok) {
+            const errorData = await respondeScopePlan.json();
+            throw new Error(errorData.message || 'Error al crear el plan de gestión del alcance');
         }
 
-        alert('Acta de constitución creada exitosamente, redirigiendo al Dashboard...');
-        await navigateTo('/dashboard')
+        // Procesar la respuesta del PDF
+        const pdfBlob = await respondeScopePlan.blob();
+        pdfUrl.value = URL.createObjectURL(pdfBlob);
+
     } catch (error) {
-        console.error('Error creating constitution act:', error);
-        errorMessage.value = error.message || 'Error al crear el acta de constitución. Por favor, intenta nuevamente.';
+        console.error('Error creating scope management plan:', error);
+        errorMessage.value = error.message || 'Error al crear el plan de gestión del alcance. Por favor, intenta nuevamente.';
     } finally {
         loading.value = false;
     }
