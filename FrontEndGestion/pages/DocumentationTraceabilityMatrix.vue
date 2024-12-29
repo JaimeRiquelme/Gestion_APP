@@ -198,35 +198,61 @@
   }
   
   async function submitForm() {
-    try {
-      if (!idExit.value) {
-        alert('Por favor, ingrese un ID de Salida válido.');
-        return;
-      }
-  
-      formData.value.requirementsDocumentation = formatRequirements();
-      formData.value.requirementsTraceabilityMatrix = formatTraceability();
-  
-      const response = await axios.post(
-        `http://localhost:8080/api/documents/TraceabilityMatrix/generate?idExit=${idExit.value}`,
-        formData.value,
-        { responseType: 'blob' }
-      );
-  
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', 'alcance_y_matriz_de_trazabilidad.pdf');
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-  
-      alert('Documento generado exitosamente.');
-    } catch (error) {
-      console.error('Error al generar el documento:', error.response?.data || error.message);
-      alert('Hubo un error al generar el documento. Por favor, revise los datos ingresados.');
+  try {
+    // Validación de sesión y datos del usuario
+    const userId = AuthStore.userId;
+    const token = AuthStore.token;
+
+    if (!userId || !token) {
+      alert('ALERTA: ¡Sesión no iniciada! Redirigiendo a login...');
+      await router.push('/login');
+      return;
     }
+
+    // Validación del ID de Salida
+    if (!idExit.value) {
+      alert('Por favor, ingrese un ID de Salida válido.');
+      return;
+    }
+
+    // Preparar los datos del formulario
+    formData.value.requirementsDocumentation = formatRequirements();
+    formData.value.requirementsTraceabilityMatrix = formatTraceability();
+
+    // Enviar datos al backend
+    const response = await fetch(
+      `http://localhost:8080/api/documents/TraceabilityMatrix/generate?idExit=${idExit.value}`, 
+      {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData.value), // Convertir datos a JSON
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`Error al generar el documento: ${response.statusText}`);
+    }
+
+    // Procesar la respuesta (Blob para descarga)
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', 'alcance_y_matriz_de_trazabilidad.pdf');
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+
+    alert('Documento generado exitosamente.');
+  } catch (error) {
+    console.error('Error al generar el documento:', error.message || error);
+    alert('Hubo un error al generar el documento. Por favor, revise los datos ingresados.');
   }
+}
+
   </script>
   
   <style scoped>
