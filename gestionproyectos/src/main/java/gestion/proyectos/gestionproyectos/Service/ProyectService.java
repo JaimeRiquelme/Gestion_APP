@@ -93,30 +93,26 @@ public class ProyectService {
     // Delete
     @Transactional
     public void delete(Long id) {
-        // Primero verificamos si existe el proyecto
-        proyectRepository.findById(id)
+        Proyect proyect = proyectRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("No se encontró el proyecto con ID: " + id));
 
         try {
-            String[] queries = {
-                    "DELETE FROM management WHERE id_proyect = :id",
-                    "DELETE FROM incident WHERE id_proyect = :id",
-                    "DELETE FROM lessons WHERE id_proyect = :id",
-                    "DELETE FROM proyects WHERE id_proyecto = :id"
-            };
+            // Limpiamos las referencias antes de eliminar
+            proyect.getManagements().forEach(management -> {
+                management.getProcesses().forEach(process -> {
+                    process.getExits().forEach(exit -> {
+                        exit.getParameters().clear();
+                    });
+                    process.getExits().clear();
+                });
+                management.getProcesses().clear();
+            });
+            proyect.getManagements().clear();
 
-            for (String sql : queries) {
-                int rowsAffected = entityManager.createNativeQuery(sql)
-                        .setParameter("id", id)
-                        .executeUpdate();
-
-                // Log para saber qué se está eliminando
-                System.out.println("Ejecutando query: " + sql);
-                System.out.println("Filas afectadas: " + rowsAffected);
-            }
+            // Ahora podemos eliminar el proyecto de forma segura
+            proyectRepository.delete(proyect);
 
             System.out.println("Proyecto y sus relaciones eliminadas exitosamente");
-
         } catch (Exception e) {
             System.err.println("Error al eliminar el proyecto: " + e.getMessage());
             throw new RuntimeException("Error al eliminar el proyecto y sus relaciones: " + e.getMessage());
