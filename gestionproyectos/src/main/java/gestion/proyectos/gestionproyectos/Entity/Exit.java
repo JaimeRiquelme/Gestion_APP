@@ -25,9 +25,9 @@ public class Exit {
     @Column(name = "id_exit")
     private Long idExit;
 
-    @ManyToOne
+    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "id_process")
-    @JsonIgnore // Ignorar la serialización directa del proceso
+    @JsonIgnore
     private Process process;
 
     @JsonProperty("idProcess") // Exponer idProcess para serialización

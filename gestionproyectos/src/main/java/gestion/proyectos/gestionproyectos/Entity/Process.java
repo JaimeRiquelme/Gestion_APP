@@ -13,10 +13,7 @@ import java.util.List;
 
 @Entity
 @Table(name = "process")
-@JsonIdentityInfo(
-        generator = ObjectIdGenerators.PropertyGenerator.class,
-        property = "idProcess"
-)
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "idProcess")
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
@@ -27,9 +24,9 @@ public class Process {
     @Column(name = "id_process")
     private Long idProcess;
 
-    @ManyToOne
+    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "id_management")
-    @JsonIgnore // Ignorar la serialización directa de Management
+    @JsonIgnore
     private Management management;
 
     @JsonProperty("idManagement") // Exponer idManagement para serialización

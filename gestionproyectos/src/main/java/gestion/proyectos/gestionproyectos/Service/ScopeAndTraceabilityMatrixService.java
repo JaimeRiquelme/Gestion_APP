@@ -44,7 +44,7 @@ public class ScopeAndTraceabilityMatrixService {
 
         String templatePath;
         try {
-            templatePath = pathResolver.resolve("Documento de requisitos y Matriz de trazabilidad.tex");
+            templatePath = pathResolver.resolve("Documentación de requisitos y Matriz de trazabilidad de requisitos.tex");
         } catch (Exception e) {
             throw new TemplateNotFoundException("The template 'Documento de requisitos y Matriz de trazabilidad.tex' was not found.");
         }
