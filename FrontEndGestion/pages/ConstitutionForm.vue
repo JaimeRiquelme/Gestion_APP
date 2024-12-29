@@ -12,8 +12,7 @@
                         <h2 class="section-title">Información Básica</h2>
                         <div class="form-group">
                             <label for="proyectName">Nombre del Proyecto *</label>
-                            <input id="proyectName" v-model="formData.proyectName" type="text" class="form-input"
-                                readonly required />
+                            <input id="proyectName" v-model="formData.proyectName" type="text" :class="['form-input', { 'invalid-input': isFieldInvalid('proyectName') }]" @focus="invalidFields.delete('proyectName')" readonly required />
                         </div>
 
                         <div class="form-group">
@@ -71,7 +70,7 @@
 
                         <div v-for="(stakeholder, index) in formData.proyectStakeholders" :key="index"
                             class="stakeholder-row">
-                            <div class="stakeholder-inputs">
+                            <div :class="['stakeholder-inputs', { 'invalid-section': isFieldInvalid(`stakeholder-${index}`) }]">
                                 <div class="form-group">
                                     <label :for="'stakeholderType' + index">Tipo *</label>
                                     <select :id="'stakeholderType' + index" v-model="stakeholder.type"
@@ -212,7 +211,7 @@
 
                         <div v-for="(role, index) in formData.rolesAndResponsabilities" :key="index"
                             class="stakeholder-row">
-                            <div class="stakeholder-inputs">
+                            <div :class="['stakeholder-inputs', { 'invalid-section': isFieldInvalid(`role-${index}`) }]">
                                 <div class="form-group">
                                     <label :for="'roleType' + index">Rol *</label>
                                     <input :id="'roleType' + index" v-model="role.Rol" type="text" class="form-input"
@@ -296,7 +295,7 @@
                     </div>
 
                     <div class="pdf-footer">
-                        <button @click="navigateTo('/dashboard')" class="pdf-button return-button">
+                        <button @click="navigateTo('/principalView')" class="pdf-button return-button">
                             Volver al Dashboard
                         </button>
                     </div>
@@ -307,11 +306,10 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue';
+import { ref, reactive, onMounted, computed } from 'vue';
 import { useAuthStore } from '../stores/auth';
 import { useProjectStore } from '../stores/project';
 import { useConstitutionFormStore } from '../stores/ConstitutionForm';
-
 
 const loading = ref(false);
 const errorMessage = ref('');
@@ -358,12 +356,40 @@ const formData = reactive({
     nonFunctionalRequirements: ''
 });
 
+const invalidFields = ref(new Set());
+
+const validateForm = () => {
+    invalidFields.value.clear();
+    
+    // Validar campos básicos
+    Object.entries(formData).forEach(([key, value]) => {
+        if (typeof value === 'string' && !value.trim()) {
+            invalidFields.value.add(key);
+        }
+    });
+
+    // Validar stakeholders
+    formData.proyectStakeholders.forEach((stakeholder, index) => {
+        if (!stakeholder.type || !stakeholder.position || !stakeholder.name) {
+            invalidFields.value.add(`stakeholder-${index}`);
+        }
+    });
+
+    // Validar roles
+    formData.rolesAndResponsabilities.forEach((role, index) => {
+        if (!role.Rol || !role.Funcion || !role.Responsabilidades) {
+            invalidFields.value.add(`role-${index}`);
+        }
+    });
+
+    return invalidFields.value.size === 0;
+};
 
 const showCancelConfirmation = ref(false);
 
 const handleCancel = () => {
     showCancelConfirmation.value = false;
-    navigateTo('/dashboard');
+    navigateTo('/principalView');
 };
 
 const addStakeholder = () => {
@@ -470,6 +496,11 @@ onMounted(() => {
 });
 
 const handleSubmit = async () => {
+    if (!validateForm()) {
+        errorMessage.value = 'Por favor, complete todos los campos obligatorios';
+        return;
+    }
+    
     try {
         loading.value = true;
         errorMessage.value = '';
@@ -633,6 +664,10 @@ const handleSave = () => {
 
     // Mostrar el JSON formateado
     console.log('JSON completo:', JSON.stringify(formattedData, null, 2));
+};
+
+const isFieldInvalid = (fieldName) => {
+    return invalidFields.value.has(fieldName);
 };
 </script>
 
@@ -1110,5 +1145,33 @@ select.form-input option {
             margin-top: 0.5rem;
         }
     }
+}
+
+.invalid-input {
+    border-color: #dc3545;
+    background-color: #fff8f8;
+}
+
+.invalid-input:focus {
+    border-color: #dc3545;
+    box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.1);
+}
+
+.invalid-section {
+    border: 1px solid #dc3545;
+    padding: 0.5rem;
+    border-radius: 4px;
+    background-color: #fff8f8;
+}
+
+.form-input.invalid-input::placeholder {
+    color: #dc3545;
+}
+
+/* Mensaje de error para campos inválidos */
+.invalid-feedback {
+    color: #dc3545;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
 }
 </style>
