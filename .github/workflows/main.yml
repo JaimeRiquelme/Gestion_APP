@@ -1,10 +1,11 @@
-name: Sync branches con main
+name: Sync branches with main and FrontEnd
 on:
   push:
     branches:
       - main
+      - FrontEnd
   schedule:
-    - cron: '0 3 * * *'  # 3 AM, corregido el formato del cron
+    - cron: '0 3 * * *'  # 3 AM
 
 jobs:
   sync:
@@ -17,28 +18,56 @@ jobs:
         with:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
-
+      
       - name: Configure Git
         run: |
           git config --global user.name 'GitHub Action'
           git config --global user.email 'action@github.com'
           git config core.hooksPath git-hooks
+      
       - name: Fetch All Branches
         run: git fetch --all
-
+      
       - name: Sync Branches
         run: |
-          # Get all remote branches except main
-          for branch in $(git branch -r | grep -v 'main' | grep -v 'HEAD' | sed 's|origin/||'); do
-            echo "Updating $branch..."
-            git checkout $branch || continue
+          # Determine which branch triggered the workflow
+          TRIGGER_BRANCH=${GITHUB_REF#refs/heads/}
+          echo "Workflow triggered by: $TRIGGER_BRANCH"
+          
+          # Function to sync branches with their parent
+          sync_branches() {
+            local parent_branch=$1
+            echo "Syncing branches that derive from $parent_branch..."
             
-            # Try to merge main into the branch
-            if git merge origin/main --no-edit; then
-              echo "Successfully merged main into $branch"
-              git push origin $branch
-            else
-              echo "Merge conflict in $branch, skipping..."
-              git merge --abort
-            fi
-          done
+            # Get all branches that have a common ancestor with the parent branch
+            for branch in $(git branch -r | grep -v "$parent_branch" | grep -v 'HEAD' | sed 's|origin/||'); do
+              # Check if this branch was created from the parent branch
+              merge_base=$(git merge-base "origin/$parent_branch" "origin/$branch")
+              branch_point=$(git rev-parse "origin/$parent_branch")
+              
+              if [ "$merge_base" = "$branch_point" ]; then
+                echo "Updating $branch (derives from $parent_branch)..."
+                git checkout $branch || continue
+                
+                # Try to merge parent branch into the current branch
+                if git merge "origin/$parent_branch" --no-edit; then
+                  echo "Successfully merged $parent_branch into $branch"
+                  git push origin $branch
+                else
+                  echo "Merge conflict in $branch, skipping..."
+                  git merge --abort
+                fi
+              fi
+            done
+          }
+          
+          # Sync based on which branch triggered the workflow
+          if [ "$TRIGGER_BRANCH" = "main" ]; then
+            sync_branches "main"
+          elif [ "$TRIGGER_BRANCH" = "FrontEnd" ]; then
+            sync_branches "FrontEnd"
+          else
+            # If triggered by schedule, sync both
+            sync_branches "main"
+            sync_branches "FrontEnd"
+          fi
