@@ -15,40 +15,18 @@
 
       <div class="button-container">
         <button @click="goToPage('/project-management')" class="button-square">
-          <span class="button-number">1.</span> Gestión de la Integracion
+          <span class="button-number">1.</span> Gestión de la Integración
         </button>
-
         <button @click="goToPage('/another-page')" class="button-square">
           <span class="button-number">2.</span> Gestión del Alcance
         </button>
-
-        <button @click="handleBackendRequest(3)" class="button-square">
+        <button @click="goToPage('/schedule-management')" class="button-square">
           <span class="button-number">3.</span> Gestión del Cronograma
         </button>
-        <button @click="handleBackendRequest(4)" class="button-square">
+        <button @click="goToPage('/cost-management')" class="button-square">
           <span class="button-number">4.</span> Gestión de los Costos
         </button>
-        <button @click="handleBackendRequest(5)" class="button-square">
-          <span class="button-number">5.</span> Gestión de la Calidad
-        </button>
-        <button @click="handleBackendRequest(6)" class="button-square">
-          <span class="button-number">6.</span> Gestión de las Comunicaciones
-        </button>
-        <button @click="handleBackendRequest(7)" class="button-square">
-          <span class="button-number">7.</span> Gestión de los Riesgos
-        </button>
-        <button @click="handleBackendRequest(8)" class="button-square">
-          <span class="button-number">8.</span> Gestión de las Adquisiciones
-        </button>
-        <button @click="handleBackendRequest(9)" class="button-square">
-          <span class="button-number">9.</span> Gestión de
-        </button>
-        <button @click="handleBackendRequest(10)" class="button-square">
-          <span class="button-number">10.</span> Gestión de
-        </button>
-        <button @click="handleBackendRequest(11)" class="button-square">
-          <span class="button-number">11.</span> Gestión de
-        </button>
+        <!-- Agregar más botones según sea necesario -->
       </div>
     </main>
 
@@ -59,43 +37,70 @@
 </template>
 
 <script setup>
+import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import axios from 'axios'; // Se importa Axios para la comunicación con el backend
+import AuthStore from '@/stores/AuthStore'; // Asegúrate de importar correctamente tus stores
+import ProjectStore from '@/stores/ProjectStore';
 
 const router = useRouter();
+const projectName = ref('Cargando...'); // Variable reactiva para el nombre del proyecto
+const loading = ref(false);
+const errorMessage = ref('');
 
-// Variable reactiva para almacenar el nombre del proyecto
-let projectName = 'Cargando...'; // Valor inicial mientras se obtiene desde el backend
-
-// Esta variable simula el valor recibido desde otra vista (puede pasarse como parámetro en `router.push`).
-let receivedValue = 1; // Cambiar esto con el valor real recibido desde otra vista
-
+// Función para navegar a otra página
 function goToPage(path) {
   router.push(path);
 }
 
-// Nueva función para manejar la solicitud GET al backend
-async function handleBackendRequest(sectionId) {
+// Nueva función para manejar la conexión al backend
+async function fetchProjectData() {
   try {
-    // Realiza una solicitud GET al backend, pasando el ID de la sección en la URL
-    const response = await axios.get(`http://localhost:8090/api/v1/proyect/getById/${sectionId}`);
+    loading.value = true;
+    errorMessage.value = '';
 
-    if (response.data) {
-      // Accede al nombre del proyecto (nameProyect) desde la respuesta
-      projectName = response.data.nameProyect; // Asigna el nombre del proyecto a la propiedad reactiva
-      console.log('Nombre del proyecto:', projectName);
-      alert(`Proyecto: ${projectName} (Sección ${sectionId})`);
+    const userId = AuthStore.userId;
+    const token = AuthStore.token;
+    const projectId = ProjectStore.projectId;
+
+    if (!userId || !token || !projectId) {
+      alert('ALERTA: ¡Sesión no iniciada o proyecto no seleccionado!, redirigiendo a login...');
+      await router.push('/login');
+      return;
+    }
+
+    // Obtener la información del proyecto
+    const response = await fetch(`http://localhost:8080/api/v1/proyect/getById/${projectId}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      projectName.value = data.nameProyect || 'Proyecto no encontrado';
+      console.log('Nombre del proyecto:', projectName.value);
     } else {
-      console.log('No se encontró el proyecto');
+      throw new Error('Error al obtener la información del proyecto');
     }
   } catch (error) {
     console.error('Error al comunicarse con el backend:', error);
-    alert('Hubo un error al obtener la información del proyecto');
+    errorMessage.value = 'Hubo un error al obtener la información del proyecto';
+    alert(errorMessage.value);
+  } finally {
+    loading.value = false;
   }
 }
+
+// Llamar a fetchProjectData cuando el componente se monte
+onMounted(() => {
+  fetchProjectData();
+});
 </script>
 
 <style scoped>
+/* Estilos permanecen iguales */
 html,
 body {
   height: 100%;
@@ -155,7 +160,7 @@ body {
   margin-bottom: 20px;
   font-size: 18px;
   font-weight: bold;
-  color: #000; /* Asegurando que el texto sea negro */
+  color: #000;
 }
 
 .button-container {
