@@ -5,6 +5,12 @@
         <div class="form-container">
           <h1 class="form-title">Registrarse</h1>
           
+          <!-- Success Snackbar --> 
+          <v-snackbar v-model="successSnackbar" :timeout="2000" class="top-snackbar" color="success"> 
+            Registro exitoso. Redirigiendo a inicio de sesion... 
+            <v-progress-linear v-model="progress" color="dark green" height="4"></v-progress-linear>
+          </v-snackbar>
+
           <form @submit.prevent="handleSubmit" class="form">
             <input
               v-model="formData.names"
@@ -36,6 +42,18 @@
               placeholder="Contraseña"
               class="input"
               required="true"
+              minlength="8"
+              @input="triggerConfirmPasswordValidation"
+            />
+
+            <input
+              v-model="formData.confirm_password"
+              type="password"
+              placeholder="Confirmar Contraseña"
+              :class="['input', { invalid: !passwordsMatch }]"
+              required="true"
+              @input="validatePasswords($event)"
+              ref="confirmPasswordInput"
             />
   
             <input
@@ -50,6 +68,10 @@
               Registrarse
             </button>
           </form>
+
+          <p v-if="errorMessage" class="error-message">
+            {{ errorMessage }}
+          </p>
   
           <div class="login-prompt">
             <span>¿Ya tienes una cuenta en esta aplicación?</span>
@@ -61,48 +83,136 @@
   </template>
   
   <script setup>
-  import { reactive } from 'vue'
+  import { reactive, ref } from 'vue'
   
   const formData = reactive({
     names: '',
     secondNames: '',
     email: '',
     password: '',
+    confirm_password: '',
     phoneNumber: ''
   })
 
+  const passwordsMatch = ref(true);
+  const confirmPasswordInput = ref(null);
+  const successSnackbar = ref(false);
+  const progress = ref(100);
+
+  const errorMessage = ref('');
+
   const url = "http://localhost:8080/api/v1/auth";
+
+  const checkPasswordsMatch = () => {
+    passwordsMatch.value = formData.password === formData.confirm_password;
+    return passwordsMatch.value
+  }
+
+  const validatePasswords = (event) => {
+    const confirmPasswordInput = event.target;
+
+    checkPasswordsMatch()
+
+    if (!passwordsMatch.value) {
+      confirmPasswordInput.setCustomValidity('Las contraseñas no coinciden');
+    } else {
+      confirmPasswordInput.setCustomValidity(''); // Reset message if valid
+    }
+  };
+
+  const triggerConfirmPasswordValidation = () => {
+    // Trigger the input event programmatically
+    const confirmPasswordField = confirmPasswordInput.value;
+    if (confirmPasswordField) {
+      confirmPasswordField.dispatchEvent(new Event("input"));
+    }
+  };
+
+  const triggerValidationMessage = () => {
+    // Trigger the input report event programmatically
+    const confirmPasswordField = confirmPasswordInput.value;
+    if (confirmPasswordField) {
+      confirmPasswordField.reportValidity(); // Show the validation message
+    }
+  };
+
+  const triggerSnackBar = () => {
+    successSnackbar.value = true;
+    progress.value = 100; // Start the progress bar countdown 
+    const interval = setInterval(() => { 
+      if (progress.value > 0) { 
+        progress.value -= 100 / 20; // Decrement by 100 / 20 every 100 ms to match 2 seconds 
+      } else { 
+        clearInterval(interval); 
+      } 
+    }, 90); // Finish slightly early for better effect
+  } 
   
   const handleSubmit = async () => {
-    try {
-      console.log('Form submitted:', formData)
+    if (! checkPasswordsMatch()) {
+      errorMessage.value = '';
+      triggerConfirmPasswordValidation(); // Ensure passwords are validated before submission
+      triggerValidationMessage();
+    }
+    else {
       try {
-        const response = await $fetch(url + '/register', {
-          method: 'POST',
-          body: { 
-            names: formData.names,
-            secondNames: formData.secondNames,
-            email: formData.email,
-            password: formData.password,
-            phoneNumber: formData.phoneNumber
-          }
-        })
-        console.log('Registered successfully');
+        console.log('Form submitted:', formData)
+        try {
+          const response = await $fetch(url + '/register', {
+            method: 'POST',
+            body: { 
+              names: formData.names,
+              secondNames: formData.secondNames,
+              email: formData.email,
+              password: formData.password,
+              phoneNumber: formData.phoneNumber
+            }
+          })
+          errorMessage.value = '';
+          console.log('Registered successfully');
 
-        // Redirect to login on successful register
-        alert('Registro exitoso. Inicie sesión para continuar');
-        await navigateTo('/login')
+          // Succesful login snackbar and progress bar
+          triggerSnackBar()
+
+          // Redirect to login on successful register
+          await new Promise(resolve => setTimeout(resolve, 2000));
+          await navigateTo('/login')
+
+        } catch (error) {
+          if (error.response && error.response.status) { 
+            switch (error.response.status) {
+              case 400: // Bad Request
+                errorMessage.value = 'Por favor, verifica los datos ingresados.';
+                break;
+              case 401: // Unauthorized
+                errorMessage.value = 'Usuario con correo indicado ya existe.';
+                break;
+              case 423: // Locked
+                errorMessage.value = 'La creacion de cuentas se encuentra desactivada actualmente.';
+                break;
+              default:
+                errorMessage.value = 'Error en Registro de Usuario. Por favor, intenta más tarde.';
+                break;
+            }
+          } 
+          else { 
+            console.error('Connection error:', error); 
+          }
+        }
       } catch (error) {
-        console.error('Connection error:', error);
+        console.error('Registration error:', error)
       }
-    } catch (error) {
-      console.error('Registration error:', error)
     }
   }
+
   </script>
   
 <style scoped>
 
+.top-snackbar { 
+  top: 70px !important; 
+  bottom: auto !important; 
+}
 
 .container {
     display: flex;
@@ -165,6 +275,11 @@
     color: #bdbdbd;
 }
 
+.input.invalid {
+  border-color: red;
+  background-color: #ffe6e6;
+}
+
 .submit-button {
     background-color: #00B8B0;
     color: #fff;
@@ -194,5 +309,14 @@
 
 .login-link:hover {
     text-decoration: underline;
+}
+
+.error-message {
+  color: #dc3545;
+  text-align: center;
+  margin-top: 10px;
+  padding: 10px;
+  border-radius: 5px;
+  background-color: #ffe6e6;
 }
 </style>
