@@ -39,8 +39,8 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import AuthStore from '@/stores/AuthStore'; // Asegúrate de importar correctamente tus stores
-import ProjectStore from '@/stores/ProjectStore';
+import { AuthStore } from '../stores/auth';
+import { ProjectStore } from '../stores/project';
 
 const router = useRouter();
 const projectName = ref('Cargando...'); // Variable reactiva para el nombre del proyecto
