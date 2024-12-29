@@ -120,6 +120,10 @@
   
   <script setup>
   import { ref } from 'vue';
+  import { useAuthStore } from '../stores/auth';
+  import { useProjectStore } from '../stores/project';
+  const AuthStore = useAuthStore();
+  const ProjectStore = useProjectStore();
   
   const idExit = ref(null);
   const formData = ref({
@@ -201,7 +205,7 @@
     // Validación de sesión y datos del usuario
     const token = AuthStore.token;
 
-    if (!userId || !token) {
+    if ( !token) {
       alert('ALERTA: ¡Sesión no iniciada! Redirigiendo a login...');
       await router.push('/login');
       return;
