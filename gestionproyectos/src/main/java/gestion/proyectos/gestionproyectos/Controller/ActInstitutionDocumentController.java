@@ -25,11 +25,12 @@ public class ActInstitutionDocumentController {
 
     @PostMapping("/generate")
     public ResponseEntity<?> generateAssumptionsDocument(
-            @RequestParam Long idExit,
+            @RequestParam Long idProyecto,  // Cambiado de idExit a idProyecto
             @RequestBody Map<String, String> requestData) {
 
         try {
-            byte[] pdfContent = actInstitutionService.generateDocument(requestData, idExit);
+            // Ahora llamamos al nuevo método que maneja todo el proceso transaccional
+            byte[] pdfContent = actInstitutionService.generateInstitutionDocumentProcess(requestData, idProyecto);
             String filename = generateFilename("acta_de_constitucion");
 
             HttpHeaders headers = new HttpHeaders();
@@ -42,16 +43,18 @@ public class ActInstitutionDocumentController {
 
         } catch (MissingFieldException e) {
             return ResponseEntity.badRequest()
-                    .body("Validation error: Missing or invalid fields: " + e.getMessage());
+                    .body("Error de validación: Campos faltantes o inválidos: " + e.getMessage());
         } catch (TemplateNotFoundException e) {
             return ResponseEntity.status(404)
-                    .body("Error: The template for generating the document was not found. Details: " + e.getMessage());
+                    .body("Error: No se encontró la plantilla para generar el documento. Detalles: " + e.getMessage());
         } catch (DocumentGenerationException e) {
             return ResponseEntity.internalServerError()
-                    .body("Error while generating the PDF document. Details: " + e.getMessage());
+                    .body("Error al generar el documento PDF. Detalles: " + e.getMessage());
         } catch (Exception e) {
+            // Log del error para debugging
+            e.printStackTrace();
             return ResponseEntity.internalServerError()
-                    .body("An unexpected error occurred: " + e.getMessage());
+                    .body("Ocurrió un error inesperado: " + e.getMessage());
         }
     }
 
