@@ -119,7 +119,6 @@
   </template>
   
   <script setup>
-  import axios from 'axios';
   import { ref } from 'vue';
   
   const idExit = ref(null);
@@ -200,7 +199,6 @@
   async function submitForm() {
   try {
     // Validación de sesión y datos del usuario
-    const userId = AuthStore.userId;
     const token = AuthStore.token;
 
     if (!userId || !token) {
