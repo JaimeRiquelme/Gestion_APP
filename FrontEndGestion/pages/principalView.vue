@@ -21,9 +21,16 @@
           >
             <div class="project-header">
               <span class="project-number">{{ project.idProyecto }}</span>
-              <button class="project-menu-btn">
-                <span class="dots">⋮</span>
-              </button>
+              <div class="project-menu">
+                <button class="project-menu-btn" @click="toggleMenu(project.idProyecto)">
+                  <span class="dots">⋮</span>
+                </button>
+                <div v-if="activeMenu === project.idProyecto" class="menu-dropdown">
+                  <button class="menu-item delete" @click="confirmDelete(project)">
+                    Eliminar proyecto
+                  </button>
+                </div>
+              </div>
             </div>
             <h3 class="project-title">{{ project.nameProyect }}</h3>
             <div class="project-details">
@@ -44,35 +51,48 @@
         </div>
       </main>
     </div>
+
+    <!-- Modal de confirmación -->
+    <div v-if="showDeleteModal" class="modal-overlay">
+      <div class="modal-content">
+        <h3>Confirmar eliminación</h3>
+        <p>¿Estás seguro que deseas eliminar el proyecto "{{ selectedProject?.nameProyect }}"?</p>
+        <div class="modal-actions">
+          <button class="btn-cancel" @click="showDeleteModal = false">Cancelar</button>
+          <button class="btn-delete" @click="deleteProject">Eliminar</button>
+        </div>
+      </div>
+    </div>
   </template>
   
   <script setup>
   import { ref, onMounted } from 'vue';
   import { useRouter } from 'vue-router';
-  import { useCookie } from 'nuxt/app';
+  import { useAuthStore } from '../stores/auth';
   
   const router = useRouter();
   const projects = ref([]);
   const userName = ref('');
   const loading = ref(true);
   const error = ref(null);
+  const AuthStore = useAuthStore();
+  const activeMenu = ref(null);
+  const showDeleteModal = ref(false);
+  const selectedProject = ref(null);
   
   onMounted(async () => {
-    const userIdCookie = useCookie('userId');
-    const namesCookie = useCookie('names');
-    const tokenCookie = useCookie('authToken');
     
-    if (!userIdCookie.value || !tokenCookie.value) {
+    if (!AuthStore.token) {
       router.push('/login');
       return;
     }
   
-    userName.value = namesCookie.value || 'usuario';
+    userName.value = AuthStore.names;
     
     try {
-      const response = await fetch(`http://localhost:8080/api/v1/user/${userIdCookie.value}/proyects`, {
+      const response = await fetch(`http://localhost:8080/api/v1/user/${AuthStore.userId}/proyects`, {
         headers: {
-          'Authorization': `Bearer ${tokenCookie.value}`,
+          'Authorization': `Bearer ${AuthStore.token}`,
           'Content-Type': 'application/json',
         },
       });
@@ -99,7 +119,43 @@
   };
   
   const handleNewProject = () => {
-    router.push('/new-project');
+    router.push('/proyectCreation');
+  };
+
+  const toggleMenu = (projectId) => {
+    activeMenu.value = activeMenu.value === projectId ? null : projectId;
+  };
+  
+  const confirmDelete = (project) => {
+    selectedProject.value = project;
+    showDeleteModal.value = true;
+    activeMenu.value = null;
+  };
+  
+  const deleteProject = async () => {
+    try {
+      const response = await fetch(`http://localhost:8080/api/v1/proyect/delete/${selectedProject.value.idProyecto}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${AuthStore.token}`,
+        },
+      });
+  
+      if (!response.ok) {
+        throw new Error('Error al eliminar el proyecto');
+      }
+  
+      // Eliminar el proyecto de la lista local
+      projects.value = projects.value.filter(p => p.idProyecto !== selectedProject.value.idProyecto);
+      //mostrar el id del proyecto a elimianr
+      console.log(selectedProject.value.idProyecto);
+      showDeleteModal.value = false;
+      selectedProject.value = null;
+  
+    } catch (err) {
+      console.error('Error deleting project:', err);
+      console.log(selectedProject.value.idProyecto);
+    }
   };
   </script>
   
@@ -232,5 +288,89 @@
   
   .dots {
     line-height: 1;
+  }
+
+  .project-menu {
+    position: relative;
+  }
+  
+  .menu-dropdown {
+    position: absolute;
+    right: 0;
+    top: 100%;
+    background: white;
+    border: 1px solid #eee;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    z-index: 10;
+  }
+  
+  .menu-item {
+    padding: 0.5rem 1rem;
+    width: 100%;
+    text-align: left;
+    border: none;
+    background: none;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  
+  .menu-item.delete {
+    color: #dc3545;
+  }
+  
+  .menu-item.delete:hover {
+    background-color: #ffffff;
+  }
+  
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+  }
+  
+  .modal-content {
+    background: white;
+    padding: 2rem;
+    border-radius: 8px;
+    max-width: 400px;
+    width: 90%;
+    color: #333;
+  }
+  
+  .modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 1.5rem;
+  }
+  
+  .btn-cancel {
+    padding: 0.5rem 1rem;
+    border: 1px solid #ddd;
+    background: rgb(255, 255, 255);
+    border-radius: 4px;
+    cursor: pointer;
+    color: #333;
+  }
+  
+  .btn-delete {
+    padding: 0.5rem 1rem;
+    background: #dc3545;
+    color: rgb(255, 255, 255);
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .btn-delete:hover {
+    background: #c82333;
   }
   </style>

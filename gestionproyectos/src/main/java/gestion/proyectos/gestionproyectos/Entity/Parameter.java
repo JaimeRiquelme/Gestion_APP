@@ -19,7 +19,7 @@ public class Parameter {
     private Long idParameter;
 
 
-    @ManyToOne
+    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "exit_id")
     @JsonIgnore
     private Exit exit;
