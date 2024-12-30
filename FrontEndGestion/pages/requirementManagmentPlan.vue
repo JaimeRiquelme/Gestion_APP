@@ -9,13 +9,13 @@
             
               <div class="form-group">
                 <label>Nombre del Proyecto *</label>
-                <input v-model="formData.proyectName" class="form-input" type="text" placeholder="Ingrese el nombre del proyecto" required />
+                <input v-model="formData.proyectName" class="form-input" type="text" placeholder="Ingrese el nombre del proyecto" required disabled />
               </div>
           
               <div class="flex-row">
                 <div class="form-group half-width">
                   <label>Identificador del Proyecto *</label>
-                  <input v-model="formData.idProyect" class="form-input" type="text" placeholder="Ingrese el identificador del proyecto" required />
+                  <input v-model="formData.idProyect" class="form-input" type="text" placeholder="Ingrese el identificador del proyecto" required disabled />
                 </div>
             
                 <div class="form-group half-width">
@@ -27,7 +27,7 @@
               <div class="flex-row">
                 <div class="form-group half-width">
                   <label>Líder del Proyecto *</label>
-                  <input v-model="formData.proyectLeader" class="form-input" type="text" placeholder="Ingrese el líder del proyecto" required />
+                  <input v-model="formData.proyectLeader" class="form-input" type="text" placeholder="Ingrese el líder del proyecto" required disabled />
                 </div>
             
                 <div class="form-group half-width">
@@ -198,6 +198,8 @@
   const tableFieldsWithComma = ref(new Map());
 
   const url_doc_generator = "http://localhost:8080/api/documents/requirements-management-plan"
+  const url_exit = "http://localhost:8080/api/v1/exit"
+  const url_process = "http://localhost:8080/api/v1/process"
   
   const formData = reactive({
     proyectName: "",
@@ -407,7 +409,7 @@
 
         const userId = AuthStore.userId;
         const token = AuthStore.token;
-        const projectId = 1//ProjectStore.projectId;
+        const projectId = ProjectStore.projectId;
 
         if (!userId || !token || !projectId) {
             alert('ALERTA: ¡Sesión no iniciada!, redirigiendo a login...')
@@ -415,10 +417,34 @@
             return;
         }
 
+        // Generating respective Exit in backend
+        const responseExit = await fetch(url_exit + "/create", {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                nameExit: "Plan de Gestion de Requisitos",
+                description: "Plan donde se explican los metodos y herramientas para gestionar los requisitos",
+                dateCreation: formData.elaborationDate,
+                priority: "Alta",
+                responsible: formData.proyectLeader,
+                state: "Activo",
+                idProcess: "", // FALTA RECUPERAR DE UN STORE
+            }),
+        });
+
+        if (!responseExit.ok) {
+            const errorData = await responseExit.json();
+            throw new Error(errorData.message || 'Error al crear la salida: Plan de Gestión de Requisitos');
+        }
+        const exitResponse = await responseExit.json();
+
         const formattedRequirementsPrioritization = formatRequirementsToString(formData.requirementsPrioritization);
 
         // Endpoint call to generate pdf document
-        const responseRequirementManagmentPlan = await fetch(url_doc_generator + `/generate?idProyecto=${projectId}`, {
+        const responseRequirementManagmentPlan = await fetch(url_doc_generator + `/generate?idExit=${exitResponse.idExit}`, {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${token}`,
@@ -625,6 +651,10 @@
     outline: none;
     border-color: #00B8B0;
     box-shadow: 0 0 0 2px rgba(0, 184, 176, 0.1);
+  }
+
+  .form-input:disabled {
+    color: #007973;
   }
   
   .form-textarea {
