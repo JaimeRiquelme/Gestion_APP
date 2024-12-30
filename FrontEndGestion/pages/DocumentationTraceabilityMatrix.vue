@@ -303,7 +303,7 @@
   }
   
   .submit-button {
-    background-color: #007bff;
+    background-color: #00B8B0;
     color: black;
     padding: 10px 15px;
     border: none;
