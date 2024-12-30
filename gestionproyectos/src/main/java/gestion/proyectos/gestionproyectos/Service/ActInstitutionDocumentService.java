@@ -134,6 +134,7 @@ public class ActInstitutionDocumentService implements DocumentService {
 
             // 5. Actualizar el Exit con el documento
             exitService.updateAssumptionsDocument(savedExit.getIdExit(), pdfContent);
+            parameterService.saveParameters(requestData, savedExit.getIdExit());
 
             return pdfContent;
 
