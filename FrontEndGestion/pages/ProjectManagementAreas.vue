@@ -86,7 +86,22 @@ async function fetchProjectData() {
       alert('ALERTA: ¡Sesión no iniciada o proyecto no seleccionado!, redirigiendo a login...');
       await router.push('/login');
       return;
+    } else {
+      const respondeManagement = await fetch(`http://localhost:8080/api/v1/management/getByNameAndIdProyect?nameManagement=Gestión de Integración&idProyect=${projectId}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+      });
+
+      if (!respondeManagement.ok) {
+        alert('ALERTA: ¡No se ha creado la gestión de integración!, redirigiendo a formulario...');
+        await router.push('/ConstitutionForm');
+      }
     }
+
+
 
     // Obtener la información del proyecto
     const response = await fetch(`http://localhost:8080/api/v1/proyect/getById/${projectId}`, {
