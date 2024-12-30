@@ -127,7 +127,7 @@ async function fetchProjectData() {
       });
 
       if (!respondeManagement.ok) {
-        showAlert('Gestión no encontrada', '¡No se ha creado la gestión de integración!', 'warning');
+        showAlert('Gestión no encontrada', '¡No se ha creado la gestión de integración!... Redirigiendo a su creación', 'warning');
         return;
       }
     }
