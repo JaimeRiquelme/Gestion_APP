@@ -17,7 +17,7 @@
         <button @click="goToPage('/project-management')" class="button-square">
           <span class="button-number">1.</span> Gestión de la Integración
         </button>
-        <button @click="goToPage('/another-page')" class="button-square">
+        <button @click="goToPage('/ScopeManagementView')" class="button-square">
           <span class="button-number">2.</span> Gestión del Alcance
         </button>
         <button  class="button-square">

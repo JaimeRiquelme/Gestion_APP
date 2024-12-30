@@ -132,4 +132,9 @@ public class ProcessService {
         Process process = getById(processId);
         return process.getExits();
     }
+
+    //Metodo para obtener un proceso por el id de management y el nombre del proceso
+    public Process getProcessByIdManagementAndNameProcess(Long idManagement, String nameProcess) {
+        return processRepository.findByIdManagementAndNameProcess(idManagement, nameProcess);
+    }
 }

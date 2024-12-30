@@ -75,4 +75,20 @@ public class ManagementController {
 			return new ResponseEntity<>(null, HttpStatus.NOT_FOUND); // Retornamos 404 si no se encuentra el Management
 		}
 	}
+
+	// Obtener Management por nombre y ID de Proyecto
+	@GetMapping("/getByNameAndIdProyect")
+	public ResponseEntity<Management> getByNameManagementAndIdProyect(@RequestParam String nameManagement, @RequestParam Long idProyect) {
+		try {
+			Management management = managementService.findByNameManagementAndIdProyect(nameManagement, idProyect);
+
+			if(management != null) {
+				return new ResponseEntity<>(management, HttpStatus.OK);
+			} else {
+				return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+			}
+		} catch (RuntimeException e) {
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
 }
