@@ -48,6 +48,14 @@
       </div>
     </main>
 
+    <AlertPopup
+      :show="alert.show"
+      :title="alert.title"
+      :message="alert.message"
+      :type="alert.type"
+      @confirm="handleAlertConfirm"
+    />
+
     <footer class="footer">
       <p>&copy; 2024 USACH. Todos los derechos reservados.</p>
     </footer>
@@ -55,10 +63,11 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, reactive } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '../stores/auth';
 import { useProjectStore } from '../stores/project';
+import AlertPopup from '../components/AlertPopup.vue';
 
 const router = useRouter();
 const projectName = ref('Cargando...'); // Variable reactiva para el nombre del proyecto
@@ -66,6 +75,29 @@ const AuthStore = useAuthStore();
 const ProjectStore = useProjectStore();
 const loading = ref(false);
 const errorMessage = ref('');
+
+const alert = reactive({
+  show: false,
+  title: '',
+  message: '',
+  type: 'info',
+});
+
+const showAlert = (title, message, type = 'info') => {
+  alert.title = title;
+  alert.message = message;
+  alert.type = type;
+  alert.show = true;
+};
+
+const handleAlertConfirm = () => {
+  alert.show = false;
+  if (alert.type === 'error' && alert.message.includes('Sesión no iniciada')) {
+    router.push('/login');
+  } else if (alert.message.includes('No se ha creado la gestión')) {
+    router.push('/ConstitutionForm');
+  }
+};
 
 // Función para navegar a otra página
 function goToPage(path) {
@@ -83,8 +115,7 @@ async function fetchProjectData() {
     const projectId = ProjectStore.projectId;
 
     if (!userId || !token || !projectId) {
-      alert('ALERTA: ¡Sesión no iniciada o proyecto no seleccionado!, redirigiendo a login...');
-      await router.push('/login');
+      showAlert('Error de Sesión', '¡Sesión no iniciada o proyecto no seleccionado!', 'error');
       return;
     } else {
       const respondeManagement = await fetch(`http://localhost:8080/api/v1/management/getByNameAndIdProyect?nameManagement=Gestión de Integración&idProyect=${projectId}`, {
@@ -96,8 +127,8 @@ async function fetchProjectData() {
       });
 
       if (!respondeManagement.ok) {
-        alert('ALERTA: ¡No se ha creado la gestión de integración!, redirigiendo a formulario...');
-        await router.push('/ConstitutionForm');
+        showAlert('Gestión no encontrada', '¡No se ha creado la gestión de integración!', 'warning');
+        return;
       }
     }
 
@@ -120,9 +151,7 @@ async function fetchProjectData() {
       throw new Error('Error al obtener la información del proyecto');
     }
   } catch (error) {
-    console.error('Error al comunicarse con el backend:', error);
-    errorMessage.value = 'Hubo un error al obtener la información del proyecto';
-    alert(errorMessage.value);
+    showAlert('Error', 'Hubo un error al obtener la información del proyecto', 'error');
   } finally {
     loading.value = false;
   }

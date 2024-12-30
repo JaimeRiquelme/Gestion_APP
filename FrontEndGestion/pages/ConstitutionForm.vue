@@ -339,6 +339,15 @@
             </div>
         </main>
     </div>
+
+    <!-- Agregar el componente AlertPopup -->
+    <AlertPopup
+        :show="alert.show"
+        :title="alert.title"
+        :message="alert.message"
+        :type="alert.type"
+        @confirm="handleAlertConfirm"
+    />
 </template>
 
 <script setup>
@@ -346,6 +355,7 @@ import { ref, reactive, onMounted, computed } from 'vue';
 import { useAuthStore } from '../stores/auth';
 import { useProjectStore } from '../stores/project';
 import { useConstitutionFormStore } from '../stores/ConstitutionForm';
+import AlertPopup from '../components/AlertPopup.vue';
 
 const loading = ref(false);
 const errorMessage = ref('');
@@ -489,8 +499,7 @@ const fetchProjectData = async () => {
         const projectId = ProjectStore.projectId;
 
         if (!userId || !token || !projectId) {
-            alert('ALERTA: ¡Sesión no iniciada o proyecto no seleccionado!, redirigiendo a login...')
-            await navigateTo('/login')
+            showAlert('Error de Sesión', '¡Sesión no iniciada o proyecto no seleccionado!', 'error');
             return;
         }
 
@@ -534,8 +543,7 @@ const fetchProjectData = async () => {
         formData.proyectLeader = `${userDataResponse.names} ${userDataResponse.secondNames}`;
 
     } catch (error) {
-        console.error('Error fetching data:', error);
-        errorMessage.value = 'Error al obtener la información. Por favor, intenta nuevamente.';
+        showAlert('Error', 'Error al obtener la información. Por favor, intenta nuevamente.', 'error');
     } finally {
         loading.value = false;
     }
@@ -560,8 +568,7 @@ const handleSubmit = async () => {
         const projectId = ProjectStore.projectId;
 
         if (!userId || !token || !projectId) {
-            alert('ALERTA: ¡Sesión no iniciada!, redirigiendo a login...')
-            await navigateTo('/login')
+            showAlert('Error de Sesión', '¡Sesión no iniciada!, redirigiendo a login...', 'error');
             return;
         }
 
@@ -593,8 +600,7 @@ const handleSubmit = async () => {
         pdfUrl.value = URL.createObjectURL(pdfBlob);
 
     } catch (error) {
-        console.error('Error creating constitution act:', error);
-        errorMessage.value = error.message || 'Error al crear el acta de constitución. Por favor, intenta nuevamente.';
+        showAlert('Error', error.message || 'Error al crear el acta de constitución. Por favor, intenta nuevamente.', 'error');
     } finally {
         loading.value = false;
     }
@@ -623,10 +629,9 @@ const confirmSave = async () => {
         await handleSave();
 
         // Mostrar mensaje de éxito
-        alert('Los datos se han guardado correctamente');
+        showAlert('Éxito', 'Los datos se han guardado correctamente', 'success');
     } catch (error) {
-        console.error('Error al guardar:', error);
-        errorMessage.value = 'Error al guardar los datos. Por favor, intenta nuevamente.';
+        showAlert('Error', 'Error al guardar los datos. Por favor, intenta nuevamente.', 'error');
     } finally {
         loading.value = false;
     }
@@ -639,8 +644,7 @@ const handleSave = async () => {
         const projectId = ProjectStore.projectId;
 
         if (!userId || !token || !projectId) {
-            alert('ALERTA: ¡Sesión no iniciada!, redirigiendo a login...')
-            await navigateTo('/login')
+            showAlert('Error de Sesión', '¡Sesión no iniciada!, redirigiendo a login...', 'error');
             return;
         }
 
@@ -670,7 +674,7 @@ const handleSave = async () => {
 
         return await saveData.json();
     } catch (error) {
-        console.error('Error saving data:', error);
+        showAlert('Error', 'Error al guardar los datos. Por favor, intenta nuevamente.', 'error');
         throw error;
     }
 };
@@ -692,6 +696,27 @@ const validateNoCommas = (event, type, index, field) => {
         } else if (type === 'role') {
             formData.rolesAndResponsabilities[index][field] = value.replace(/,/g, '');
         }
+    }
+};
+
+const alert = reactive({
+    show: false,
+    title: '',
+    message: '',
+    type: 'info',
+});
+
+const showAlert = (title, message, type = 'info') => {
+    alert.title = title;
+    alert.message = message;
+    alert.type = type;
+    alert.show = true;
+};
+
+const handleAlertConfirm = () => {
+    alert.show = false;
+    if (alert.type === 'error' && alert.message.includes('Sesión no iniciada')) {
+        navigateTo('/login');
     }
 };
 </script>
@@ -970,6 +995,7 @@ select.form-input option {
     border-radius: 8px;
     max-width: 500px;
     width: 90%;
+    color: #333;
 }
 
 .modal-content h3 {
