@@ -69,4 +69,15 @@ public class ParameterController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
+
+    //Guardar una lista de parametros a partir de un Map<String, String> asociado a un Exit
+    @PostMapping("/saveParametersList")
+    public ResponseEntity<Void> saveParameters(@RequestBody Map<String, String> data, @RequestParam Long idExit) {
+        try {
+            parameterService.saveParameters(data, idExit);
+            return new ResponseEntity<>(HttpStatus.CREATED);
+        } catch (RuntimeException e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+    }
 }

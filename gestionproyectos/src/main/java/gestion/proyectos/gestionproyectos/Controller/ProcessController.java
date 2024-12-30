@@ -74,4 +74,21 @@ public class ProcessController {
             return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
         }
     }
+
+    @GetMapping("/getByIdManagementAndNameProcess/{idManagement}/{nameProcess}")
+    public ResponseEntity<Process> getByIdManagementAndNameProcess(@PathVariable Long idManagement, @PathVariable String nameProcess) {
+        try {
+            System.out.println("idManagement: " + idManagement);
+            System.out.println("nameProcess: " + nameProcess);
+            Process process = processService.getProcessByIdManagementAndNameProcess(idManagement, nameProcess);
+
+            if(process != null) {
+                return new ResponseEntity<>(process, HttpStatus.OK);
+            }else {
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
+        } catch (RuntimeException e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+    }
 }

@@ -12,7 +12,9 @@
                         <h2 class="section-title">Información Básica</h2>
                         <div class="form-group">
                             <label for="proyectName">Nombre del Proyecto *</label>
-                            <input id="proyectName" v-model="formData.proyectName" type="text" :class="['form-input', { 'invalid-input': isFieldInvalid('proyectName') }]" @focus="invalidFields.delete('proyectName')" readonly required />
+                            <input id="proyectName" v-model="formData.proyectName" type="text"
+                                :class="['form-input', { 'invalid-input': isFieldInvalid('proyectName') }]"
+                                @focus="invalidFields.delete('proyectName')" readonly required />
                         </div>
 
                         <div class="form-group">
@@ -70,7 +72,8 @@
 
                         <div v-for="(stakeholder, index) in formData.proyectStakeholders" :key="index"
                             class="stakeholder-row">
-                            <div :class="['stakeholder-inputs', { 'invalid-section': isFieldInvalid(`stakeholder-${index}`) }]">
+                            <div
+                                :class="['stakeholder-inputs', { 'invalid-section': isFieldInvalid(`stakeholder-${index}`) }]">
                                 <div class="form-group">
                                     <label :for="'stakeholderType' + index">Tipo *</label>
                                     <select :id="'stakeholderType' + index" v-model="stakeholder.type"
@@ -84,15 +87,19 @@
                                 <div class="form-group">
                                     <label :for="'stakeholderPosition' + index">Cargo *</label>
                                     <input :id="'stakeholderPosition' + index" v-model="stakeholder.position"
-                                        type="text" class="form-input" placeholder="Ingrese el cargo" @input="validateNoCommas($event, 'stakeholder', index, 'position')" required />
-                                    <span v-if="hasComma(stakeholder.position)" class="invalid-feedback">No se permiten comas en este campo</span>
+                                        type="text" class="form-input" placeholder="Ingrese el cargo"
+                                        @input="validateNoCommas($event, 'stakeholder', index, 'position')" required />
+                                    <span v-if="hasComma(stakeholder.position)" class="invalid-feedback">No se permiten
+                                        comas en este campo</span>
                                 </div>
 
                                 <div class="form-group">
                                     <label :for="'stakeholderName' + index">Nombre *</label>
                                     <input :id="'stakeholderName' + index" v-model="stakeholder.name" type="text"
-                                        class="form-input" placeholder="Ingrese el nombre" @input="validateNoCommas($event, 'stakeholder', index, 'name')" required />
-                                    <span v-if="hasComma(stakeholder.name)" class="invalid-feedback">No se permiten comas en este campo</span>
+                                        class="form-input" placeholder="Ingrese el nombre"
+                                        @input="validateNoCommas($event, 'stakeholder', index, 'name')" required />
+                                    <span v-if="hasComma(stakeholder.name)" class="invalid-feedback">No se permiten
+                                        comas en este campo</span>
                                 </div>
                             </div>
 
@@ -213,26 +220,34 @@
 
                         <div v-for="(role, index) in formData.rolesAndResponsabilities" :key="index"
                             class="stakeholder-row">
-                            <div :class="['stakeholder-inputs', { 'invalid-section': isFieldInvalid(`role-${index}`) }]">
+                            <div
+                                :class="['stakeholder-inputs', { 'invalid-section': isFieldInvalid(`role-${index}`) }]">
                                 <div class="form-group">
                                     <label :for="'roleType' + index">Rol *</label>
                                     <input :id="'roleType' + index" v-model="role.Rol" type="text" class="form-input"
-                                        placeholder="Ingrese el rol" @input="validateNoCommas($event, 'role', index, 'Rol')" required />
-                                    <span v-if="hasComma(role.Rol)" class="invalid-feedback">No se permiten comas en este campo</span>
+                                        placeholder="Ingrese el rol"
+                                        @input="validateNoCommas($event, 'role', index, 'Rol')" required />
+                                    <span v-if="hasComma(role.Rol)" class="invalid-feedback">No se permiten comas en
+                                        este campo</span>
                                 </div>
 
                                 <div class="form-group">
                                     <label :for="'roleFunction' + index">Función *</label>
                                     <input :id="'roleFunction' + index" v-model="role.Funcion" type="text"
-                                        class="form-input" placeholder="Ingrese la función" @input="validateNoCommas($event, 'role', index, 'Funcion')" required />
-                                    <span v-if="hasComma(role.Funcion)" class="invalid-feedback">No se permiten comas en este campo</span>
+                                        class="form-input" placeholder="Ingrese la función"
+                                        @input="validateNoCommas($event, 'role', index, 'Funcion')" required />
+                                    <span v-if="hasComma(role.Funcion)" class="invalid-feedback">No se permiten comas en
+                                        este campo</span>
                                 </div>
 
                                 <div class="form-group">
                                     <label :for="'roleResponsibility' + index">Responsabilidad *</label>
                                     <input :id="'roleResponsibility' + index" v-model="role.Responsabilidades"
-                                        type="text" class="form-input" placeholder="Ingrese la responsabilidad" @input="validateNoCommas($event, 'role', index, 'Responsabilidades')" required />
-                                    <span v-if="hasComma(role.Responsabilidades)" class="invalid-feedback">No se permiten comas en este campo</span>
+                                        type="text" class="form-input" placeholder="Ingrese la responsabilidad"
+                                        @input="validateNoCommas($event, 'role', index, 'Responsabilidades')"
+                                        required />
+                                    <span v-if="hasComma(role.Responsabilidades)" class="invalid-feedback">No se
+                                        permiten comas en este campo</span>
                                 </div>
                             </div>
 
@@ -254,7 +269,8 @@
                             <button type="button" class="cancel-button" @click="showCancelConfirmation = true">
                                 Cancelar
                             </button>
-                            <button type="button" class="save-button" :disabled="loading" @click="handleSave">
+                            <button type="button" class="save-button" :disabled="loading"
+                                @click="showSaveConfirmation = true">
                                 {{ loading ? 'Guardando...' : 'Guardar' }}
                             </button>
                             <button type="submit" class="submit-button" :disabled="loading" @click="handleSubmit">
@@ -273,6 +289,22 @@
                                     </button>
                                     <button class="confirm-button" @click="handleCancel">
                                         Sí, cancelar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Diálogo de confirmación para guardar -->
+                        <div v-if="showSaveConfirmation" class="modal-overlay">
+                            <div class="modal-content">
+                                <h3>Confirmar Guardado</h3>
+                                <p>¿Estás seguro que deseas guardar los cambios actuales?</p>
+                                <div class="modal-actions">
+                                    <button class="cancel-button" @click="showSaveConfirmation = false">
+                                        No, seguir editando
+                                    </button>
+                                    <button class="save-button" @click="confirmSave">
+                                        Sí, guardar
                                     </button>
                                 </div>
                             </div>
@@ -299,7 +331,7 @@
                     </div>
 
                     <div class="pdf-footer">
-                        <button @click="navigateTo('/principalView')" class="pdf-button return-button">
+                        <button @click="navigateTo('/ProjectManagementAreas')" class="pdf-button return-button">
                             Volver al Dashboard
                         </button>
                     </div>
@@ -307,6 +339,15 @@
             </div>
         </main>
     </div>
+
+    <!-- Agregar el componente AlertPopup -->
+    <AlertPopup
+        :show="alert.show"
+        :title="alert.title"
+        :message="alert.message"
+        :type="alert.type"
+        @confirm="handleAlertConfirm"
+    />
 </template>
 
 <script setup>
@@ -314,6 +355,7 @@ import { ref, reactive, onMounted, computed } from 'vue';
 import { useAuthStore } from '../stores/auth';
 import { useProjectStore } from '../stores/project';
 import { useConstitutionFormStore } from '../stores/ConstitutionForm';
+import AlertPopup from '../components/AlertPopup.vue';
 
 const loading = ref(false);
 const errorMessage = ref('');
@@ -364,7 +406,7 @@ const invalidFields = ref(new Set());
 
 const validateForm = () => {
     invalidFields.value.clear();
-    
+
     // Validar campos básicos
     Object.entries(formData).forEach(([key, value]) => {
         if (typeof value === 'string' && !value.trim()) {
@@ -403,6 +445,7 @@ const validateForm = () => {
 };
 
 const showCancelConfirmation = ref(false);
+const showSaveConfirmation = ref(false);
 
 const handleCancel = () => {
     showCancelConfirmation.value = false;
@@ -456,8 +499,7 @@ const fetchProjectData = async () => {
         const projectId = ProjectStore.projectId;
 
         if (!userId || !token || !projectId) {
-            alert('ALERTA: ¡Sesión no iniciada o proyecto no seleccionado!, redirigiendo a login...')
-            await navigateTo('/login')
+            showAlert('Error de Sesión', '¡Sesión no iniciada o proyecto no seleccionado!', 'error');
             return;
         }
 
@@ -501,8 +543,7 @@ const fetchProjectData = async () => {
         formData.proyectLeader = `${userDataResponse.names} ${userDataResponse.secondNames}`;
 
     } catch (error) {
-        console.error('Error fetching data:', error);
-        errorMessage.value = 'Error al obtener la información. Por favor, intenta nuevamente.';
+        showAlert('Error', 'Error al obtener la información. Por favor, intenta nuevamente.', 'error');
     } finally {
         loading.value = false;
     }
@@ -517,7 +558,7 @@ const handleSubmit = async () => {
         errorMessage.value = 'Por favor, complete todos los campos obligatorios';
         return;
     }
-    
+
     try {
         loading.value = true;
         errorMessage.value = '';
@@ -527,8 +568,7 @@ const handleSubmit = async () => {
         const projectId = ProjectStore.projectId;
 
         if (!userId || !token || !projectId) {
-            alert('ALERTA: ¡Sesión no iniciada!, redirigiendo a login...')
-            await navigateTo('/login')
+            showAlert('Error de Sesión', '¡Sesión no iniciada!, redirigiendo a login...', 'error');
             return;
         }
 
@@ -560,8 +600,7 @@ const handleSubmit = async () => {
         pdfUrl.value = URL.createObjectURL(pdfBlob);
 
     } catch (error) {
-        console.error('Error creating constitution act:', error);
-        errorMessage.value = error.message || 'Error al crear el acta de constitución. Por favor, intenta nuevamente.';
+        showAlert('Error', error.message || 'Error al crear el acta de constitución. Por favor, intenta nuevamente.', 'error');
     } finally {
         loading.value = false;
     }
@@ -581,26 +620,63 @@ const formatStakeholdersToString = (stakeholders) => {
     return result;
 };
 
-const handleSave = () => {
-    // Convertir los arrays al formato requerido
-    const formattedStakeholders = formatStakeholdersToString(formData.proyectStakeholders);
-    const formattedRoles = formatRolesToString(formData.rolesAndResponsabilities);
+const confirmSave = async () => {
+    try {
+        loading.value = true;
+        showSaveConfirmation.value = false;
 
-    // Crear el objeto con los datos formateados
-    const formattedData = {
-        ...formData,
-        proyectStakeholders: formattedStakeholders,
-        rolesAndResponsabilities: formattedRoles,
-    };
+        // Aquí implementarías la lógica para guardar los datos
+        await handleSave();
 
-    // Mostrar los datos en la consola de manera formateada
-    console.log('Datos del formulario (raw):', formData);
-    console.log('Datos formateados para envío:', formattedData);
-    console.log('Stakeholders formateados:', formattedStakeholders);
-    console.log('Roles formateados:', formattedRoles);
+        // Mostrar mensaje de éxito
+        showAlert('Éxito', 'Los datos se han guardado correctamente', 'success');
+    } catch (error) {
+        showAlert('Error', 'Error al guardar los datos. Por favor, intenta nuevamente.', 'error');
+    } finally {
+        loading.value = false;
+    }
+};
 
-    // Mostrar el JSON formateado
-    console.log('JSON completo:', JSON.stringify(formattedData, null, 2));
+const handleSave = async () => {
+    try {
+        const userId = AuthStore.userId;
+        const token = AuthStore.token;
+        const projectId = ProjectStore.projectId;
+
+        if (!userId || !token || !projectId) {
+            showAlert('Error de Sesión', '¡Sesión no iniciada!, redirigiendo a login...', 'error');
+            return;
+        }
+
+        // Convertir los arrays al formato requerido
+        const formattedStakeholders = formatStakeholdersToString(formData.proyectStakeholders);
+        const formattedRoles = formatRolesToString(formData.rolesAndResponsabilities);
+
+        //llamada a la ruta: http://localhost:8080/api/v1/parameters/saveParametersList enviando (@RequestBody Map<String, String> data, @RequestParam Long idExit)
+
+        const saveData = await fetch(`http://localhost:8080/api/v1/parameters/saveParametersList?idExit=${ProjectStore.projectId}`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                ...formData,
+                proyectStakeholders: formattedStakeholders,
+                rolesAndResponsabilities: formattedRoles,
+            }),
+        }); 
+
+        if (!saveData.ok) {
+            const errorData = await saveData.json();
+            throw new Error(errorData.message || 'Error al guardar los datos');
+        }
+
+        return await saveData.json();
+    } catch (error) {
+        showAlert('Error', 'Error al guardar los datos. Por favor, intenta nuevamente.', 'error');
+        throw error;
+    }
 };
 
 const isFieldInvalid = (fieldName) => {
@@ -620,6 +696,27 @@ const validateNoCommas = (event, type, index, field) => {
         } else if (type === 'role') {
             formData.rolesAndResponsabilities[index][field] = value.replace(/,/g, '');
         }
+    }
+};
+
+const alert = reactive({
+    show: false,
+    title: '',
+    message: '',
+    type: 'info',
+});
+
+const showAlert = (title, message, type = 'info') => {
+    alert.title = title;
+    alert.message = message;
+    alert.type = type;
+    alert.show = true;
+};
+
+const handleAlertConfirm = () => {
+    alert.show = false;
+    if (alert.type === 'error' && alert.message.includes('Sesión no iniciada')) {
+        navigateTo('/login');
     }
 };
 </script>
@@ -898,6 +995,7 @@ select.form-input option {
     border-radius: 8px;
     max-width: 500px;
     width: 90%;
+    color: #333;
 }
 
 .modal-content h3 {
@@ -1127,5 +1225,18 @@ select.form-input option {
     font-size: 0.875rem;
     margin-top: 0.25rem;
     display: block;
+}
+
+/* Estilos adicionales para el diálogo de guardar */
+.save-confirmation .modal-content {
+    background-color: #f8f9fa;
+}
+
+.save-confirmation .save-button {
+    background-color: #28a745;
+}
+
+.save-confirmation .save-button:hover {
+    background-color: #218838;
 }
 </style>

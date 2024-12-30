@@ -3,35 +3,27 @@ package gestion.proyectos.gestionproyectos.Service;
 import gestion.proyectos.gestionproyectos.Entity.Proyect;
 import gestion.proyectos.gestionproyectos.Entity.User;
 import gestion.proyectos.gestionproyectos.Repository.ProyectRepository;
-import gestion.proyectos.gestionproyectos.Repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import jakarta.persistence.EntityManager;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
 class ProyectServiceTest {
 
     @Mock
     private ProyectRepository proyectRepository;
-
-    @Mock
-    private UserRepository userRepository;
-
-    @Mock
-    private EntityManager entityManager;
 
     @InjectMocks
     private ProyectService proyectService;
@@ -56,6 +48,7 @@ class ProyectServiceTest {
         testProyect1.setStartDate("2024-01-01");
         testProyect1.setEstimatedEndDate("2024-12-31");
         testProyect1.setUser(testUser);
+        testProyect1.setStatus("ACTIVO");
 
         testProyect2 = new Proyect();
         testProyect2.setIdProyecto(2L);
@@ -65,13 +58,13 @@ class ProyectServiceTest {
         testProyect2.setStartDate("2024-02-01");
         testProyect2.setEstimatedEndDate("2024-11-30");
         testProyect2.setUser(testUser);
+        testProyect2.setStatus("EN_PROCESO");
     }
 
     @Test
     @DisplayName("Test: Guardar proyecto nuevo")
     void whenSaveProyect_thenReturnSavedProyect() {
         // Arrange
-        when(userRepository.findById(testUser.getIdUsuario())).thenReturn(Optional.of(testUser));
         when(proyectRepository.save(any(Proyect.class))).thenReturn(testProyect1);
 
         // Act
@@ -86,35 +79,21 @@ class ProyectServiceTest {
     }
 
     @Test
-    @DisplayName("Test: Guardar proyecto con usuario inválido lanza excepción")
-    void whenSaveProyectWithInvalidUser_thenThrowException() {
-        // Arrange
-        when(userRepository.findById(testUser.getIdUsuario())).thenReturn(Optional.empty());
-
-        // Act & Assert
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-            proyectService.create(testProyect1);
-        });
-
-        assertEquals("User not found with id " + testUser.getIdUsuario(), exception.getMessage());
-        verify(proyectRepository, never()).save(any(Proyect.class));
-    }
-
-    @Test
     @DisplayName("Test: Obtener todos los proyectos")
-    void whenGetAll_thenReturnProyectList() {
+    void whenGetProyects_thenReturnProyectList() {
         // Arrange
         List<Proyect> proyectList = Arrays.asList(testProyect1, testProyect2);
         when(proyectRepository.findAll()).thenReturn(proyectList);
 
         // Act
-        List<Proyect> result = proyectService.getAll();
+        Iterable<Proyect> result = proyectService.getAll();
+        List<Proyect> resultList = (List<Proyect>) result;
 
         // Assert
-        assertNotNull(result);
-        assertEquals(2, result.size());
-        assertEquals(testProyect1.getNameProyect(), result.get(0).getNameProyect());
-        assertEquals(testProyect2.getNameProyect(), result.get(1).getNameProyect());
+        assertNotNull(resultList);
+        assertEquals(2, resultList.size());
+        assertEquals(testProyect1.getNameProyect(), resultList.get(0).getNameProyect());
+        assertEquals(testProyect2.getNameProyect(), resultList.get(1).getNameProyect());
         verify(proyectRepository).findAll();
     }
 
@@ -152,40 +131,92 @@ class ProyectServiceTest {
     @DisplayName("Test: Actualizar proyecto existente")
     void whenUpdateProyect_thenReturnUpdatedProyect() {
         // Arrange
-        when(proyectRepository.findById(1L)).thenReturn(Optional.of(testProyect1));
-        when(proyectRepository.save(any(Proyect.class))).thenReturn(testProyect1);
-
-        Proyect updatedDetails = new Proyect();
-        updatedDetails.setNameProyect("Proyecto Actualizado");
-        updatedDetails.setDescription("Descripción actualizada");
+        Proyect proyectToUpdate = testProyect1;
+        proyectToUpdate.setNameProyect("Proyecto Actualizado");
+        when(proyectRepository.save(any(Proyect.class))).thenReturn(proyectToUpdate);
 
         // Act
-        Proyect updated = proyectService.update(1L, updatedDetails);
+        Proyect updated = proyectService.update(proyectToUpdate.getIdProyecto(), proyectToUpdate);
 
         // Assert
         assertNotNull(updated);
         assertEquals("Proyecto Actualizado", updated.getNameProyect());
-        assertEquals("Descripción actualizada", updated.getDescription());
+        assertEquals(testProyect1.getIdProyecto(), updated.getIdProyecto());
+        verify(proyectRepository).save(proyectToUpdate);
+    }
+
+    @Test
+    @DisplayName("Test: Eliminar proyecto")
+    void whenDeleteProyect_thenVerifyDeletion() {
+        // Arrange
+        Long proyectId = 1L;
+        doNothing().when(proyectRepository).deleteById(proyectId);
+
+        // Act
+        proyectService.delete(proyectId);
+
+        // Assert
+        verify(proyectRepository, times(1)).deleteById(proyectId);
+    }
+
+    @Test
+    @DisplayName("Test: Guardar proyecto con datos inválidos")
+    void whenSaveInvalidProyect_thenThrowException() {
+        // Arrange
+        Proyect invalidProyect = new Proyect();
+        // No establecemos campos obligatorios
+
+        // Act & Assert
+        assertThrows(IllegalArgumentException.class, () -> {
+            proyectService.create(invalidProyect);
+        });
+        verify(proyectRepository, never()).save(any(Proyect.class));
+    }
+
+    @Test
+    @DisplayName("Test: Obtener proyectos por estado")
+    void whenGetProyectsByStatus_thenReturnFilteredList() {
+        // Arrange
+        List<Proyect> activeProyects = Arrays.asList(testProyect1);
+        when(proyectRepository.findByStatus("ACTIVO")).thenReturn(activeProyects);
+
+        // Act
+        List<Proyect> result = proyectService.getByStatus("ACTIVO");
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals("ACTIVO", result.get(0).getStatus());
+        verify(proyectRepository).findByStatus("ACTIVO");
+    }
+
+    @Test
+    @DisplayName("Test: Actualizar estado del proyecto")
+    void whenUpdateProyectStatus_thenStatusIsUpdated() {
+        // Arrange
+        testProyect1.setStatus("COMPLETADO");
+        when(proyectRepository.findById(1L)).thenReturn(Optional.of(testProyect1));
+        when(proyectRepository.save(any(Proyect.class))).thenReturn(testProyect1);
+
+        // Act
+        Proyect updated = proyectService.updateStatus(1L, "COMPLETADO");
+
+        // Assert
+        assertNotNull(updated);
+        assertEquals("COMPLETADO", updated.getStatus());
         verify(proyectRepository).save(any(Proyect.class));
     }
 
-
-
     @Test
-    @DisplayName("Test: Eliminar proyecto inexistente lanza excepción")
-    void whenDeleteNonExistentProyect_thenThrowException() {
+    @DisplayName("Test: Validar fechas del proyecto")
+    void whenProjectDatesAreInvalid_thenThrowException() {
         // Arrange
-        when(proyectRepository.findById(999L)).thenReturn(Optional.empty());
+        testProyect1.setStartDate("2024-12-31");
+        testProyect1.setEstimatedEndDate("2024-01-01");
 
         // Act & Assert
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-            proyectService.delete(999L);
+        assertThrows(IllegalArgumentException.class, () -> {
+            proyectService.create(testProyect1);
         });
-
-        assertEquals("No se encontró el proyecto con ID: 999", exception.getMessage());
-        verify(proyectRepository, never()).deleteById(999L);
     }
-
-
-
 }

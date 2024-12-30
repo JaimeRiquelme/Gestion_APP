@@ -87,4 +87,8 @@ public class ManagementService {
         Management management = getById(managementId);
         return management.getProcesses();
     }
+
+    public Management findByNameManagementAndIdProyect(String nameManagement, Long idProyect) {
+        return managementRepository.findByNameManagementAndIdProyect(nameManagement, idProyect);
+    }
 }
