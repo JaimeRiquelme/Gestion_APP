@@ -1,50 +1,95 @@
 <template>
-  <div class="container">
+  <div class="dashboard-container">
     <header class="header">
-      <div class="logo-container">
-        <div class="logo">USACH</div>
-        <h1 class="title">USACH</h1>
+      <div class="logo">
+        <img src="../assets/usach-logo.png" alt="USACH" class="usach-logo" />
       </div>
     </header>
 
     <main class="main-content">
-      <div class="project-info">
-        <!-- Mostrar el texto con el nombre del proyecto -->
-        <p>Áreas de gestión del proyecto: <strong>{{ projectName }}</strong></p>
-      </div>
+      <h2 class="section-title">Áreas de gestión del proyecto: {{ projectName }}</h2>
 
-      <div class="button-container">
-        <button @click="goToPage('/project-management')" class="button-square">
-          <span class="button-number">1.</span> Gestión de la Integración
-        </button>
-        <button @click="goToPage('/ScopeManagementView')" class="button-square">
-          <span class="button-number">2.</span> Gestión del Alcance
-        </button>
-        <button  class="button-square">
-          <span class="button-number">3.</span> Gestión del Cronograma
-        </button>
-        <button  class="button-square">
-          <span class="button-number">4.</span> Gestión de los Costos
-        </button>
-        <button  class="button-square">
-          <span class="button-number">5.</span> Gestión de calidad
-        </button>
-        <button  class="button-square">
-          <span class="button-number">6.</span> Gestión de las comunicaciones
+      <div class="management-grid">
+        <button @click="goToPage('/project-management')" class="management-card">
+          <div class="management-header">
+            <span class="management-number">1</span>
+          </div>
+          <div class="management-content">
+            <h3>Gestión de la Integración</h3>
+          </div>
         </button>
 
-        <button  class="button-square">
-          <span class="button-number">7.</span> Gestión de los riesgos
+        <button @click="goToPage('/ScopeManagementView')" class="management-card">
+          <div class="management-header">
+            <span class="management-number">2</span>
+          </div>
+          <div class="management-content">
+            <h3>Gestión del Alcance</h3>
+          </div>
         </button>
 
-        <button  class="button-square">
-          <span class="button-number">8.</span> Gestión de las adquisiciones
+        <button class="management-card disabled">
+          <div class="management-header">
+            <span class="management-number">3</span>
+          </div>
+          <div class="management-content">
+            <h3>Gestión del Cronograma</h3>
+          </div>
         </button>
 
-        <button  class="button-square">
-          <span class="button-number">9.</span> Gestión de las comunicaciones
+        <button class="management-card disabled">
+          <div class="management-header">
+            <span class="management-number">4</span>
+          </div>
+          <div class="management-content">
+            <h3>Gestión de los Costos</h3>
+          </div>
         </button>
-        <!-- Agregar más botones según sea necesario -->
+
+        <button class="management-card disabled">
+          <div class="management-header">
+            <span class="management-number">5</span>
+          </div>
+          <div class="management-content">
+            <h3>Gestión de Calidad</h3>
+          </div>
+        </button>
+
+        <button class="management-card disabled">
+          <div class="management-header">
+            <span class="management-number">6</span>
+          </div>
+          <div class="management-content">
+            <h3>Gestión de las Comunicaciones</h3>
+          </div>
+        </button>
+
+        <button class="management-card disabled">
+          <div class="management-header">
+            <span class="management-number">7</span>
+          </div>
+          <div class="management-content">
+            <h3>Gestión de los Riesgos</h3>
+          </div>
+        </button>
+
+        <button class="management-card disabled">
+          <div class="management-header">
+            <span class="management-number">8</span>
+          </div>
+          <div class="management-content">
+            <h3>Gestión de las Adquisiciones</h3>
+          </div>
+        </button>
+
+        <button class="management-card disabled">
+          <div class="management-header">
+            <span class="management-number">9</span>
+          </div>
+          <div class="management-content">
+            <h3>Gestión de las Comunicaciones</h3>
+          </div>
+        </button>
       </div>
     </main>
 
@@ -60,7 +105,7 @@
       <p>&copy; 2024 USACH. Todos los derechos reservados.</p>
     </footer>
   </div>
-</template>
+</template> 
 
 <script setup>
 import { ref, onMounted, reactive } from 'vue';
@@ -164,110 +209,88 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* Estilos permanecen iguales */
-html,
-body {
-  height: 100%;
-  margin: 0;
-  font-family: Arial, sans-serif;
-}
-
-.container {
-  display: flex;
-  flex-direction: column;
+.dashboard-container {
   min-height: 100vh;
+  background-color: #f5f5f5;
 }
 
 .header {
-  background-color: white;
-  padding: 20px;
-  border-bottom: 1px solid #ddd;
-}
-
-.logo-container {
+  background-color: #00B8B0;
+  padding: 1rem 2rem;
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  gap: 10px;
-}
-
-.logo {
-  width: 40px;
-  height: 40px;
-  background-color: #00b8b0;
   color: white;
-  font-weight: bold;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 22px;
 }
 
-.title {
-  color: #333;
-  font-size: 30px;
-  font-weight: bold;
+.usach-logo {
+  height: 40px;
 }
 
 .main-content {
-  flex-grow: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-  padding: 40px;
-  background-color: white;
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
-.project-info {
-  margin-bottom: 20px;
-  font-size: 18px;
-  font-weight: bold;
-  color: #000;
+.section-title {
+  color: #333;
+  margin-bottom: 1.5rem;
+  font-size: 1.5rem;
 }
 
-.button-container {
+.management-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
-  width: 70%;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1.5rem;
 }
 
-.button-square {
-  background-color: #d3d3d3;
-  color: #333;
+.management-card {
+  background: white;
   border: none;
-  padding: 40px;
-  font-size: 20px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
   border-radius: 8px;
-  text-align: center;
+  padding: 1.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s, box-shadow 0.2s;
+  cursor: pointer;
   width: 100%;
-  position: relative;
-  min-width: 200px;
+  text-align: left;
 }
 
-.button-square:hover {
-  background-color: #a9a9a9;
+.management-card:not(.disabled):hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
-.button-number {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  font-size: 22px;
-  font-weight: bold;
+.management-card.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background-color: #f0f0f0;
+}
+
+.management-header {
+  margin-bottom: 1rem;
+}
+
+.management-number {
+  background-color: #00B8B0;
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.9rem;
+}
+
+.management-content h3 {
+  font-size: 1.1rem;
   color: #333;
+  margin: 0;
 }
 
 .footer {
-  background-color: #00b8b0;
+  background-color: #00B8B0;
   color: white;
   text-align: center;
-  padding: 20px;
-  font-size: 18px;
+  padding: 1rem;
+  margin-top: auto;
 }
 </style>
