@@ -82,9 +82,13 @@ onMounted(async () => {
             return;
         }
 
+        // Codificar los parámetros de la URL
+        const nameManagement = encodeURIComponent("Gestión del Alcance");
+        const idProyect = encodeURIComponent(ProjectStore.projectId);
+
         // Primera petición para verificar si existe el management
         const checkResponse = await fetch(
-            `http://localhost:8080/api/v1/management/getByNameAndIdProyect?nameManagement=Gestión del Alcance&idProyect=${ProjectStore.projectId}`,
+            `http://localhost:8080/api/v1/management/getByNameAndIdProyect?nameManagement=${nameManagement}&idProyect=${idProyect}`,
             {
                 headers: {
                     'Authorization': `Bearer ${AuthStore.token}`,
@@ -94,10 +98,8 @@ onMounted(async () => {
         );
 
         if (checkResponse.status === 200) {
-            // Si existe, guardamos el id en el store
             const managementData = await checkResponse.json();
             ManagementsStore.managementId = managementData.idManagement;  
-            
         } else if (checkResponse.status === 404) {
             // Si no existe, creamos uno nuevo
             const createResponse = await fetch(
@@ -118,14 +120,13 @@ onMounted(async () => {
 
             if (createResponse.ok) {
                 const newManagementData = await createResponse.json();
-                ManagementStore.setManagementId(newManagementData.idManagement);
+                ManagementsStore.managementId = newManagementData.idManagement;  
             } else {
-                throw new Error('Error al crear el management');
+                console.error('Error al crear el management');
             }
         }
     } catch (error) {
         console.error('Error en la gestión del management:', error);
-        // Aquí podrías agregar un manejo de error más específico si lo necesitas
     }
 });
 </script>
