@@ -179,7 +179,7 @@
                             <button type="button" class="save-button" :disabled="loading" @click="handleSave">
                                 {{ loading ? 'Guardando...' : 'Guardar' }}
                             </button>
-                            <button type="submit" class="submit-button" :disabled="loading">
+                            <button type="submit" class="submit-button" :disabled="loading" @click="handleSubmit">
                                 {{ loading ? 'Creando...' : 'Crear Documento' }}
                             </button>
                         </div>
@@ -204,6 +204,27 @@
 
                 <div v-if="errorMessage" class="error-message">
                     {{ errorMessage }}
+                </div>
+                <div v-if="pdfUrl" class="pdf-container">
+                    <div class="pdf-header">
+                        <h2 class="pdf-title">Vista previa del documento</h2>
+                        <div class="pdf-actions">
+                            <a :href="pdfUrl" download="PlanGestionDelAlcance.pdf" class="pdf-button download-button">
+                                <span class="button-icon">↓</span>
+                                Descargar PDF
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="pdf-viewer">
+                        <iframe :src="pdfUrl" class="pdf-iframe"></iframe>
+                    </div>
+
+                    <div class="pdf-footer">
+                        <button @click="navigateTo('/principalView')" class="pdf-button return-button">
+                            Volver al Dashboard
+                        </button>
+                    </div>
                 </div>
             </div>
         </main>
@@ -335,7 +356,7 @@ const handleSubmit = async () => {
             return;
         }
 
-        const respondeScopePlan = await fetch('http://localhost:8080/api/documents/scope-management-plan/generate', {
+        const respondeScopePlan = await fetch(`http://localhost:8080/api/documents/scope-management-plan/generate?idProyecto=${projectId}`, {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${token}`,
