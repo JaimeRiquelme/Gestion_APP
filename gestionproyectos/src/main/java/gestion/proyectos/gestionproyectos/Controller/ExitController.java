@@ -81,4 +81,15 @@ public class ExitController {
             return new ResponseEntity<>(null, HttpStatus.NOT_FOUND); // Retornamos 404 si no se encuentra el Exit
         }
     }
+
+    // Obtener Exit por ID de Proceso y nombre de Exit
+    @GetMapping("/getByIdProcessAndNameExit")
+    public ResponseEntity<Exit> getByIdProcessAndNameExit(@RequestParam Long idProcess, @RequestParam String nameExit) {
+        try {
+            Exit exit = exitService.findByIdProcessAndNameExit(idProcess, nameExit);
+            return new ResponseEntity<>(exit, HttpStatus.OK);
+        } catch (RuntimeException e) {
+            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+        }
+    }
 }
