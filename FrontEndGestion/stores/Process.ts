@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 
 
-export const useProcessStore = defineStore('process', {
+export const useProcessStore = defineStore('Process', {
     state: () => ({
         processId: null as string | null,
         processName: null as string | null,

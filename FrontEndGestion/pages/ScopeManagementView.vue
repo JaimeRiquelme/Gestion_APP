@@ -24,18 +24,18 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '../stores/auth';
 import { useProjectStore } from '../stores/project';
-import { onMounted } from 'vue';
+import { onMounted, reactive } from 'vue';
 import { useManagementsStore } from '../stores/Managements';
-import { id } from 'vuetify/locale';
+import { useProcessStore } from '../stores/Process';
 
 const router = useRouter();
 const AuthStore = useAuthStore();
 const ProjectStore = useProjectStore();
 const ManagementsStore = useManagementsStore();
+const ProcessStore = useProcessStore();
 
 const managementAreas = [
     {
@@ -61,7 +61,7 @@ const managementAreas = [
     {
         id: 5,
         title: 'Enunciado del alcance del proyecto',
-        route: '/scope-validation'
+        route: '/ScopeStatement'
     },
     {
         id: 6,
@@ -80,8 +80,79 @@ const managementAreas = [
     }
 ];
 
-const handleAreaClick = (area) => {
-    router.push(area.route);
+const handleAreaClick = async (area) => {
+    try {
+        const token = AuthStore.token;
+        const idProyecto = ProjectStore.projectId;
+        const idGestion = ManagementsStore.managementId;
+
+        if (!token || !idProyecto || !idGestion) {
+            console.error('No hay token, idProyecto o idGestion');
+            router.push('/ScopeManagementView');
+            return;
+        }
+
+        // Primero verificamos si ya existe el área
+        const response = await fetch(`http://localhost:8080/api/v1/process/getByIdManagementAndNameProcess?idManagement=${idGestion}&nameProcess=${area.title}`, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+            },
+        });
+
+        if (response.ok) {
+            const process = await response.json();
+            ProcessStore.processId = process.idProcess;
+            ProcessStore.processName = process.nameProcess;
+            console.log('Proceso encontrado:', process);
+            router.push(area.route);
+        } else if (response.status === 404) {
+            // Formatear la fecha actual en YYYY-MM-DD
+            const currentDate = new Date().toISOString().split('T')[0];
+
+            // Si no existe, creamos uno nuevo
+            const createResponse = await fetch('http://localhost:8080/api/v1/process/create', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    idManagement: idGestion,
+                    nameProcess: area.title,
+                    description: area.title,
+                    stateProcess: "Activo",
+                    startDatePlanned: currentDate,
+                    endDatePlanned: currentDate,
+                    startDateReal: currentDate,
+                    endDateReal: currentDate
+                }),
+            });
+
+            console.log('Json:', JSON.stringify({
+                idManagement: idGestion,
+                nameProcess: area.title,
+                description: area.title,
+                stateProcess: "Activo",
+                startDatePlanned: currentDate,
+                endDatePlanned: currentDate,
+                startDateReal: currentDate,
+                endDateReal: currentDate
+            }));
+
+            if (createResponse.ok) {
+                const newProcess = await createResponse.json();
+                ProcessStore.processId = newProcess.idProcess;
+                ProcessStore.processName = newProcess.nameProcess;
+                console.log('Proceso creado:', newProcess);
+                router.push(area.route);
+            } else {
+                console.error('Error al crear el proceso');
+            }
+        }
+    } catch (error) {
+        console.error('Error en la gestión del proceso:', error);
+    }
 };
 
 onMounted(async () => {
@@ -94,8 +165,8 @@ onMounted(async () => {
         }
 
         // Codificar los parámetros de la URL
-        const nameManagement = encodeURIComponent("Gestión del Alcance");
-        const idProyect = encodeURIComponent(ProjectStore.projectId);
+        const nameManagement = ManagementsStore.managementName;
+        const idProyect = ProjectStore.projectId;
 
         // Primera petición para verificar si existe el management
         const checkResponse = await fetch(
@@ -110,7 +181,8 @@ onMounted(async () => {
 
         if (checkResponse.status === 200) {
             const managementData = await checkResponse.json();
-            ManagementsStore.managementId = managementData.idManagement;  
+            ManagementsStore.managementId = managementData.idManagement;
+            ManagementsStore.managementName = managementData.nameManagement;
         } else if (checkResponse.status === 404) {
             // Si no existe, creamos uno nuevo
             const createResponse = await fetch(
@@ -132,6 +204,8 @@ onMounted(async () => {
             if (createResponse.ok) {
                 const newManagementData = await createResponse.json();
                 ManagementsStore.managementId = newManagementData.idManagement;  
+                ManagementsStore.managementName = newManagementData.nameManagement;
+                console.log('Management creado:', newManagementData);
             } else {
                 console.error('Error al crear el management');
             }
