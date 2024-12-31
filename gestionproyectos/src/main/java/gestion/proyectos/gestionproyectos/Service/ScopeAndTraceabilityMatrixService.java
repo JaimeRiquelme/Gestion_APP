@@ -34,7 +34,7 @@ public class ScopeAndTraceabilityMatrixService {
             "proyectLeader",
             "qaLeader",
             "elaborationDate",
-            "requirementsDocumentation",
+            "documentationAndVersionControl",
             "requirementsTraceabilityMatrix"
     ));
 

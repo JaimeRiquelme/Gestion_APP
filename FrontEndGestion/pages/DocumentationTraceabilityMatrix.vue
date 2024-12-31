@@ -54,7 +54,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="(row, index) in requirementsDocumentation" :key="index">
+              <tr v-for="(row, index) in documentationAndVersionControl" :key="index">
                 <td><input type="text" v-model="row.idRequirement" placeholder="ID del requisito" /></td>
                 <td><input type="text" v-model="row.description" placeholder="Descripción" /></td>
                 <td><input type="text" v-model="row.responsible" placeholder="Responsable" /></td>
@@ -135,7 +135,7 @@
   });
   const showPopup = ref(false);
   const showTraceabilityPopup = ref(false);
-  const requirementsDocumentation = ref([]);
+  const documentationAndVersionControl = ref([]);
   const requirementsTraceabilityMatrix = ref([]);
   
   function openPopup() {
@@ -147,7 +147,7 @@
   }
   
   function addRow() {
-    requirementsDocumentation.value.push({
+    documentationAndVersionControl.value.push({
       idRequirement: '',
       description: '',
       responsible: '',
@@ -155,7 +155,7 @@
   }
   
   function removeRow(index) {
-    requirementsDocumentation.value.splice(index, 1);
+    documentationAndVersionControl.value.splice(index, 1);
   }
   
   function openTraceabilityPopup() {
@@ -185,7 +185,7 @@
   }
   
   function formatRequirements() {
-    return requirementsDocumentation.value
+    return documentationAndVersionControl.value
       .map(
         (row, index) => `&${row.idRequirement},${row.description},${row.responsible}&${index + 1}`
       )
@@ -218,7 +218,7 @@
     }
 
     // Preparar los datos del formulario
-    formData.value.requirementsDocumentation = formatRequirements();
+    formData.value.documentationAndVersionControl = formatRequirements();
     formData.value.requirementsTraceabilityMatrix = formatTraceability();
 
     // Enviar datos al backend
@@ -303,7 +303,7 @@
   }
   
   .submit-button {
-    background-color: #007bff;
+    background-color: #00B8B0;
     color: black;
     padding: 10px 15px;
     border: none;
