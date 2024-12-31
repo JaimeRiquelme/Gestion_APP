@@ -318,6 +318,7 @@ import { useProcessStore } from '../stores/Process';
 import { useExitStore } from '../stores/Exit';
 import AlertPopup from '../components/AlertPopup.vue';
 import { useRouter } from 'vue-router';
+import { ro } from 'vuetify/locale';
 
 // Store instantiation
 const AuthStore = useAuthStore();
@@ -477,6 +478,7 @@ const handleSubmit = async () => {
 
         const blob = await response.blob();
         window.open(URL.createObjectURL(blob));
+        router.push('/ScopeManagementView');
 
     } catch (error) {
         showAlert('Error', error.message, 'error');
@@ -514,11 +516,11 @@ const calculateNetBenefit = () => {
 
 // Funciones de validación
 const validateForm = () => {
-    return true; // Implementar validación específica si es necesaria
+    return true; 
 };
 
 const isFieldInvalid = (fieldName) => {
-    return false; // Implementar validación específica si es necesaria
+    return false; 
 };
 
 // Funciones de manejo de eventos
