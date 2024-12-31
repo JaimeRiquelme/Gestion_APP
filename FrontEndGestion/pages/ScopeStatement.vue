@@ -348,7 +348,7 @@ const formData = reactive({
     deliverables: '',
     acceptanceCriteria: '',
     restrictions: '',
-    costEstimation: [{  // Cambiado de objeto a array con un solo elemento inicial
+    costEstimation: [{
         expense: '',
         estimatedBudget: 0,
         spentToDate: 0,
@@ -423,7 +423,7 @@ const getExistingExit = async (processId, token) => {
     if (response.ok) {
         const textData = await response.text();
         if (!textData.trim()) {
-            return null; // Indicate need to create new exit
+            return null; 
         }
         const exitData = JSON.parse(textData);
         return exitData.idExit;
@@ -477,6 +477,7 @@ const handleSubmit = async () => {
 
         const blob = await response.blob();
         window.open(URL.createObjectURL(blob));
+        router.push('/ScopeManagementView');
 
     } catch (error) {
         showAlert('Error', error.message, 'error');
@@ -614,6 +615,7 @@ const handleSave = async () => {
     const userId = AuthStore.userId;
     const token = AuthStore.token;
     const projectId = ProjectStore.projectId;
+    const processId = ProcessStore.processId;
 
     const dataToSend = {
         ...formData,
@@ -622,9 +624,35 @@ const handleSave = async () => {
         costBenefitAnalysis: formatCostBenefitTable(formData)
     };
 
-    console.log("JSON para Postman:", JSON.stringify(dataToSend, null, 2));
+    let exitId = await getExistingExit(processId, token);
+        if (!exitId) {
+            exitId = await createNewExit(processId, nameUser, token);
+        }
 
-    // return await response.json();
+    const response = await fetch(`http://localhost:8080/api/v1/parameters/saveParametersList?idExit=${exitId}`, {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(dataToSend),
+    });
+
+    if (!response.ok) {
+        throw new Error(await response.text());
+    }
+
+    const responseText = await response.text();
+    if (!responseText.trim()) {
+        throw new Error('No se recibió ningún contenido JSON');
+    }
+
+    const responseData = JSON.parse(responseText);
+    if (!responseData.success) {
+        throw new Error(responseData.message);
+    }
+
+    return responseData;
 };
 
 // Funciones de alertas
