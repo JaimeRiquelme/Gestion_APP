@@ -97,20 +97,65 @@ public class ProyectService {
                 .orElseThrow(() -> new RuntimeException("No se encontró el proyecto con ID: " + id));
         try {
             String[] queries = {
-                    "DELETE FROM management WHERE id_proyect = :id",
-                    "DELETE FROM incident WHERE id_proyect = :id",
-                    "DELETE FROM lessons WHERE id_proyect = :id",
-                    "DELETE FROM proyects WHERE id_proyecto = :id"
+                    "DELETE FROM parameter WHERE exit_id IN (SELECT id_exit FROM exit WHERE id_process IN (SELECT id_process FROM process WHERE id_management IN (SELECT id_management FROM management WHERE id_proyect = :id)))", // Eliminar los parameters relacionados con los exits
+                    "DELETE FROM exit WHERE id_process IN (SELECT id_process FROM process WHERE id_management IN (SELECT id_management FROM management WHERE id_proyect = :id))", // Eliminar los exits relacionados con los process
+                    "DELETE FROM process WHERE id_management IN (SELECT id_management FROM management WHERE id_proyect = :id)", // Eliminar los process relacionados con los managements
+                    "DELETE FROM management WHERE id_proyect = :id", // Eliminar los managements relacionados
+                    "DELETE FROM incident WHERE id_proyect = :id",  // Eliminar los incidentes relacionados
+                    "DELETE FROM lessons WHERE id_proyect = :id",   // Eliminar las lecciones relacionadas
+                    "DELETE FROM proyects WHERE id_proyecto = :id"  // Eliminar el proyecto
             };
-            for (String sql : queries) {
-                int rowsAffected = entityManager.createNativeQuery(sql)
+
+            try {
+                // Primero eliminamos los parameters asociados a los exits
+                int rowsAffected = entityManager.createNativeQuery(queries[0])
                         .setParameter("id", id)
                         .executeUpdate();
-                // Log para saber qué se está eliminando
-                System.out.println("Ejecutando query: " + sql);
-                System.out.println("Filas afectadas: " + rowsAffected);
+                System.out.println("Parameters eliminados, filas afectadas: " + rowsAffected);
+
+                // Luego eliminamos los exits asociados a los process
+                rowsAffected = entityManager.createNativeQuery(queries[1])
+                        .setParameter("id", id)
+                        .executeUpdate();
+                System.out.println("Exits eliminados, filas afectadas: " + rowsAffected);
+
+                // Eliminar los process asociados a los managements
+                rowsAffected = entityManager.createNativeQuery(queries[2])
+                        .setParameter("id", id)
+                        .executeUpdate();
+                System.out.println("Processes eliminados, filas afectadas: " + rowsAffected);
+
+                // Después eliminamos los managements
+                rowsAffected = entityManager.createNativeQuery(queries[3])
+                        .setParameter("id", id)
+                        .executeUpdate();
+                System.out.println("Gestiones eliminadas, filas afectadas: " + rowsAffected);
+
+                // Luego eliminamos los incidentes
+                rowsAffected = entityManager.createNativeQuery(queries[4])
+                        .setParameter("id", id)
+                        .executeUpdate();
+                System.out.println("Incidentes eliminados, filas afectadas: " + rowsAffected);
+
+                // Luego eliminamos las lecciones
+                rowsAffected = entityManager.createNativeQuery(queries[5])
+                        .setParameter("id", id)
+                        .executeUpdate();
+                System.out.println("Lecciones eliminadas, filas afectadas: " + rowsAffected);
+
+                // Finalmente eliminamos el proyecto
+                rowsAffected = entityManager.createNativeQuery(queries[6])
+                        .setParameter("id", id)
+                        .executeUpdate();
+                System.out.println("Proyecto eliminado, filas afectadas: " + rowsAffected);
+
+                System.out.println("Proyecto y sus relaciones eliminadas exitosamente.");
+            } catch (Exception e) {
+                System.err.println("Error al eliminar el proyecto: " + e.getMessage());
+                throw new RuntimeException("Error al eliminar el proyecto y sus relaciones: " + e.getMessage());
             }
-            System.out.println("Proyecto y sus relaciones eliminadas exitosamente");
+
+
         } catch (Exception e) {
             System.err.println("Error al eliminar el proyecto: " + e.getMessage());
             throw new RuntimeException("Error al eliminar el proyecto y sus relaciones: " + e.getMessage());
