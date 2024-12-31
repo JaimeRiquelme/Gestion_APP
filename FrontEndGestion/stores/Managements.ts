@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 
-export const useManagementsStore = defineStore('managements', {
+export const useManagementsStore = defineStore('Managements', {
     state: () => ({
         managementId: null as string | null,
         managementName: null as string | null,

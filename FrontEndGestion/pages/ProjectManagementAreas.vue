@@ -10,7 +10,7 @@
       <h2 class="section-title">Áreas de gestión del proyecto: {{ projectName }}</h2>
 
       <div class="management-grid">
-        <button @click="goToPage('/project-management')" class="management-card">
+        <button @click="handleManagementArea('Gestión de Integración', '/project-management')" class="management-card">
           <div class="management-header">
             <span class="management-number">1</span>
           </div>
@@ -19,7 +19,7 @@
           </div>
         </button>
 
-        <button @click="goToPage('/ScopeManagementView')" class="management-card">
+        <button @click="handleManagementArea('Gestión del Alcance', '/ScopeManagementView')" class="management-card">
           <div class="management-header">
             <span class="management-number">2</span>
           </div>
@@ -93,31 +93,28 @@
       </div>
     </main>
 
-    <AlertPopup
-      :show="alert.show"
-      :title="alert.title"
-      :message="alert.message"
-      :type="alert.type"
-      @confirm="handleAlertConfirm"
-    />
+    <AlertPopup :show="alert.show" :title="alert.title" :message="alert.message" :type="alert.type"
+      @confirm="handleAlertConfirm" />
 
     <footer class="footer">
       <p>&copy; 2024 USACH. Todos los derechos reservados.</p>
     </footer>
   </div>
-</template> 
+</template>
 
 <script setup>
 import { ref, onMounted, reactive } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '../stores/auth';
 import { useProjectStore } from '../stores/project';
+import { useManagementsStore } from '../stores/Managements';
 import AlertPopup from '../components/AlertPopup.vue';
 
 const router = useRouter();
-const projectName = ref('Cargando...'); // Variable reactiva para el nombre del proyecto
+const projectName = ref('Cargando...');
 const AuthStore = useAuthStore();
 const ProjectStore = useProjectStore();
+const ManagementStore = useManagementsStore();
 const loading = ref(false);
 const errorMessage = ref('');
 
@@ -144,10 +141,6 @@ const handleAlertConfirm = () => {
   }
 };
 
-// Función para navegar a otra página
-function goToPage(path) {
-  router.push(path);
-}
 
 // Nueva función para manejar la conexión al backend
 async function fetchProjectData() {
@@ -164,11 +157,11 @@ async function fetchProjectData() {
       return;
     } else {
       const respondeManagement = await fetch(`http://localhost:8080/api/v1/management/getByNameAndIdProyect?nameManagement=Gestión de Integración&idProyect=${projectId}`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      }
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
       });
 
       if (!respondeManagement.ok) {
@@ -199,6 +192,66 @@ async function fetchProjectData() {
     showAlert('Error', 'Hubo un error al obtener la información del proyecto', 'error');
   } finally {
     loading.value = false;
+  }
+}
+
+async function handleManagementArea(managementName, redirectPath) {
+  try {
+    const token = AuthStore.token;
+    const projectId = ProjectStore.projectId;
+
+    if (!token || !projectId) {
+      showAlert('Error', 'No hay sesión activa o proyecto seleccionado', 'error');
+      return;
+    }
+
+    // First, try to get existing management
+    const response = await fetch(
+      `http://localhost:8080/api/v1/management/getByNameAndIdProyect?nameManagement=${managementName}&idProyect=${projectId}`,
+      {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+
+    if (response.ok) {
+      const data = await response.json();
+      // Store management data and redirect
+      ManagementStore.idManagement = data.idManagement;
+      ManagementStore.nameManagement = data.nameManagement;
+      router.push(redirectPath);
+    } else if (response.status === 404) {
+      // Create new management if not found
+      const createResponse = await fetch('http://localhost:8080/api/v1/management/create', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          idProyecto: projectId,
+          nameManagement: managementName,
+          description: `Area de ${managementName} del proyecto`
+        })
+      });
+
+      if (createResponse.ok) {
+        const newManagement = await createResponse.json();
+
+        ManagementStore.idManagement = newManagement.idManagement;
+        ManagementStore.nameManagement = newManagement.nameManagement;
+
+        router.push(redirectPath);
+      } else {
+        showAlert('Error', 'No se pudo crear la gestión', 'error');
+      }
+    }
+  } catch (error) {
+    showAlert('Error', 'Error al procesar la solicitud', 'error');
+    console.error(error);
   }
 }
 

@@ -24,13 +24,11 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '../stores/auth';
 import { useProjectStore } from '../stores/project';
 import { onMounted } from 'vue';
 import { useManagementsStore } from '../stores/Managements';
-import { id } from 'vuetify/locale';
 
 const router = useRouter();
 const AuthStore = useAuthStore();
@@ -61,7 +59,7 @@ const managementAreas = [
     {
         id: 5,
         title: 'Enunciado del alcance del proyecto',
-        route: '/scope-validation'
+        route: '/ScopeStatement'
     },
     {
         id: 6,
@@ -94,8 +92,8 @@ onMounted(async () => {
         }
 
         // Codificar los parámetros de la URL
-        const nameManagement = encodeURIComponent("Gestión del Alcance");
-        const idProyect = encodeURIComponent(ProjectStore.projectId);
+        const nameManagement = ManagementsStore.managementName;
+        const idProyect = ProjectStore.projectId;
 
         // Primera petición para verificar si existe el management
         const checkResponse = await fetch(
@@ -110,7 +108,8 @@ onMounted(async () => {
 
         if (checkResponse.status === 200) {
             const managementData = await checkResponse.json();
-            ManagementsStore.managementId = managementData.idManagement;  
+            ManagementsStore.managementId = managementData.idManagement;
+            ManagementsStore.managementName = managementData.nameManagement;
         } else if (checkResponse.status === 404) {
             // Si no existe, creamos uno nuevo
             const createResponse = await fetch(
@@ -132,6 +131,8 @@ onMounted(async () => {
             if (createResponse.ok) {
                 const newManagementData = await createResponse.json();
                 ManagementsStore.managementId = newManagementData.idManagement;  
+                ManagementsStore.managementName = newManagementData.nameManagement;
+                console.log('Management creado:', newManagementData);
             } else {
                 console.error('Error al crear el management');
             }
