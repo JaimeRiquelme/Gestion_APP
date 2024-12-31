@@ -75,8 +75,8 @@ public class ProcessController {
         }
     }
 
-    @GetMapping("/getByIdManagementAndNameProcess/{idManagement}/{nameProcess}")
-    public ResponseEntity<Process> getByIdManagementAndNameProcess(@PathVariable Long idManagement, @PathVariable String nameProcess) {
+    @GetMapping("/getByIdManagementAndNameProcess")
+    public ResponseEntity<Process> getByIdManagementAndNameProcess(@RequestParam Long idManagement, @RequestParam String nameProcess) {
         try {
             System.out.println("idManagement: " + idManagement);
             System.out.println("nameProcess: " + nameProcess);
