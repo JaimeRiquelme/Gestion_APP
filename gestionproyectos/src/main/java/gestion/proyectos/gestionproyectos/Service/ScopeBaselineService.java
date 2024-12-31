@@ -44,7 +44,7 @@ public class ScopeBaselineService implements DocumentService {
         validateData(data);
         String templatePath;
         try {
-            templatePath = pathResolver.resolve("Línea base del alcance.tex");
+            templatePath = pathResolver.resolve("EDT.tex");
         } catch (Exception e) {
             throw new TemplateNotFoundException("The template 'project_scope_statement.tex' was not found.");
         }

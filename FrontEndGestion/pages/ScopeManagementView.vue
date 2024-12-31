@@ -30,6 +30,7 @@ import { useAuthStore } from '../stores/auth';
 import { useProjectStore } from '../stores/project';
 import { onMounted } from 'vue';
 import { useManagementsStore } from '../stores/Managements';
+import { id } from 'vuetify/locale';
 
 const router = useRouter();
 const AuthStore = useAuthStore();
@@ -39,33 +40,43 @@ const ManagementsStore = useManagementsStore();
 const managementAreas = [
     {
         id: 1,
-        title: 'Planificar la Gestión del Alcance (Planeación)',
+        title: 'Plan de gestión del alcance',
         route: '/scope-planning'
     },
     {
         id: 2,
-        title: 'Recopilar los Requisitos (Planeación)',
+        title: 'Plan de gestión de los requisitos',
         route: '/requirements'
     },
     {
         id: 3,
-        title: 'Definir el Alcance (Planeación)',
+        title: 'Documentación de los requisitos',
         route: '/scope-definition'
     },
     {
         id: 4,
-        title: 'Crear la Estructura Desglosada del Trabajo (WBS) (Planeación)',
+        title: 'Estructura de desglose del trabajo (EDT)',
         route: '/wbs'
     },
     {
         id: 5,
-        title: 'Validar el Alcance (Monitoreo)',
+        title: 'Enunciado del alcance del proyecto',
         route: '/scope-validation'
     },
     {
         id: 6,
-        title: 'Controlar el Alcance (Monitoreo)',
+        title: 'Línea base del alcance',
         route: '/scope-control'
+    },
+    {
+        id: 7,
+        title: 'Entregables validados',
+        route: '/validated-deliverables'
+    },
+    {
+        id: 8,
+        title: 'Informes de desempeño del trabajo',
+        route: '/work-performance-reports'
     }
 ];
 
