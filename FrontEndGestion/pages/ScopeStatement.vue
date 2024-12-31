@@ -176,23 +176,18 @@
                                     <!-- Beneficio 1: Reducción de retrasos -->
                                     <div class="form-group">
                                         <label>Reducción de retrasos en un 30%</label>
-                                        <input v-model="formData.costBenefitAnalysis.benefits.delays" 
-                                            type="number" 
-                                            class="form-input" 
-                                            placeholder="0" 
-                                            required />
+                                        <input v-model="formData.costBenefitAnalysis.benefits.delays" type="number"
+                                            class="form-input" placeholder="0" required />
                                         <small class="input-help">
-                                            Representa el valor monetario obtenido por disminuir los retrasos en las operaciones
+                                            Representa el valor monetario obtenido por disminuir los retrasos en las
+                                            operaciones
                                         </small>
                                     </div>
                                     <!-- Beneficio 2: Reducción de Sobrecostos -->
                                     <div class="form-group">
                                         <label>Reducción de Sobrecostos en un 30%</label>
-                                        <input v-model="formData.costBenefitAnalysis.benefits.overruns" 
-                                            type="number" 
-                                            class="form-input" 
-                                            placeholder="0" 
-                                            required />
+                                        <input v-model="formData.costBenefitAnalysis.benefits.overruns" type="number"
+                                            class="form-input" placeholder="0" required />
                                         <small class="input-help">
                                             Indica el ahorro o beneficio para controlar mejor los sobrecostos
                                         </small>
@@ -200,13 +195,11 @@
                                     <!-- Beneficio 3: Mejora de Asignación de Recursos -->
                                     <div class="form-group">
                                         <label>Mejora de la Asignación de Recursos</label>
-                                        <input v-model="formData.costBenefitAnalysis.benefits.resources" 
-                                            type="number" 
-                                            class="form-input" 
-                                            placeholder="0" 
-                                            required />
+                                        <input v-model="formData.costBenefitAnalysis.benefits.resources" type="number"
+                                            class="form-input" placeholder="0" required />
                                         <small class="input-help">
-                                            Refleja el beneficio obtenido al utilizar los recursos de manera más eficiente
+                                            Refleja el beneficio obtenido al utilizar los recursos de manera más
+                                            eficiente
                                         </small>
                                     </div>
                                 </div>
@@ -321,17 +314,25 @@
 import { ref, reactive, onMounted } from 'vue';
 import { useAuthStore } from '../stores/auth';
 import { useProjectStore } from '../stores/project';
+import { useProcessStore } from '../stores/Process';
+import { useExitStore } from '../stores/Exit';
 import AlertPopup from '../components/AlertPopup.vue';
 import { useRouter } from 'vue-router';
 
-const loading = ref(false);
-const errorMessage = ref('');
+// Store instantiation
 const AuthStore = useAuthStore();
 const ProjectStore = useProjectStore();
-const showCancelConfirmation = ref(false);
-const showSaveConfirmation = ref(false);
+const ProcessStore = useProcessStore();
+const ExitStore = useExitStore();
 const router = useRouter();
 
+// Reactive state
+const loading = ref(false);
+const errorMessage = ref('');
+const showCancelConfirmation = ref(false);
+const showSaveConfirmation = ref(false);
+
+// Initial form data
 const formData = reactive({
     proyectName: '',
     idProyect: '',
@@ -368,8 +369,7 @@ const formData = reactive({
         netBenefit: 0
     },
     proyectPromotorTitle: '',
-    proyectPromotor: '',
-    deliverables: ''
+    proyectPromotor: ''
 });
 
 const alert = reactive({
@@ -378,6 +378,112 @@ const alert = reactive({
     message: '',
     type: 'info',
 });
+
+// API Functions
+const createNewExit = async (processId, nameUser, token) => {
+    const createExitResponse = await fetch(`http://localhost:8080/api/v1/exit/create`, {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            idProcess: processId,
+            nameExit: 'Enunciado del Alcance del Proyecto',
+            state: 'Activo',
+            dateCreation: new Date().toISOString().split('T')[0],
+            dateValidation: new Date().toISOString().split('T')[0],
+            priority: 'Alta',
+            responsible: nameUser,
+            description: 'Enunciado del Alcance del Proyecto'
+        })
+    });
+
+    const responseText = await createExitResponse.text();
+    if (!responseText.trim()) {
+        throw new Error('No se recibió ningún contenido JSON');
+    }
+
+    if (!createExitResponse.ok) {
+        throw new Error(`Error al crear la salida: ${responseText}`);
+    }
+
+    const newExit = JSON.parse(responseText);
+    return newExit.idExit;
+};
+
+const getExistingExit = async (processId, token) => {
+    const response = await fetch(
+        `http://localhost:8080/api/v1/exit/getByIdProcessAndNameExit?idProcess=${processId}&nameExit=Enunciado del Alcance del Proyecto`,
+        {
+            headers: { 'Authorization': `Bearer ${token}` },
+        }
+    );
+
+    if (response.ok) {
+        const textData = await response.text();
+        if (!textData.trim()) {
+            return null; // Indicate need to create new exit
+        }
+        const exitData = JSON.parse(textData);
+        return exitData.idExit;
+    }
+    return null;
+};
+
+// Event Handlers
+const handleSubmit = async () => {
+    if (!validateForm()) return;
+
+    try {
+        loading.value = true;
+        const { userId, token, name: nameUser } = AuthStore;
+        const processId = ProcessStore.processId;
+
+        if (!userId || !token) {
+            router.push('/login');
+            return;
+        }
+
+        // Get or create exit
+        let exitId = await getExistingExit(processId, token);
+        if (!exitId) {
+            exitId = await createNewExit(processId, nameUser, token);
+        }
+
+        // Generate document
+        const formattedData = {
+            ...formData,
+            costBenefitAnalysis: formatCostBenefitTable(formData),
+            highLevelRequirements: formatHighLevelRequirements(formData),
+            costEstimation: formatCostEstimation(formData),
+        };
+
+        const response = await fetch(
+            `http://localhost:8080/api/documents/project-scope-statement/generate?idExit=${exitId}`,
+            {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formattedData),
+            }
+        );
+
+        if (!response.ok) {
+            throw new Error(await response.text());
+        }
+
+        const blob = await response.blob();
+        window.open(URL.createObjectURL(blob));
+
+    } catch (error) {
+        showAlert('Error', error.message, 'error');
+    } finally {
+        loading.value = false;
+    }
+};
 
 // Funciones principales
 const addRequirement = () => {
@@ -421,53 +527,14 @@ const handleCancel = () => {
     router.push('/ProjectManagementAreas');
 };
 
-const handleSubmit = async () => {
-    if (!validateForm()) {
-        errorMessage.value = 'Por favor, complete todos los campos obligatorios';
-        return;
-    }
-
-    try {
-        loading.value = true;
-        errorMessage.value = '';
-
-        const userId = AuthStore.userId;
-        const token = AuthStore.token;
-        const projectId = ProjectStore.projectId;
-
-        // Formatear los datos según la convención
-        const formattedData = {
-            ...formData,
-            costBenefitAnalysis: formatCostBenefitTable(formData),
-            highLevelRequirements: formatHighLevelRequirements(formData),
-            costEstimation: formatCostEstimation(formData),
-        };
-
-        console.log("JSON para Postman (handleSubmit):", JSON.stringify(formattedData, null, 2));
-
-        const response = await fetch(`http://localhost:8080/api/documents/project-scope-statement/generate?idExit=${projectId}`, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(formattedData),
-            
-        });
-
-        if (!response.ok) {
-            throw new Error('Error al crear el documento');
-        }
-
-        const blob = await response.blob();
-        const url = URL.createObjectURL(blob);
-        window.open(url);
-
-    } catch (error) {
-        showAlert('Error', error.message, 'error');
-    } finally {
-        loading.value = false;
-    }
+// Formato para Estimación de Costos 
+const formatCostEstimation = (data) => {
+    let table = "&Gastos,Presupuesto Estimado,Gastado hasta la fecha,Estimación para completar,Diferencia&";
+    data.costEstimation.forEach(cost => {
+        const difference = Number(cost.estimatedBudget) - (Number(cost.spentToDate) + Number(cost.estimateToComplete));
+        table += `${cost.expense},${cost.estimatedBudget},${cost.spentToDate},${cost.estimateToComplete},${difference}&`;
+    });
+    return table;
 };
 
 const formatCostBenefitTable = (data) => {
@@ -529,17 +596,6 @@ const formatHighLevelRequirements = (data) => {
     });
     return table;
 };
-
-// Formato para Estimación de Costos 
-const formatCostEstimation = (data) => {
-    let table = "&Gastos,Presupuesto Estimado,Gastado hasta la fecha,Estimación para completar,Diferencia&";
-    data.costEstimation.forEach(cost => {
-        const difference = Number(cost.estimatedBudget) - (Number(cost.spentToDate) + Number(cost.estimateToComplete));
-        table += `${cost.expense},${cost.estimatedBudget},${cost.spentToDate},${cost.estimateToComplete},${difference}&`;
-    });
-    return table;
-};
-
 
 const confirmSave = async () => {
     try {

@@ -133,4 +133,8 @@ public class ExitService {
         Exit exit = getById(exitId);
         return exit.getParameters();
     }
+
+    public Exit findByIdProcessAndNameExit(Long idProcess, String nameExit) {
+        return exitRepository.findByIdProcessAndNameExit(idProcess, nameExit);
+    }
 }
