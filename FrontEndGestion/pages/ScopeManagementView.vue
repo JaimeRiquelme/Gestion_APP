@@ -195,8 +195,8 @@ onMounted(async () => {
                     },
                     body: JSON.stringify({
                         idProyecto: ProjectStore.projectId,
-                        nameManagement: "Gestión del Alcance",
-                        description: "Gestión del Alcance del Proyecto"
+                        nameManagement: "Gestion del Alcance",
+                        description: "Gestion del Alcance del Proyecto"
                     })
                 }
             );
