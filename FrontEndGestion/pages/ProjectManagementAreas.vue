@@ -10,7 +10,7 @@
       <h2 class="section-title">Áreas de gestión del proyecto: {{ projectName }}</h2>
 
       <div class="management-grid">
-        <button @click="handleManagementArea('Gestión de Integración', '/project-management')" class="management-card">
+        <button @click="handleManagementArea('Gestion de Integracion', '/project-management')" class="management-card">
           <div class="management-header">
             <span class="management-number">1</span>
           </div>
@@ -19,7 +19,7 @@
           </div>
         </button>
 
-        <button @click="handleManagementArea('Gestión del Alcance', '/ScopeManagementView')" class="management-card">
+        <button @click="handleManagementArea('Gestion del Alcance', '/ScopeManagementView')" class="management-card">
           <div class="management-header">
             <span class="management-number">2</span>
           </div>
@@ -142,7 +142,7 @@ const handleAlertConfirm = () => {
 };
 
 
-// Nueva función para manejar la conexión al backend
+
 async function fetchProjectData() {
   try {
     loading.value = true;
@@ -156,7 +156,7 @@ async function fetchProjectData() {
       showAlert('Error de Sesión', '¡Sesión no iniciada o proyecto no seleccionado!', 'error');
       return;
     } else {
-      const respondeManagement = await fetch(`http://localhost:8080/api/v1/management/getByNameAndIdProyect?nameManagement=Gestión de Integración&idProyect=${projectId}`, {
+      const respondeManagement = await fetch(`http://localhost:8080/api/v1/management/getByNameAndIdProyect?nameManagement=Gestion de Integracion&idProyect=${projectId}`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -234,7 +234,7 @@ async function handleManagementArea(managementName, redirectPath) {
         body: JSON.stringify({
           idProyecto: projectId,
           nameManagement: managementName,
-          description: `Area de ${managementName} del proyecto`
+          description: `${managementName} del proyecto`
         })
       });
 
