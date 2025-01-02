@@ -24,8 +24,8 @@
                             </div>
 
                             <div class="form-group">
-                                <label for="idEmployee">ID de Empleado <span class="red-text">*</span></label>
-                                <input id="idEmployee" v-model="formData.idEmployee"
+                                <label for="employeeId">ID de Empleado <span class="red-text">*</span></label>
+                                <input id="employeeId" v-model="formData.employeeId"
                                     class="form-input" required></input>
                             </div>
                         </div>
@@ -82,7 +82,6 @@
                                         comas en este campo</span>
                                 </div>
 
-                                <!-- TODO: HACER QUE SEA CON CASILLAS -->
                                 <div class="form-group">
                                     <label :for="'characteristicType' + index">Calificación <span class="red-text">*</span></label>
                                     <div class="form-check-group">
@@ -199,30 +198,6 @@
                     </section>
                 </form>
 
-                <div v-if="errorMessage" class="error-message">
-                    {{ errorMessage }}
-                </div>
-                <div v-if="pdfUrl" class="pdf-container">
-                    <div class="pdf-header">
-                        <h2 class="pdf-title">Vista previa del documento</h2>
-                        <div class="pdf-actions">
-                            <a :href="pdfUrl" download="RevisionDesemepenoTrabajo.pdf" class="pdf-button download-button">
-                                <span class="button-icon">↓</span>
-                                Descargar PDF
-                            </a>
-                        </div>
-                    </div>
-
-                    <div class="pdf-viewer">
-                        <iframe :src="pdfUrl" class="pdf-iframe"></iframe>
-                    </div>
-
-                    <div class="pdf-footer">
-                        <button @click="navigateTo('/ProjectManagementAreas')" class="pdf-button return-button">
-                            Volver al Dashboard
-                        </button>
-                    </div>
-                </div>
             </div>
         </main>
     </div>
@@ -238,40 +213,111 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, computed } from 'vue';
+import { ref, reactive, onMounted } from 'vue';
 import { useAuthStore } from '../stores/auth';
 import { useProjectStore } from '../stores/project';
+import { useProcessStore } from '../stores/Process';
+import { useExitStore } from '../stores/Exit';
 import AlertPopup from '../components/AlertPopup.vue';
+import { useRouter } from 'vue-router';
+import { ro } from 'vuetify/locale';
 
-const loading = ref(false);
-const errorMessage = ref('');
+// Store instantiation
 const AuthStore = useAuthStore();
 const ProjectStore = useProjectStore();
-const pdfUrl = ref(null);
+const ProcessStore = useProcessStore();
+const ExitStore = useExitStore();
+const router = useRouter();
 
+// Reactive state
+const loading = ref(false);
+const errorMessage = ref('');
+const showCancelConfirmation = ref(false);
+const showSaveConfirmation = ref(false);
+
+// Initial form data
 const formData = reactive({
     employeeName: '',
     employeeDepartment: '',
-    idEmployee: '',
+    employeeId: '',
     reviewerName: '',
     employeePosition: '',
     reviewerTitle: '',
     lastReviewDate: new Date().toISOString().split('T')[0],
     currentDate: '', // TODO: Verificar como hacer esto, problamente solucionado en el backend.
-    employeeCharacteristicsEvaluations: [ // TODO: Rellenar con el backend
-        {
-            name: '',
-            qualification: ''
-        }
-    ],
+    employeeCharacteristicsEvaluations: [{ // TODO: Rellenar con el backend
+        number: '',
+        name: '',
+        qualification: ''
+    }],
     currentGoalsReview: '',
     futureGoals: '',
     comments: ''
 });
 
+const alert = reactive({
+    show: false,
+    title: '',
+    message: '',
+    type: 'info',
+});
+
+// API Functions
+const createNewExit = async (processId, nameUser, token) => {
+    const createExitResponse = await fetch(`http://localhost:8080/api/v1/exit/create`, {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            idProcess: processId,
+            nameExit: 'Informes de desempeño del trabajo',
+            state: 'Activo',
+            dateCreation: new Date().toISOString().split('T')[0],
+            dateValidation: new Date().toISOString().split('T')[0],
+            priority: 'Alta',
+            responsible: nameUser,
+            description: 'Informes de desempeño del trabajo'
+        })
+    });
+
+    const responseText = await createExitResponse.text();
+    if (!responseText.trim()) {
+        throw new Error('No se recibió ningún contenido JSON');
+    }
+
+    if (!createExitResponse.ok) {
+        throw new Error(`Error al crear la salida: ${responseText}`);
+    }
+
+    const newExit = JSON.parse(responseText);
+    return newExit.idExit;
+};
+
+const getExistingExit = async (processId, token) => {
+    const response = await fetch(
+        `http://localhost:8080/api/v1/exit/getByIdProcessAndNameExit?idProcess=${processId}&nameExit=Informes de desempeño del trabajo`,
+        {
+            headers: { 'Authorization': `Bearer ${token}` },
+        }
+    );
+
+    if (response.ok) {
+        const textData = await response.text();
+        if (!textData.trim()) {
+            return null; // Indicate need to create new exit
+        }
+        const exitData = JSON.parse(textData);
+        return exitData.idExit;
+    }
+    return null;
+};
+
 const invalidFields = ref(new Set());
 
 const validateForm = () => {
+    /*
     invalidFields.value.clear();
 
     // Validar campos básicos
@@ -289,7 +335,6 @@ const validateForm = () => {
     });
 
     // Agregar validación de comas
-    // TODO: AVERIGUAR COMO ESCRIBIR ESTO
     formData.employeeCharacteristicsEvaluations.forEach((characteristics, index) => {
         if (hasComma(characteristics.position) || hasComma(characteristics.name)) {
             invalidFields.value.add(`characteristic-${index}`);
@@ -297,10 +342,9 @@ const validateForm = () => {
     });
 
     return invalidFields.value.size === 0;
+    */
+    return true;
 };
-
-const showCancelConfirmation = ref(false);
-const showSaveConfirmation = ref(false);
 
 const handleCancel = () => {
     showCancelConfirmation.value = false;
@@ -309,9 +353,8 @@ const handleCancel = () => {
 
 const addEmployeeCharacteristics = () => {
     formData.employeeCharacteristicsEvaluations.push({
-        type: '',
-        position: '',
-        name: ''
+        characteristic: '',
+        qualification: ''
     });
 };
 
@@ -319,135 +362,72 @@ const removeEmployeeCharacteristics = (index) => {
     formData.employeeCharacteristicsEvaluations.splice(index, 1);
 };
 
-const fetchProjectData = async () => {
-    try {
-        loading.value = true;
-        errorMessage.value = '';
-
-        const userId = AuthStore.userId;
-        const token = AuthStore.token;
-        const projectId = ProjectStore.projectId;
-
-        if (!userId || !token || !projectId) {
-            showAlert('Error de Sesión', '¡Sesión no iniciada o proyecto no seleccionado!', 'error');
-            return;
-        }
-
-        // Obtener la información del proyecto
-        const respondeProyect = await fetch(`http://localhost:8080/api/v1/proyect/getById/${projectId}`, {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json',
-            }
-        });
-
-        //imprimo por consola la informacion del proyecto
-        console.log(respondeProyect);
-
-        // Obtener la información del usuario
-        const respondeUser = await fetch(`http://localhost:8080/api/v1/user/getById/${userId}`, {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json',
-            }
-        });
-
-        //imprimo por consola la informacion del usuario
-        console.log(respondeUser);
-
-        if (!respondeProyect.ok || !respondeUser.ok) {
-            throw new Error('Error al obtener la información necesaria');
-        }
-
-        const projectDataResponse = await respondeProyect.json();
-        const userDataResponse = await respondeUser.json();
-
-        // Actualizar el formData
-        /*
-        formData.proyectName = projectDataResponse.nameProyect;
-        formData.idProyect = projectDataResponse.idProyecto;
-        formData.company = projectDataResponse.organization;
-        formData.elaborationDate = projectDataResponse.startDate;
-        formData.proyectDescription = projectDataResponse.description;
-        formData.proyectLeader = `${userDataResponse.names} ${userDataResponse.secondNames}`;
-        */
-
-    } catch (error) {
-        showAlert('Error', 'Error al obtener la información. Por favor, intenta nuevamente.', 'error');
-    } finally {
-        loading.value = false;
-    }
-};
-
 onMounted(() => {
     // fetchProjectData();
 });
 
 const handleSubmit = async () => {
-    if (!validateForm()) {
-        errorMessage.value = 'Por favor, complete todos los campos obligatorios';
-        return;
-    }
+    if (!validateForm()) return;
 
     try {
         loading.value = true;
-        errorMessage.value = '';
+        const { userId, token, name: nameUser } = AuthStore;
+        const processId = ProcessStore.processId;
 
-        const userId = AuthStore.userId;
-        const token = AuthStore.token;
-        const projectId = ProjectStore.projectId;
-
-        if (!userId || !token || !projectId) {
+        if (!userId || !token) {
             showAlert('Error de Sesión', '¡Sesión no iniciada!, redirigiendo a login...', 'error');
+            router.push('/login');
             return;
         }
 
+        // Get or create exit
+        let exitId = await getExistingExit(processId, token);
+        if (!exitId) {
+            exitId =  await createNewExit(processId, nameUser, token);
+        }
+
         // Convertir los arrays al formato requerido
-        const formattedCharacteristics = formatCharacteristicToString(formData.employeeCharacteristicsEvaluations);
+        const formattedData = {
+            ...formData,
+            employeeCharacteristicsEvaluations: formatCharacteristicToString(formData),
+        }
 
         // Ahora solo necesitamos hacer una única llamada al endpoint actualizado
-        const responseReview = await fetch(`http://localhost:8080/api/documents/work-performance-review/generate?idProyecto=${projectId}`, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                ...formData,
-                employeeCharacteristicsEvaluations: formattedCharacteristics,
-            }),
-        });
+        const response = await fetch(`http://localhost:8080/api/documents/work-performance-review/generate?idExit=${exitId}`, 
+            {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formattedData),
+            }
+        );
 
-        if (!responseReview.ok) {
-            const errorData = await responseReview.json();
-            throw new Error(errorData.message || 'Error al crear la revisión de desempeño de trabajo.');
+        if (!response.ok) {
+            throw new Error(await response.text());
         }
 
         // Procesar la respuesta del PDF
-        const pdfBlob = await responseReview.blob();
-        pdfUrl.value = URL.createObjectURL(pdfBlob);
+        const blob = await response.blob();
+        window.open(URL.createObjectURL(blob));
+        router.push('/ScopeManagementView');
 
     } catch (error) {
-        showAlert('Error', error.message || 'Error al crear la revisión de desempeño de trabajo. Por favor, intenta nuevamente.', 'error');
+        showAlert('Error', error.message, 'error');
     } finally {
         loading.value = false;
     }
 };
 
 // Función para formatear las características según la documentación
-const formatCharacteristicToString = (characteristics) => {
-    if (!characteristics || characteristics.length === 0) return '';
-
-    // Crear el encabezado
-    let result = '&Número de Característica,Nombre,Calificación&';
-
-    // Agregar cada característica
-    characteristics.forEach((characteristic, index) => {
-        result += `${index + 1},${characteristic.name},${characteristic.qualification}&`;
+const formatCharacteristicToString = (data) => {
+    let result = '&Número,Nombre,Calificación&';
+    let index = 1;
+    data.employeeCharacteristicsEvaluations.forEach(characteristic => {
+        result += `${index},${characteristic.name},${characteristic.qualification}&`;
+        index++;
     });
-
     return result;
 };
 
@@ -455,34 +435,37 @@ const confirmSave = async () => {
     try {
         loading.value = true;
         showSaveConfirmation.value = false;
-
-        // Aquí implementarías la lógica para guardar los datos
         await handleSave();
-
-        // Mostrar mensaje de éxito
         showAlert('Éxito', 'Los datos se han guardado correctamente', 'success');
     } catch (error) {
-        showAlert('Error', 'Error al guardar los datos. Por favor, intenta nuevamente.', 'error');
+        showAlert('Error', 'Error al guardar los datos.', 'error');
     } finally {
         loading.value = false;
     }
 };
 
 const handleSave = async () => {
+    const userId = AuthStore.userId;
+    const token = AuthStore.token;
+    const projectId = ProjectStore.projectId;
+
+    const dataToSend = {
+        ...formData,
+        employeeCharacteristicsEvaluations: formatCharacteristicToString(formData)
+    }
+
+    console.log("JSON para Postman:", JSON.stringify(dataToSend, null, 2));
+
+    /*
     try {
         const userId = AuthStore.userId;
         const token = AuthStore.token;
         const projectId = ProjectStore.projectId;
 
-        if (!userId || !token || !projectId) {
-            showAlert('Error de Sesión', '¡Sesión no iniciada!, redirigiendo a login...', 'error');
-            return;
+        const dataToSend = {
+            ...formData,
+            employeeCharacteristicsEvaluations: formatCharacteristicToString(formData)
         }
-
-        // Convertir los arrays al formato requerido
-        const formattedCharacteristics = formatCharacteristicToString(formData.employeeCharacteristicsEvaluations);
-
-        //llamada a la ruta: http://localhost:8080/api/v1/parameters/saveParametersList enviando (@RequestBody Map<String, String> data, @RequestParam Long idExit)
 
         const saveData = await fetch(`http://localhost:8080/api/v1/parameters/saveParametersList?idExit=${ProjectStore.projectId}`, {
             method: 'POST',
@@ -506,6 +489,7 @@ const handleSave = async () => {
         showAlert('Error', 'Error al guardar los datos. Por favor, intenta nuevamente.', 'error');
         throw error;
     }
+    */
 };
 
 const isFieldInvalid = (fieldName) => {
@@ -519,19 +503,11 @@ const hasComma = (value) => {
 const validateNoCommas = (event, type, index, field) => {
     const value = event.target.value;
     if (value.includes(',')) {
-        // Eliminar las comas del valor
         if (type === 'characteristic') {
             formData.employeeCharacteristicsEvaluations[index][field] = value.replace(/,/g, '');
         }
     }
 };
-
-const alert = reactive({
-    show: false,
-    title: '',
-    message: '',
-    type: 'info',
-});
 
 const showAlert = (title, message, type = 'info') => {
     alert.title = title;
