@@ -94,7 +94,7 @@ public class ActInstitutionDocumentService implements DocumentService {
         try {
             // 1. Crear Management
             Management management = new Management();
-            management.setNameManagement("Gestión de Integración");
+            management.setNameManagement("Gestion de Integracion");
             management.setDescription("Gestión de Integración del Proyecto");
 
             Proyect proyect = new Proyect();
