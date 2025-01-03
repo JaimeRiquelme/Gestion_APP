@@ -3,9 +3,7 @@ package gestion.proyectos.gestionproyectos.Controller;
 import gestion.proyectos.gestionproyectos.Entity.Exit;
 import gestion.proyectos.gestionproyectos.Entity.Parameter;
 import gestion.proyectos.gestionproyectos.Service.ExitService;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -92,61 +90,6 @@ public class ExitController {
             return new ResponseEntity<>(exit, HttpStatus.OK);
         } catch (RuntimeException e) {
             return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
-        }
-    }
-
-    // Nuevo endpoint para obtener el documento PDF por ID de Exit
-    @GetMapping("{id}/document")
-    public ResponseEntity<byte[]> getDocumentByIdExit(@PathVariable Long id) {
-        try {
-            byte[] pdfContent = exitService.getDocumentByIdExit(id);
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_PDF);
-            headers.setContentDispositionFormData("filename", "document.pdf");
-
-            return ResponseEntity.ok()
-                    .headers(headers)
-                    .body(pdfContent);
-        } catch (RuntimeException e) {
-            if (e.getMessage().contains("Exit not found")) {
-                return new ResponseEntity<>(null, HttpStatus.NOT_FOUND); // Exit no encontrado
-            } else if (e.getMessage().contains("Document not found")) {
-                return new ResponseEntity<>(null, HttpStatus.NO_CONTENT); // Documento es null
-            } else {
-                // Manejo de otras excepciones en tiempo de ejecución
-                e.printStackTrace();
-                return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
-            }
-        } catch (Exception e) {
-            // Manejo de cualquier otra excepción inesperada
-            e.printStackTrace();
-            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
-
-    @GetMapping("/actInstitution/ByProyectId/{idProyecto}")
-    public ResponseEntity<byte[]> getActInstitutionByIdProyect(@PathVariable Long idProyecto) {
-        try {
-            byte[] pdfContent = exitService.getActInstitutionByIdProyect(idProyecto);
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_PDF);
-            headers.setContentDispositionFormData("filename", "acta_de_constitucion.pdf");
-
-            return ResponseEntity.ok()
-                    .headers(headers)
-                    .body(pdfContent);
-        } catch (RuntimeException e) {
-            if (e.getMessage().contains("Exit not found")) {
-                return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
-            } else if (e.getMessage().contains("Document not found")) {
-                return new ResponseEntity<>(null, HttpStatus.NO_CONTENT);
-            } else {
-                e.printStackTrace();
-                return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }
