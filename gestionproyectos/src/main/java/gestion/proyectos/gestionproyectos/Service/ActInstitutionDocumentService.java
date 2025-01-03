@@ -49,7 +49,7 @@ public class ActInstitutionDocumentService implements DocumentService {
             "proyectPromotor",
             "proyectLeader",
             "elaborationDate",
-            "proyectPurpouse",
+            "proyectPurpose",
             "proyectDescription",
             "proyectStakeholders",
             "preliminaryScope",

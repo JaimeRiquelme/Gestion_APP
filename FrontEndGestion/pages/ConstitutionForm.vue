@@ -54,8 +54,8 @@
                     <section class="form-section">
                         <h2 class="section-title">Propósito y Descripción</h2>
                         <div class="form-group">
-                            <label for="proyectPurpouse">Propósito del Proyecto *</label>
-                            <textarea id="proyectPurpouse" v-model="formData.proyectPurpouse"
+                            <label for="proyectPurpose">Propósito del Proyecto *</label>
+                            <textarea id="proyectPurpose" v-model="formData.proyectPurpose"
                                 class="form-input form-textarea" required></textarea>
                         </div>
 
@@ -371,7 +371,7 @@ const formData = reactive({
     proyectPromotor: '',
     proyectLeader: '',
     elaborationDate: new Date().toISOString().split('T')[0],
-    proyectPurpouse: '',
+    proyectPurpose: '',
     proyectDescription: '',
     proyectStakeholders: [
         {
