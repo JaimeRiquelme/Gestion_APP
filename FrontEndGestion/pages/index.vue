@@ -1,12 +1,5 @@
 <template>
   <div class="container">
-    <!-- Barra de Navegación -->
-    <header class="header">
-      <div class="logo-container">
-        <div class="logo">USACH</div>
-        <h1 class="title">USACH</h1>
-      </div>
-    </header>
 
     <!-- Contenido Principal -->
     <main class="main-content">
