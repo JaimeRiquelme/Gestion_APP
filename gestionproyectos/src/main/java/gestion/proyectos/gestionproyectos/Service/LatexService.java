@@ -72,15 +72,17 @@ public class LatexService {
             String value = entry.getValue() != null ? entry.getValue() : "";
 
             if (value.contains("{") && value.contains("}")) {
-                // Procesamos el EDT y las descripciones
+                // Procesar EDT
                 Map<String, String> edtResults = processEDTContentWithDescriptions(value);
-                value = edtResults.get("forest"); // El diagrama EDT
-
-                // Reemplazar la marca de posición de las descripciones de tareas
+                value = edtResults.get("forest");
                 result = result.replace("{{taskDescriptions}}", edtResults.get("descriptions"));
             } else if (isTableFormat(value)) {
                 value = processTableContent(value);
+            } else if (value.contains("\n")) {
+                // Si el texto contiene saltos de línea, procesarlo como lista
+                value = processTextWithLineBreaks(value);
             } else {
+                // Para texto normal sin saltos de línea
                 value = escapeLatexSpecialChars(value);
             }
 
@@ -241,6 +243,32 @@ public class LatexService {
                 .replace(">", "\\textgreater{}")
                 .replace("<", "\\textless{}")
                 .replace("&", "\\&");
+    }
+
+    private String processTextWithLineBreaks(String input) {
+        if (input == null || input.trim().isEmpty()) {
+            return "";
+        }
+
+        // Dividir el texto en líneas
+        String[] lines = input.split("\\r?\\n");
+
+        // Si solo hay una línea, devolverla escapada
+        if (lines.length <= 1) {
+            return escapeLatexSpecialChars(input);
+        }
+
+        StringBuilder result = new StringBuilder();
+        result.append("\\begin{itemize}\n");
+
+        for (String line : lines) {
+            if (!line.trim().isEmpty()) {
+                result.append("  \\item ").append(escapeLatexSpecialChars(line.trim())).append("\n");
+            }
+        }
+
+        result.append("\\end{itemize}\n");
+        return result.toString();
     }
 
     private Path createTempDirectory() throws IOException {
