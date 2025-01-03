@@ -13,7 +13,9 @@
 
               <div class="management-areas">
                   <button v-for="area in managementAreas" :key="area.id" class="area-button"
-                      @click="handleAreaClick(area)">
+                      :class="{ 'area-button-disabled': area.disabled }"
+                      :disabled="area.disabled"
+                      @click="area.disabled ? null : handleAreaClick(area)">
                       <span class="area-number">{{ area.id }}.</span>
                       <span class="area-title">{{ area.title }}</span>
                   </button>
@@ -46,6 +48,7 @@ const managementAreas = [
     {
       id: 2,
       title: 'Secciones por ser implementadas',
+      disabled: true
     }
 ];
 
@@ -251,6 +254,11 @@ onMounted(async () => {
 
 .area-button:hover {
     background-color: #009B94;
+}
+
+.area-button-disabled {
+    background-color: grey;
+    cursor: not-allowed;
 }
 
 .area-number {
