@@ -7,209 +7,147 @@
 
             <div class="form-container">
                 <form @submit.prevent="handleSubmit" class="performanceReview-form">
-                    <!-- Información del Empleado -->
+                    <!-- Información básica -->
                     <section class="form-section">
-                        <h2 class="section-title">Información del Empleado</h2>
+                        <h2 class="section-title">Información Básica</h2>
                         <div class="form-group">
-                            <label for="employeeName">Nombre del Empleado <span class="red-text">*</span></label>
-                            <input id="employeeName" v-model="formData.employeeName" type="text"
-                                class="form-input" required></input>
+                            <label for="proyectName">Nombre del Proyecto <span class="red-text">*</span></label>
+                            <input id="proyectName" v-model="formData.proyectName" type="text"
+                                :class="['form-input', { 'invalid-input': isFieldInvalid('proyectName') }]" readonly
+                                required />
                         </div>
 
                         <div class="form-row">
                             <div class="form-group">
-                                <label for="employeeDepartment">Departamento <span class="red-text">*</span></label>
-                                <input id="employeeDepartment" v-model="formData.employeeDepartment"
-                                    class="form-input" required></input>
+                                <label for="idProject">ID del Proyecto <span class="red-text">*</span></label>
+                                <input id="idProject" v-model="formData.idProject"
+                                    class="form-input" readonly required></input>
                             </div>
 
                             <div class="form-group">
-                                <label for="employeeId">ID de Empleado <span class="red-text">*</span></label>
-                                <input id="employeeId" v-model="formData.employeeId"
-                                    class="form-input" required></input>
+                                <label for="elaborationDate">Fecha de Elaboración <span class="red-text">*</span></label>
+                                <input id="elaborationDate" v-model="formData.elaborationDate" type="date"
+                                    class="form-input" readonly required></input>
                             </div>
                         </div>
 
                         <div class="form-group">
-                            <label for="reviewerName">Nombre Revisor <span class="red-text">*</span></label>
-                            <input id="reviewerName" v-model="formData.reviewerName" type="text"
-                                class="form-input" required></input>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="employeePosition">Posición Empleado <span class="red-text">*</span></label>
-                            <input id="employeePosition" v-model="formData.employeePosition" type="text"
-                                class="form-input" required></input>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="reviewerTitle">Título del Revisor <span class="red-text">*</span></label>
-                            <input id="reviewerTitle" v-model="formData.reviewerTitle" type="text"
-                                class="form-input" required></input>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="lastReviewDate">Fecha de Última Revisión <span class="red-text">*</span></label>
-                                <input id="lastReviewDate" v-model="formData.lastReviewDate" type="date"
-                                    class="form-input" required></input>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="currentDate">Fecha Actual <span class="red-text">*</span></label>
-                                <input id="currentDate" v-model="formData.currentDate" type="date"
-                                    class="form-input" required></input>
-                            </div>
-                        </div>
-
-                    </section>
-
-                    <!-- Evaluación de de Características del Empleado -->
-                    <section class="form-section">
-                        <h2 class="section-title">Evaluación de de Características del Empleado</h2>
-
-                        <div v-for="(characteristics, index) in formData.employeeCharacteristicsEvaluations" :key="index"
-                            class="characteristics-row">
-                            <div
-                                :class="['characteristics-inputs', { 'invalid-section': isFieldInvalid(`characteristics-${index}`) }]">
-
-                                <div class="form-group">
-                                    <label :for="'characteristicName' + index">Característica <span class="red-text">*</span></label>
-                                    <input :id="'characteristicName' + index" v-model="characteristics.name"
-                                        type="text" class="form-input" placeholder="Ingrese el nombre"
-                                        @input="validateNoCommas($event, 'characteristics', index, 'position')" required />
-                                    <span v-if="hasComma(characteristics.position)" class="invalid-feedback">No se permiten
-                                        comas en este campo</span>
-                                </div>
-
-                                <div class="form-group">
-                                    <label :for="'characteristicType' + index">Calificación <span class="red-text">*</span></label>
-                                    <div class="form-check-group">
-                                        <div 
-                                        v-for="option in ['Insuficiente', 'Satisfactoria', 'Buena', 'Excelente']" 
-                                        :key="option" 
-                                        class="form-check-vertical"
-                                        >
-                                        <label 
-                                            :for="'characteristicType-' + index + '-' + option" 
-                                            class="custom-radio-label"
-                                        >
-                                            {{ option }}
-                                            <input 
-                                            type="radio" 
-                                            :id="'characteristicType-' + index + '-' + option" 
-                                            :value="option" 
-                                            v-model="characteristics.qualification" 
-                                            class="custom-radio-input" 
-                                            required
-                                            />
-                                            <span class="custom-radio-box"></span>
-                                        </label>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <button v-if="formData.employeeCharacteristicsEvaluations.length > 1" type="button"
-                                class="remove-characteristics-button" @click="removeEmployeeCharacteristics(index)">
-                                ×
-                            </button>
-                        </div>
-
-                        <div class="add-characteristics-container">
-                            <button type="button" class="add-characteristics-button" @click="addEmployeeCharacteristics">
-                                +
-                            </button>
+                            <label for="projectLeader">Líder del Proyecto <span class="red-text">*</span></label>
+                            <input id="projectLeader" v-model="formData.projectLeader" type="text"
+                                class="form-input" readonly required />
                         </div>
                     </section>
 
-
-                    <!-- Metas -->
+                    <!-- Resumen del Alcance -->
                     <section class="form-section">
-                        <h2 class="section-title">Metas</h2>
+                        <h2 class="section-title">Resumen del Alcance <span class="red-text">*</span></h2>
                         <div class="form-group">
-                            <label for="currentGoalsReview">¿Fueron las metas alcanzadas en la actual revisión? <span class="red-text">*</span></label>
-                            <textarea id="currentGoalsReview" v-model="formData.currentGoalsReview"
-                                class="form-input form-textarea" required></textarea>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="futureGoals">Metas para la siguiente revisión: <span class="red-text">*</span></label>
-                            <textarea id="futureGoals" v-model="formData.futureGoals"
+                            <label for="scopeSummary">En esta sección se describe brevemente el propósito y los objetivos principales del proyecto, con un enfoque en el alcance aprobado. Se debe incluir una descripción de los entregables planificados, las actividades clave que se deben realizar para lograrlos y cualquier criterio de éxito acordado. Este resumen ayuda a contextualizar el progreso evaluado y a recordar los límites del alcance del proyecto.</label>
+                            <textarea id="scopeSummary" v-model="formData.scopeSummary"
                                 class="form-input form-textarea" required></textarea>
                         </div>
                     </section>
 
-                    <!-- Comentarios y Aprobación -->
+                    <!-- Progreso Actual -->
                     <section class="form-section">
-                        <h2 class="section-title">Comentarios y Aprobación</h2>
+                        <h2 class="section-title">Progreso actual <span class="red-text">*</span></h2>
                         <div class="form-group">
-                            <label for="comments">Comentarios: <span class="red-text">*</span></label>
-                            <textarea id="comments" v-model="formData.comments"
+                            <label for="progress">Comentarios: Esta sección detalla los avances logrados en el proyecto en términos de tareas completadas, entregables producidos y el porcentaje de avance global. También se deben incluir métricas clave como el índice de desempeño del cronograma (SPI) y cualquier desviación respecto a lo planificado.</label>
+                            <textarea id="progress" v-model="formData.progress"
                                 class="form-input form-textarea" required></textarea>
                         </div>
                     </section>
 
+                    <!-- Progreso Actual -->
+                    <section class="form-section">
+                        <h2 class="section-title">Progreso actual <span class="red-text">*</span></h2>
+                        <div class="form-group">
+                            <label for="deviationsDetected">Comentarios: Esta sección detalla los avances logrados en el proyecto en términos de tareas completadas, entregables producidos y el porcentaje de avance global. También se deben incluir métricas clave como el índice de desempeño del cronograma (SPI) y cualquier desviación respecto a lo planificado.</label>
+                            <textarea id="deviationsDetected" v-model="formData.deviationsDetected"
+                                class="form-input form-textarea" required></textarea>
+                        </div>
+                    </section>
+
+                    <!-- Desviaciones Detectadas -->
+                    <section class="form-section">
+                        <h2 class="section-title">Desviaciones detectadas <span class="red-text">*</span></h2>
+                        <div class="form-group">
+                            <label for="analysisOfCauses">En esta sección se identifican y describen las desviaciones del plan de alcance, junto con las actividades o entregables afectados. Es importante detallar si estas desviaciones fueron causadas por factores internos (como problemas de recursos) o externos (como cambios en los requisitos).</label>
+                            <textarea id="analysisOfCauses" v-model="formData.analysisOfCauses"
+                                class="form-input form-textarea" required></textarea>
+                        </div>
+                    </section>
+
+                    <!-- Análisis de causas -->
+                    <section class="form-section">
+                        <h2 class="section-title">Análisis de causas <span class="red-text">*</span></h2>
+                        <div class="form-group">
+                            <label for="correctiveActions">En esta sección se analizan las causas raíz de las desviaciones detectadas. Esto ayuda a comprender por qué ocurrieron y a identificar patrones que podrían prevenirse en el futuro.</label>
+                            <textarea id="correctiveActions" v-model="formData.correctiveActions"
+                                class="form-input form-textarea" required></textarea>
+                        </div>
+                    </section>
+
+                    <!-- Acciones correctivas -->
+                    <section class="form-section">
+                        <h2 class="section-title">Acciones correctivas <span class="red-text">*</span></h2>
+                        <div class="form-group">
+                            <label for="nextSteps">Aquí se describen las acciones tomadas o planificadas para resolver los problemas detectados y asegurar el cumplimiento del alcance. Es fundamental detallar quién será responsable de implementar estas medidas y los plazos esperados para su ejecución.</label>
+                            <textarea id="nextSteps" v-model="formData.nextSteps"
+                                class="form-input form-textarea" required></textarea>
+                        </div>
+                    </section>
+
+                    <!-- Botones de acción -->
                     <section class="form-actions">
-                        <div class="form-actions">
-                            <button type="button" class="cancel-button" @click="showCancelConfirmation = true">
-                                Cancelar
-                            </button>
-                            <button type="button" class="save-button" :disabled="loading"
-                                @click="showSaveConfirmation = true">
-                                {{ loading ? 'Guardando...' : 'Guardar' }}
-                            </button>
-                            <button type="submit" class="submit-button" :disabled="loading" @click="handleSubmit">
-                                {{ loading ? 'Creando...' : 'Crear Documento' }}
-                            </button>
-                        </div>
-
-                        <!-- Diálogo de confirmación para cancelar -->
-                        <div v-if="showCancelConfirmation" class="modal-overlay">
-                            <div class="modal-content">
-                                <h3>Confirmar Cancelación</h3>
-                                <p>¿Estás seguro que deseas cancelar? Los cambios no guardados se perderán.</p>
-                                <div class="modal-actions">
-                                    <button class="cancel-button" @click="showCancelConfirmation = false">
-                                        No, continuar editando
-                                    </button>
-                                    <button class="confirm-button" @click="handleCancel">
-                                        Sí, cancelar
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Diálogo de confirmación para guardar -->
-                        <div v-if="showSaveConfirmation" class="modal-overlay">
-                            <div class="modal-content">
-                                <h3>Confirmar Guardado</h3>
-                                <p>¿Estás seguro que deseas guardar los cambios actuales?</p>
-                                <div class="modal-actions">
-                                    <button class="cancel-button" @click="showSaveConfirmation = false">
-                                        No, seguir editando
-                                    </button>
-                                    <button class="save-button" @click="confirmSave">
-                                        Sí, guardar
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
+                        <button type="button" class="cancel-button" @click="showCancelConfirmation = true">
+                            Cancelar
+                        </button>
+                        <button type="button" class="save-button" :disabled="loading"
+                            @click="showSaveConfirmation = true">
+                            {{ loading ? 'Guardando...' : 'Guardar' }}
+                        </button>
+                        <button type="submit" class="submit-button" :disabled="loading">
+                            {{ loading ? 'Creando...' : 'Crear Documento' }}
+                        </button>
                     </section>
                 </form>
 
+                <!-- Diálogos de confirmación -->
+                <div v-if="showCancelConfirmation" class="modal-overlay">
+                    <div class="modal-content">
+                        <h3>Confirmar Cancelación</h3>
+                        <p>¿Estás seguro que deseas cancelar? Los cambios no guardados se perderán.</p>
+                        <div class="modal-actions">
+                            <button class="cancel-button" @click="showCancelConfirmation = false">
+                                No, continuar editando
+                            </button>
+                            <button class="confirm-button" @click="handleCancel">
+                                Sí, cancelar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div v-if="showSaveConfirmation" class="modal-overlay">
+                    <div class="modal-content">
+                        <h3>Confirmar Guardado</h3>
+                        <p>¿Estás seguro que deseas guardar los cambios actuales?</p>
+                        <div class="modal-actions">
+                            <button class="cancel-button" @click="showSaveConfirmation = false">
+                                No, seguir editando
+                            </button>
+                            <button class="save-button" @click="confirmSave">
+                                Sí, guardar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <AlertPopup :show="alert.show" :title="alert.title" :message="alert.message" :type="alert.type"
+                    @confirm="handleAlertConfirm" />
             </div>
         </main>
     </div>
-
-    <!-- Agregar el componente AlertPopup -->
-    <AlertPopup
-        :show="alert.show"
-        :title="alert.title"
-        :message="alert.message"
-        :type="alert.type"
-        @confirm="handleAlertConfirm"
-    />
 </template>
 
 <script setup>
@@ -237,22 +175,16 @@ const showSaveConfirmation = ref(false);
 
 // Initial form data
 const formData = reactive({
-    employeeName: '',
-    employeeDepartment: '',
-    employeeId: '',
-    reviewerName: '',
-    employeePosition: '',
-    reviewerTitle: '',
-    lastReviewDate: new Date().toISOString().split('T')[0],
-    currentDate: '', // TODO: Verificar como hacer esto, problamente solucionado en el backend.
-    employeeCharacteristicsEvaluations: [{ // TODO: Rellenar con el backend
-        number: '',
-        name: '',
-        qualification: ''
-    }],
-    currentGoalsReview: '',
-    futureGoals: '',
-    comments: ''
+    proyectName: '',
+    idProject: '',
+    projectLeader: '',
+    elaborationDate: new Date().toISOString().split('T')[0],
+    scopeSummary: '',
+    progress: '',
+    deviationsDetected: '',
+    analysisOfCauses: '',
+    correctiveActions: '',
+    nextSteps: ''
 });
 
 const alert = reactive({
@@ -317,33 +249,11 @@ const getExistingExit = async (processId, token) => {
 const invalidFields = ref(new Set());
 
 const validateForm = () => {
-    /*
-    invalidFields.value.clear();
-
-    // Validar campos básicos
-    Object.entries(formData).forEach(([key, value]) => {
-        if (typeof value === 'string' && !value.trim()) {
-            invalidFields.value.add(key);
-        }
-    });
-
-    // Validar caracteristicas
-    formData.employeeCharacteristicsEvaluations.forEach((characteristic, index) => {
-        if (!characteristic.name || !characteristic.qualification) {
-            invalidFields.value.add(`characteristic-${index}`);
-        }
-    });
-
-    // Agregar validación de comas
-    formData.employeeCharacteristicsEvaluations.forEach((characteristics, index) => {
-        if (hasComma(characteristics.position) || hasComma(characteristics.name)) {
-            invalidFields.value.add(`characteristic-${index}`);
-        }
-    });
-
-    return invalidFields.value.size === 0;
-    */
     return true;
+};
+
+const isFieldInvalid = (fieldName) => {
+    return false; 
 };
 
 const handleCancel = () => {
@@ -351,19 +261,41 @@ const handleCancel = () => {
     navigateTo('/principalView');
 };
 
-const addEmployeeCharacteristics = () => {
-    formData.employeeCharacteristicsEvaluations.push({
-        characteristic: '',
-        qualification: ''
-    });
-};
+onMounted(async () => {
+    try {
+        loading.value = true;
+        const projectId = ProjectStore.projectId;
+        const userId = AuthStore.userId;
+        const token = AuthStore.token;
 
-const removeEmployeeCharacteristics = (index) => {
-    formData.employeeCharacteristicsEvaluations.splice(index, 1);
-};
+        const response = await fetch(`http://localhost:8080/api/v1/proyect/getById/${projectId}`, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+            },
+        });
 
-onMounted(() => {
-    // fetchProjectData();
+        const respondeUser = await fetch(`http://localhost:8080/api/v1/user/getById/${userId}`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+            }
+        });
+
+        const userDataResponse = await respondeUser.json();
+
+        if (response.ok && respondeUser.ok) {
+            const data = await response.json();
+            formData.proyectName = data.nameProyect;
+            formData.idProject = data.idProyecto;
+            formData.projectLeader = `${userDataResponse.names} ${userDataResponse.secondNames}`;
+            formData.elaborationDate = data.startDate;
+        }
+    } catch (error) {
+        showAlert('Error', 'Error al cargar los datos del proyecto', 'error');
+    } finally {
+        loading.value = false;
+    }
 });
 
 const handleSubmit = async () => {
@@ -389,7 +321,7 @@ const handleSubmit = async () => {
         // Convertir los arrays al formato requerido
         const formattedData = {
             ...formData,
-            employeeCharacteristicsEvaluations: formatCharacteristicToString(formData),
+            //employeeCharacteristicsEvaluations: formatCharacteristicToString(formData),
         }
 
         // Ahora solo necesitamos hacer una única llamada al endpoint actualizado
@@ -420,17 +352,6 @@ const handleSubmit = async () => {
     }
 };
 
-// Función para formatear las características según la documentación
-const formatCharacteristicToString = (data) => {
-    let result = '&Número,Nombre,Calificación&';
-    let index = 1;
-    data.employeeCharacteristicsEvaluations.forEach(characteristic => {
-        result += `${index},${characteristic.name},${characteristic.qualification}&`;
-        index++;
-    });
-    return result;
-};
-
 const confirmSave = async () => {
     try {
         loading.value = true;
@@ -451,7 +372,7 @@ const handleSave = async () => {
 
     const dataToSend = {
         ...formData,
-        employeeCharacteristicsEvaluations: formatCharacteristicToString(formData)
+        //employeeCharacteristicsEvaluations: formatCharacteristicToString(formData)
     }
 
     console.log("JSON para Postman:", JSON.stringify(dataToSend, null, 2));
@@ -490,23 +411,6 @@ const handleSave = async () => {
         throw error;
     }
     */
-};
-
-const isFieldInvalid = (fieldName) => {
-    return invalidFields.value.has(fieldName);
-};
-
-const hasComma = (value) => {
-    return value && value.includes(',');
-};
-
-const validateNoCommas = (event, type, index, field) => {
-    const value = event.target.value;
-    if (value.includes(',')) {
-        if (type === 'characteristic') {
-            formData.employeeCharacteristicsEvaluations[index][field] = value.replace(/,/g, '');
-        }
-    }
 };
 
 const showAlert = (title, message, type = 'info') => {

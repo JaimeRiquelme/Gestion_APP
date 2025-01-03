@@ -1,75 +1,50 @@
-\documentclass[10pt]{article}
-\usepackage[utf8]{inputenc}
-\usepackage[spanish]{babel}
-\usepackage[table]{xcolor}
-\usepackage{tabularx}
-\usepackage{array}
-\usepackage{geometry}
-\geometry{margin=1.5cm}
-
-% Definir nuevos tipos de columnas
-\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
-\newcolumntype{L}{>{\raggedright\arraybackslash\hsize=0.5\hsize}X}
-\newcolumntype{R}{>{\raggedright\arraybackslash\hsize=1.2\hsize}X}
+\documentclass{article}
+\usepackage[table]{xcolor} % Para colorear celdas
+\usepackage{tabularx} % Para tablas ajustables al ancho
+\usepackage{geometry} % Para ajustar márgenes
+\geometry{margin=1.5cm} % Márgenes pequeños
 
 \begin{document}
 
-    \begin{center}
-    {\huge\textbf{Revisión de Desempeño de Trabajo}}\\[1cm]
-    \end{center}
+\begin{center}
+{\huge\textbf{Revisión de Desempeño del Trabajo}}\\[14cm]
+\end{center}
 
-    \renewcommand{\arraystretch}{1.5}
+\newcommand{\wrappingmulticolumn}[3]
+    {\multicolumn{#1}
+                 {|>{\hsize=\dimexpr#1\hsize+\tabcolsep * (2 * (#1 - 1) )+\arrayrulewidth* (#1 - 2)\relax}#2|}
+                 {#3}}
+\renewcommand{\arraystretch}{1.5} % Espacio entre filas
+\rowcolors{2}{gray!10}{white} % Colores alternos para filas
 
-% Primera tabla - Información del proyecto
-    \noindent
-    \begin{tabularx}{\textwidth}{|c|c|c|c|c|c|}
-        \hline
-        \multicolumn{6}{|>{\columncolor{gray!50}}p{18.12cm}|}{\centering\textbf{INFORMACIÓN DEL EMPLEADO}} \\ \hline
-        \multicolumn{1}{|>{\columncolor{gray!20}}p{2.91cm}|}{\textbf{NOMBRE DEL EMPLEADO}} &
-        \multicolumn{2}{p{5.5cm}|}{\textbf{{{employeeName}}}} &
-        \multicolumn{1}{|>{\columncolor{gray!20}}p{2.91cm}|}{\textbf{DEPART- AMENTO}} &
-        \multicolumn{2}{p{5.5cm}|}{\textbf{{{employeeDepartment}}}} \\ \hline
-        \multicolumn{1}{|>{\columncolor{gray!20}}p{2.91cm}|}{\textbf{ID DEL EMPLEADO}} &
-        \multicolumn{2}{p{5.5cm}|}{\textbf{{{idEmployee}}}} &
-        \multicolumn{1}{|>{\columncolor{gray!20}}p{2.91cm}|}{\textbf{NOMBRE REVISOR}} &
-        \multicolumn{2}{p{5.5cm}|}{\textbf{{{reviewerName}}}} \\ \hline
-        \multicolumn{1}{|>{\columncolor{gray!20}}p{2.91cm}|}{\textbf{POSICIÓN EMPLEADO}} &
-        \multicolumn{2}{p{5.5cm}|}{\textbf{{{employeePosition}}}} &
-        \multicolumn{1}{|>{\columncolor{gray!20}}p{2.91cm}|}{\textbf{TÍTULO DEL REVISOR}} &
-        \multicolumn{2}{p{5.5cm}|}{\textbf{{{reviewerTitle}}}} \\ \hline
-        \multicolumn{2}{|>{\columncolor{gray!20}}p{5.5cm}|}{\textbf{FECHA DE ÚLTIMA REVISIÓN}} &
-        \multicolumn{1}{p{2.9cm}|}{\textbf{{{lastReviewDate}}}} &
-        \multicolumn{2}{|>{\columncolor{gray!20}}p{5.5cm}|}{\textbf{FECHA ACTUAL}} &
-        \multicolumn{1}{p{2.9cm}|}{\textbf{{{currentDate}}}} \\ \hline
-    \end{tabularx}
+\begin{tabular}{|ll|} \hline
+\rowcolor{gray!10}\textbf{Nombre del proyecto:} & {{proyectName}} \\[0.3cm]
+\textbf{Identificador del proyecto:} & {{idProject}} \\[0.3cm]
+\textbf{Lider de proyecto:} & {{projectLeader}} \\[0.3cm]
+\textbf{Fecha elaboración:} & {{elaborationDate}} \\ \hline
+\end{tabular}
 
-    \vspace{0.5cm}
+\newpage
 
-    \section{Evaluación de Características del Empleado}
-    {{employeeCharacteristicsEvaluations}}
+\tableofcontents
+\newpage
 
-    \section{Metas}
-    \noindent
-    \begin{tabularx}{\textwidth}{|c|c|c|c|c|c|}
-        \hline
-        \multicolumn{6}{|>{\columncolor{gray!50}}p{18.12cm}|}{\centering\textbf{METAS}} \\ \hline
-        \multicolumn{6}{|>{\columncolor{gray!20}}p{18.12cm}|}{\centering\textbf{¿FUERON LAS METAS ALCANZADAS EN LA ACTUAL REVISIÓN?}} \\ \hline
-        \multicolumn{6}{|p{18.12cm}|}{\centering\textbf{{{currentGoalsReview}}}} \\ \hline
-        \multicolumn{6}{|>{\columncolor{gray!20}}p{18.12cm}|}{\centering\textbf{METAS PARA SIGUIENTE REVISIÓN}} \\ \hline
-        \multicolumn{6}{|p{18.12cm}|}{\centering\textbf{{{futureGoals}}}} \\ \hline
-    \end{tabularx}
+\section{Resumen del Alcance}
+{{scopeSummary}}
 
-    \section{Comentarios y Aprobación}
-    \noindent
-    \begin{tabularx}{\textwidth}{|c|c|c|c|c|c|}
-        \hline
-        \multicolumn{6}{|>{\columncolor{gray!50}}p{18.12cm}|}{\centering\textbf{COMENTARIOS Y APROBACIÓN}} \\ \hline
-        \multicolumn{6}{|>{\columncolor{gray!20}}p{18.12cm}|}{\centering\textbf{COMENTARIOS}} \\ \hline
-        \multicolumn{6}{|p{18.12cm}|}{\centering\textbf{{{comments}}}} \\ \hline
-        \multicolumn{1}{|>{\columncolor{gray!20}}p{2.91cm}|}{\textbf{FIRMA EMPLEADO}} &
-        \multicolumn{2}{p{5.5cm}|}{} &
-        \multicolumn{1}{|>{\columncolor{gray!20}}p{2.91cm}|}{\textbf{FIRMA REVISOR}} &
-        \multicolumn{2}{p{5.5cm}|}{} \\ \hline
-    \end{tabularx}
+\section{Progreso Actual}
+{{progress}}
+
+\section{Desviaciones detectadas}
+{{deviationsDetected}}
+
+\section{Análisis de causas}
+{{analysisOfCauses}}
+
+\section{Acciones Correctivas}
+{{correctiveActions}}
+
+\section{Próximos pasos}
+{{nextSteps}}
 
 \end{document}
