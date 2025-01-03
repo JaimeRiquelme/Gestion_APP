@@ -123,4 +123,30 @@ public class ExitController {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+    @GetMapping("/actInstitution/ByProyectId/{idProyecto}")
+    public ResponseEntity<byte[]> getActInstitutionByIdProyect(@PathVariable Long idProyecto) {
+        try {
+            byte[] pdfContent = exitService.getActInstitutionByIdProyect(idProyecto);
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_PDF);
+            headers.setContentDispositionFormData("filename", "acta_de_constitucion.pdf");
+
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .body(pdfContent);
+        } catch (RuntimeException e) {
+            if (e.getMessage().contains("Exit not found")) {
+                return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+            } else if (e.getMessage().contains("Document not found")) {
+                return new ResponseEntity<>(null, HttpStatus.NO_CONTENT);
+            } else {
+                e.printStackTrace();
+                return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 }

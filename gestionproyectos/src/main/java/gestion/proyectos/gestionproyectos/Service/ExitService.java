@@ -152,4 +152,18 @@ public class ExitService {
         return document;
     }
 
+    public byte[] getActInstitutionByIdProyect(Long idProyecto) {
+        Exit exit = exitRepository.findActInstitutionByIdProyect(idProyecto);
+        if (exit == null) {
+            throw new RuntimeException("Exit not found for project id: " + idProyecto);
+        }
+
+        byte[] document = exit.getDocument();
+        if (document == null) {
+            throw new RuntimeException("Document not found for exit with project id: " + idProyecto);
+        }
+
+        return document;
+    }
+
 }
