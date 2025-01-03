@@ -32,18 +32,16 @@ public class WorkPerformanceReviewDocumentService implements DocumentService {
 
     // Define the required fields for the Work Performance Review document
     private static final Set<String> REQUIRED_FIELDS = new HashSet<>(Arrays.asList(
-            "employeeName",
-            "employeeDepartment",
-            "employeeId",
-            "reviewerName",
-            "employeePosition",
-            "reviewerTitle",
-            "lastReviewDate",
-            "currentDate",
-            "employeeCharacteristicsEvaluations",
-            "currentGoalsReview",
-            "futureGoals",
-            "comments"
+            "proyectName",
+            "idProject",
+            "projectLeader",
+            "elaborationDate",
+            "scopeSummary",
+            "progress",
+            "deviationsDetected",
+            "analysisOfCauses",
+            "correctiveActions",
+            "nextSteps"
     ));
 
     /**
