@@ -10,7 +10,7 @@
       <h2 class="section-title">Áreas de gestión del proyecto: {{ projectName }}</h2>
 
       <div class="management-grid">
-        <button @click="handleManagementArea('Gestion de Integracion', '/project-management')" class="management-card">
+        <button @click="handleManagementArea('Gestion de Integracion', '/IntegrationManagementView')" class="management-card">
           <div class="management-header">
             <span class="management-number">1</span>
           </div>
