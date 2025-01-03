@@ -268,11 +268,7 @@
                         <div class="form-actions">
                             <button type="button" class="cancel-button" @click="showCancelConfirmation = true">
                                 Cancelar
-                            </button>
-                            <button type="button" class="save-button" :disabled="loading"
-                                @click="showSaveConfirmation = true">
-                                {{ loading ? 'Guardando...' : 'Guardar' }}
-                            </button>
+                            </button>                         
                             <button type="submit" class="submit-button" :disabled="loading" @click="handleSubmit">
                                 {{ loading ? 'Creando...' : 'Crear Documento' }}
                             </button>

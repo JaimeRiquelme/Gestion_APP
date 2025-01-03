@@ -1,10 +1,10 @@
 <template>
-    <v-header class="appheader">
+    <v-header v-if="!isLandingPage && !isLoginPage" class="appheader">
         <div class="header-content">
             <div class="logotype">
                 <img src="assets/usach-logo.png" alt="USACH Logo" class="logo" />
             </div>
-
+ 
             <div class="nav-controls">
                 <v-btn
                     variant="text"
@@ -15,7 +15,7 @@
                     <v-icon start>mdi-arrow-left</v-icon>
                     Atrás
                 </v-btn>
-
+ 
                 <v-btn
                     variant="text"
                     color="white"
@@ -25,7 +25,7 @@
                     <v-icon start>mdi-menu</v-icon>
                     Menú Principal
                 </v-btn>
-
+ 
                 <v-menu
                     v-model="showUserMenu"
                     :close-on-content-click="false"
@@ -50,7 +50,7 @@
                             <v-icon>mdi-chevron-down</v-icon>
                         </v-btn>
                     </template>
-
+ 
                     <v-card min-width="200">
                         <v-list>
                             <v-list-item>
@@ -73,114 +73,118 @@
             </div>
         </div>
     </v-header>
-</template>
-
-<script setup>
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
-import { useAuthStore } from '../stores/auth';
-
-const router = useRouter();
-const authStore = useAuthStore();
-const showUserMenu = ref(false);
-const userName = authStore.names;
-
-const goBack = () => {
+ </template>
+ 
+ <script setup>
+ import { ref, computed } from 'vue';
+ import { useRouter, useRoute } from 'vue-router';
+ import { useAuthStore } from '../stores/auth';
+ 
+ const router = useRouter();
+ const route = useRoute();
+ const authStore = useAuthStore();
+ const showUserMenu = ref(false);
+ const userName = authStore.names;
+ 
+ const isLandingPage = computed(() => route.path === '/');
+ const isLoginPage = computed(() => route.path === '/login');
+ 
+ const goBack = () => {
     router.back();
-};
-
-const goToMenu = () => {
+ };
+ 
+ const goToMenu = () => {
     router.push('/principalView');
-};
-
-const logout = () => {
+ };
+ 
+ const logout = () => {
     showUserMenu.value = false;
     authStore.clearAuthData();
     router.push('/login');
-};
-</script>
-
-<style scoped>
-.appheader {
+ };
+ </script>
+ 
+ <style scoped>
+ .appheader {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     z-index: 1000;
     background-color: #00B8B0;
-}
-
-.header-content {
+ }
+ 
+ .header-content {
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 0 2rem;
     height: 100px;
-}
-
-.logotype {
+ }
+ 
+ .logotype {
     display: flex;
     align-items: center;
-}
-
-.logo {
+ }
+ 
+ .logo {
     height: 100px;
     width: auto;
-}
-
-.nav-controls {
+ }
+ 
+ .nav-controls {
     display: flex;
     align-items: center;
     gap: 8px;
-}
-
-.nav-btn {
+ }
+ 
+ .nav-btn {
     margin: 0 4px;
     text-transform: none !important;
     letter-spacing: normal;
     height: 36px;
-}
-
-.user-btn {
+ }
+ 
+ .user-btn {
     margin-left: 4px;
     text-transform: none !important;
     letter-spacing: normal;
     height: 36px;
-}
-
-.username {
+ }
+ 
+ .username {
     margin: 0 4px;
     color: white;
-}
-
-.logout-item {
+ }
+ 
+ .logout-item {
     cursor: pointer;
-}
-
-.logout-item:hover {
+ }
+ 
+ .logout-item:hover {
     background-color: rgb(var(--v-theme-error), 0.1);
-}
-
-@media (max-width: 768px) {
+ }
+ 
+ @media (max-width: 768px) {
     .header-content {
         padding: 0 1rem;
         height: 80px;
     }
-
+ 
     .logo {
         height: 80px;
     }
-
+ 
     .nav-btn :deep(.v-btn__content) span {
         display: none;
     }
-
+ 
     .username {
         display: none;
     }
-
+ 
     .nav-controls {
         gap: 4px;
     }
-}
-</style>
+ }
+ </style>
