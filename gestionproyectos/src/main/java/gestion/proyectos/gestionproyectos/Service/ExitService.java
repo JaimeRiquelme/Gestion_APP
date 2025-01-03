@@ -137,4 +137,19 @@ public class ExitService {
     public Exit findByIdProcessAndNameExit(Long idProcess, String nameExit) {
         return exitRepository.findByIdProcessAndNameExit(idProcess, nameExit);
     }
+
+    public byte[] getDocumentByIdExit(Long exitId) {
+        Exit exit = getById(exitId);
+        if (exit == null) {
+            throw new RuntimeException("Exit not found with id: " + exitId);
+        }
+
+        byte[] document = exit.getDocument();
+        if (document == null) {
+            throw new RuntimeException("Document not found with exit id: " + exitId);
+        }
+
+        return document;
+    }
+
 }
