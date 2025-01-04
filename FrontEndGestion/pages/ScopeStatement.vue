@@ -318,7 +318,6 @@ import { useProcessStore } from '../stores/Process';
 import { useExitStore } from '../stores/Exit';
 import AlertPopup from '../components/AlertPopup.vue';
 import { useRouter } from 'vue-router';
-import { ro } from 'vuetify/locale';
 
 // Store instantiation
 const AuthStore = useAuthStore();
@@ -910,7 +909,7 @@ const parseCostEstimation = (content) => {
 
 const parseCostBenefitAnalysis = (content) => {
     try {
-        const lines = content.split('\n');
+        // Inicializar el objeto con valores por defecto
         const costBenefit = {
             projectCosts: {
                 recurringCost: 0,
@@ -924,48 +923,83 @@ const parseCostBenefitAnalysis = (content) => {
             }
         };
 
-        // Log para depuración
+        // Si no hay contenido, retornar el objeto con valores por defecto
+        if (!content) {
+            console.log('No hay contenido para analizar');
+            return costBenefit;
+        }
+
+        // Log inicial para debugging
         console.log('Contenido recibido en parseCostBenefitAnalysis:', content);
 
-        lines.forEach(line => {
-            // Dividir por coma y limpiar espacios en blanco
+        // Dividir el contenido en líneas
+        const lines = content.split('\n');
+
+        // Procesar cada línea
+        lines.forEach((line, index) => {
+            // Dividir la línea por comas y limpiar espacios en blanco
             const parts = line.split(',').map(part => part.trim());
+            
+            // Verificar que la línea tenga suficientes partes
+            if (parts.length < 2) {
+                console.log(`Línea ${index + 1} no tiene suficientes partes:`, line);
+                return; // Continuar con la siguiente línea
+            }
 
-            // Extraer valores numéricos de la segunda columna (Con PMD Project)
-            const value = parts[1] ? Number(parts[1]) : 0;
+            // Obtener el valor numérico de la segunda columna
+            let value = 0;
+            if (parts[1] && parts[1] !== '') {
+                // Limpiar el valor de caracteres no numéricos excepto - y .
+                const cleanValue = parts[1].replace(/[^\d.-]/g, '');
+                value = Number(cleanValue);
+                if (isNaN(value)) {
+                    console.log(`Valor no numérico encontrado en línea ${index + 1}:`, parts[1]);
+                    value = 0;
+                }
+            }
 
-            // Log para depuración de cada línea
-            console.log('Procesando línea:', line);
-            console.log('Partes:', parts);
-            console.log('Valor:', value);
+            // Log de debugging para cada línea
+            console.log('Procesando línea:', {
+                lineContent: line,
+                parts: parts,
+                cleanedValue: value
+            });
 
-            if (line.includes('Recurring Cost')) {
+            // Asignar valores según el tipo de línea
+            const lineContent = line.trim();
+            if (lineContent.startsWith('Recurring Cost')) {
                 costBenefit.projectCosts.recurringCost = value;
+                console.log('Recurring Cost asignado:', value);
             }
-            // Modificación aquí para manejar Non-Recurring Cost
-            else if (line.includes('Non-Recurring Cost')) {
+            else if (lineContent.startsWith('Non-Recurring Cost')) {
                 costBenefit.projectCosts.nonRecurringCost = value;
-                console.log('Asignando nonRecurringCost:', value);
+                console.log('Non-Recurring Cost asignado:', value);
             }
-            else if (line.includes('Capital Costs')) {
+            else if (lineContent.startsWith('Capital Costs')) {
                 costBenefit.projectCosts.capitalCosts = value;
+                console.log('Capital Costs asignado:', value);
             }
-            else if (line.includes('Reduce Delays')) {
+            else if (lineContent.includes('Reduce Delays')) {
                 costBenefit.benefits.delays = Math.abs(value);
+                console.log('Delays benefit asignado:', Math.abs(value));
             }
-            else if (line.includes('Reduce Overruns')) {
+            else if (lineContent.includes('Reduce Overruns')) {
                 costBenefit.benefits.overruns = Math.abs(value);
+                console.log('Overruns benefit asignado:', Math.abs(value));
             }
-            else if (line.includes('Improve Resource')) {
+            else if (lineContent.includes('Improve Resource')) {
                 costBenefit.benefits.resources = Math.abs(value);
+                console.log('Resource benefit asignado:', Math.abs(value));
             }
         });
 
-        // Log final para verificar el objeto resultante
-        console.log('Objeto costBenefit final:', costBenefit);
+        // Log final del objeto resultante
+        console.log('Objeto costBenefit final:', JSON.stringify(costBenefit, null, 2));
+        
         return costBenefit;
     } catch (error) {
         console.error('Error en parseCostBenefitAnalysis:', error);
+        // En caso de error, retornar el objeto con valores por defecto
         return {
             projectCosts: {
                 recurringCost: 0,
