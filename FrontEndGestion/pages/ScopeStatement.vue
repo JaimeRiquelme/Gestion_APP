@@ -349,7 +349,7 @@ const formData = reactive({
     deliverables: '',
     acceptanceCriteria: '',
     restrictions: '',
-    costEstimation: [{  // Cambiado de objeto a array con un solo elemento inicial
+    costEstimation: [{  
         expense: '',
         estimatedBudget: 0,
         spentToDate: 0,
@@ -516,11 +516,11 @@ const calculateNetBenefit = () => {
 
 // Funciones de validación
 const validateForm = () => {
-    return true; 
+    return true;
 };
 
 const isFieldInvalid = (fieldName) => {
-    return false; 
+    return false;
 };
 
 // Funciones de manejo de eventos
@@ -540,11 +540,18 @@ const formatCostEstimation = (data) => {
 };
 
 const formatCostBenefitTable = (data) => {
+    // Log para depuración
+    console.log('Datos recibidos en formatCostBenefitTable:', {
+        recurringCost: data.costBenefitAnalysis.projectCosts.recurringCost,
+        nonRecurringCost: data.costBenefitAnalysis.projectCosts.nonRecurringCost,
+        capitalCosts: data.costBenefitAnalysis.projectCosts.capitalCosts
+    });
+
     const costBenefit = {
         with: {
             costs: {
                 recurring: data.costBenefitAnalysis.projectCosts.recurringCost || 0,
-                nonRecurring: data.costBenefitAnalysis.projectCosts.nonRecurring || 0,
+                nonRecurring: data.costBenefitAnalysis.projectCosts.nonRecurringCost || 0,
                 capital: data.costBenefitAnalysis.projectCosts.capitalCosts || 0
             },
             benefits: {
@@ -576,7 +583,7 @@ const formatCostBenefitTable = (data) => {
     table += "& ,Con PMD Project,Sin PMD Project&\n";
     table += "Costs of Project, , &\n";
     table += `Recurring Cost,${costBenefit.with.costs.recurring},0&\n`;
-    table += `Non-Recurring Cost,${costBenefit.with.costs.nonRecurring},0&\n`;
+    table += `Non-Recurring Cost,${costBenefit.with.costs.nonRecurring},0&\n`; // Usando nonRecurring aquí
     table += `Capital Costs,${costBenefit.with.costs.capital},0&\n`;
     table += `Total Cost of PMD Project,${withTotal.costs},0&\n`;
     table += " , , &\n";
@@ -599,34 +606,89 @@ const formatHighLevelRequirements = (data) => {
     return table;
 };
 
+const handleSave = async () => {
+    try {
+        const userId = AuthStore.userId;
+        const token = AuthStore.token;
+        const projectId = ProjectStore.projectId;
+
+        const dataToSend = {
+            ...formData,
+            highLevelRequirements: formatHighLevelRequirements(formData),
+            costEstimation: formatCostEstimation(formData),
+            costBenefitAnalysis: formatCostBenefitTable(formData)
+        };
+
+        const exitId = await getExistingExit(ProcessStore.processId, token);
+        let finalExitId = exitId;
+
+        if (!exitId) {
+            finalExitId = await createNewExit(ProcessStore.processId, AuthStore.name, token);
+        }
+
+        const response = await fetch(
+            `http://localhost:8080/api/v1/parameters/saveParametersList?idExit=${finalExitId}`,
+            {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(dataToSend),
+            }
+        );
+
+        // Modificación aquí para manejar la respuesta
+        if (!response.ok) {
+            throw new Error('Error al guardar los datos');
+        }
+
+        const responseText = await response.text();
+
+        // Si la respuesta está vacía pero el status es 201/200, consideramos que fue exitoso
+        if (response.ok && (!responseText || responseText.trim() === '')) {
+            return { success: true, message: 'Datos guardados correctamente' };
+        }
+
+        // Solo intentamos parsear como JSON si hay contenido
+        try {
+            const responseData = JSON.parse(responseText);
+            return responseData;
+        } catch (e) {
+            // Si hay contenido pero no es JSON válido, igual consideramos exitoso si el status es ok
+            if (response.ok) {
+                return { success: true, message: 'Datos guardados correctamente' };
+            }
+            throw new Error('Respuesta inválida del servidor');
+        }
+
+    } catch (error) {
+        console.error('Error en handleSave:', error);
+        throw error;
+    }
+};
+
 const confirmSave = async () => {
     try {
         loading.value = true;
         showSaveConfirmation.value = false;
         await handleSave();
         showAlert('Éxito', 'Los datos se han guardado correctamente', 'success');
+        // Se elimina la redirección directa aquí
     } catch (error) {
-        showAlert('Error', 'Error al guardar los datos', 'error');
+        showAlert('Error', error.message || 'Error al guardar los datos', 'error');
     } finally {
         loading.value = false;
     }
 };
 
-const handleSave = async () => {
-    const userId = AuthStore.userId;
-    const token = AuthStore.token;
-    const projectId = ProjectStore.projectId;
-
-    const dataToSend = {
-        ...formData,
-        highLevelRequirements: formatHighLevelRequirements(formData),
-        costEstimation: formatCostEstimation(formData),
-        costBenefitAnalysis: formatCostBenefitTable(formData)
-    };
-
-    console.log("JSON para Postman:", JSON.stringify(dataToSend, null, 2));
-
-    // return await response.json();
+const handleAlertConfirm = () => {
+    alert.show = false;
+    if (alert.type === 'error' && alert.message.includes('Sesión no iniciada')) {
+        navigateTo('/login');
+    } else if (alert.type === 'success' && alert.message.includes('Los datos se han guardado correctamente')) {
+        navigateTo('/ScopeManagementView');
+    }
 };
 
 // Funciones de alertas
@@ -652,12 +714,7 @@ const removeCost = (index) => {
     }
 };
 
-const handleAlertConfirm = () => {
-    alert.show = false;
-    if (alert.type === 'error' && alert.message.includes('Sesión no iniciada')) {
-        navigateTo('/login');
-    }
-};
+// Removed duplicate declaration of handleAlertConfirm
 
 // Inicialización
 onMounted(async () => {
@@ -666,24 +723,263 @@ onMounted(async () => {
         const projectId = ProjectStore.projectId;
         const token = AuthStore.token;
 
-        const response = await fetch(`http://localhost:8080/api/v1/proyect/getById/${projectId}`, {
+        // Primera petición para obtener datos del proyecto
+        const projectResponse = await fetch(`http://localhost:8080/api/v1/proyect/getById/${projectId}`, {
             headers: {
                 'Authorization': `Bearer ${token}`,
             },
         });
 
-        if (response.ok) {
-            const data = await response.json();
-            formData.proyectName = data.nameProyect;
-            formData.idProyect = data.idProyecto;
-            formData.elaborationDate = data.startDate;
+        if (projectResponse.ok) {
+            const projectData = await projectResponse.json();
+            formData.proyectName = projectData.nameProyect;
+            formData.idProyect = projectData.idProyecto;
+            formData.elaborationDate = projectData.startDate;
+        }
+
+        // Obtener el exitId
+        const exitId = await getExistingExit(ProcessStore.processId, token);
+
+        if (exitId) {
+            // Segunda petición para obtener los parámetros
+            const parametersResponse = await fetch(
+                `http://localhost:8080/api/v1/exit/${exitId}/parameters`,
+                {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                    },
+                }
+            );
+
+            if (parametersResponse.ok) {
+                const parameters = await parametersResponse.json();
+
+                // Mapear los parámetros a los campos del formulario
+                parameters.forEach(param => {
+                    console.log(`Processing parameter: ${param.nameParameter}`, param.content);
+                    switch (param.nameParameter) {
+                        case 'proyectName':
+                            formData.proyectName = param.content;
+                            break;
+
+                        case 'idProyect':
+                            formData.idProyect = param.content;
+                            break;
+
+                        case 'elaborationDate':
+                            formData.elaborationDate = param.content;
+                            break;
+
+                        case 'purposeJustificationProject':
+                            formData.purposeJustificationProject = param.content;
+                            break;
+
+                        case 'scopeDescription':
+                            formData.scopeDescription = param.content;
+                            break;
+
+                        case 'boundaries':
+                            formData.boundaries = param.content;
+                            break;
+
+                        case 'strategy':
+                            formData.strategy = param.content;
+                            break;
+
+                        case 'deliverables':
+                            formData.deliverables = param.content;
+                            break;
+
+                        case 'acceptanceCriteria':
+                            formData.acceptanceCriteria = param.content;
+                            break;
+
+                        case 'restrictions':
+                            formData.restrictions = param.content;
+                            break;
+
+                        case 'proyectPromotorTitle':
+                            formData.proyectPromotorTitle = param.content;
+                            break;
+
+                        case 'proyectPromotor':
+                            formData.proyectPromotor = param.content;
+                            break;
+
+                        case 'costEstimation':
+                            const costEstimation = parseCostEstimation(param.content);
+                            formData.costEstimation = [...costEstimation];
+                            console.log('Parsed Cost Estimation:', formData.costEstimation);
+                            break;
+
+                        case 'costBenefitAnalysis':
+                            const costBenefit = parseCostBenefitAnalysis(param.content);
+                            formData.costBenefitAnalysis.projectCosts.recurringCost = costBenefit.projectCosts.recurringCost;
+                            formData.costBenefitAnalysis.projectCosts.nonRecurringCost = costBenefit.projectCosts.nonRecurringCost;
+                            formData.costBenefitAnalysis.projectCosts.capitalCosts = costBenefit.projectCosts.capitalCosts;
+                            formData.costBenefitAnalysis.benefits.delays = costBenefit.benefits.delays;
+                            formData.costBenefitAnalysis.benefits.overruns = costBenefit.benefits.overruns;
+                            formData.costBenefitAnalysis.benefits.resources = costBenefit.benefits.resources;
+                            console.log('Parsed Cost Benefit:', formData.costBenefitAnalysis);
+                            break;
+
+                        case 'highLevelRequirements':
+                            const requirements = parseHighLevelRequirements(param.content);
+                            formData.highLevelRequirements = [...requirements];
+                            console.log('Parsed Requirements:', formData.highLevelRequirements);
+                            break;
+
+                        default:
+                            console.log(`Parámetro no manejado: ${param.nameParameter}`);
+                            break;
+                    }
+                });
+            }
         }
     } catch (error) {
         showAlert('Error', 'Error al cargar los datos del proyecto', 'error');
+        console.error('Error:', error);
     } finally {
         loading.value = false;
     }
 });
+
+const parseHighLevelRequirements = (content) => {
+    try {
+        const rows = content.split('&');
+        // Ignorar la fila de encabezados y el último elemento vacío
+        const dataRows = rows.slice(2, -1);
+
+        if (dataRows.length === 0) {
+            return [{
+                id: '',
+                description: ''
+            }];
+        }
+
+        return dataRows.map(row => {
+            const [id, description] = row.split(',');
+            return {
+                id: id || '',
+                description: description || ''
+            };
+        });
+    } catch (error) {
+        console.error('Error parsing high level requirements:', error);
+        return [{
+            id: '',
+            description: ''
+        }];
+    }
+};
+
+const parseCostEstimation = (content) => {
+    try {
+        // Remover los headers de la tabla
+        const rows = content.split('&');
+        const dataRows = rows.slice(2, -1); // Ignorar headers y último elemento vacío
+
+        if (dataRows.length === 0) {
+            return [{
+                expense: '',
+                estimatedBudget: 0,
+                spentToDate: 0,
+                estimateToComplete: 0
+            }];
+        }
+
+        return dataRows.map(row => {
+            const [expense, estimatedBudget, spentToDate, estimateToComplete] = row.split(',');
+            return {
+                expense: expense || '',
+                estimatedBudget: Number(estimatedBudget) || 0,
+                spentToDate: Number(spentToDate) || 0,
+                estimateToComplete: Number(estimateToComplete) || 0
+            };
+        });
+    } catch (error) {
+        console.error('Error parsing cost estimation:', error);
+        return [{
+            expense: '',
+            estimatedBudget: 0,
+            spentToDate: 0,
+            estimateToComplete: 0
+        }];
+    }
+};
+
+const parseCostBenefitAnalysis = (content) => {
+    try {
+        const lines = content.split('\n');
+        const costBenefit = {
+            projectCosts: {
+                recurringCost: 0,
+                nonRecurringCost: 0,
+                capitalCosts: 0
+            },
+            benefits: {
+                delays: 0,
+                overruns: 0,
+                resources: 0
+            }
+        };
+
+        // Log para depuración
+        console.log('Contenido recibido en parseCostBenefitAnalysis:', content);
+
+        lines.forEach(line => {
+            // Dividir por coma y limpiar espacios en blanco
+            const parts = line.split(',').map(part => part.trim());
+
+            // Extraer valores numéricos de la segunda columna (Con PMD Project)
+            const value = parts[1] ? Number(parts[1]) : 0;
+
+            // Log para depuración de cada línea
+            console.log('Procesando línea:', line);
+            console.log('Partes:', parts);
+            console.log('Valor:', value);
+
+            if (line.includes('Recurring Cost')) {
+                costBenefit.projectCosts.recurringCost = value;
+            }
+            // Modificación aquí para manejar Non-Recurring Cost
+            else if (line.includes('Non-Recurring Cost')) {
+                costBenefit.projectCosts.nonRecurringCost = value;
+                console.log('Asignando nonRecurringCost:', value);
+            }
+            else if (line.includes('Capital Costs')) {
+                costBenefit.projectCosts.capitalCosts = value;
+            }
+            else if (line.includes('Reduce Delays')) {
+                costBenefit.benefits.delays = Math.abs(value);
+            }
+            else if (line.includes('Reduce Overruns')) {
+                costBenefit.benefits.overruns = Math.abs(value);
+            }
+            else if (line.includes('Improve Resource')) {
+                costBenefit.benefits.resources = Math.abs(value);
+            }
+        });
+
+        // Log final para verificar el objeto resultante
+        console.log('Objeto costBenefit final:', costBenefit);
+        return costBenefit;
+    } catch (error) {
+        console.error('Error en parseCostBenefitAnalysis:', error);
+        return {
+            projectCosts: {
+                recurringCost: 0,
+                nonRecurringCost: 0,
+                capitalCosts: 0
+            },
+            benefits: {
+                delays: 0,
+                overruns: 0,
+                resources: 0
+            }
+        };
+    }
+};
 </script>
 
 
