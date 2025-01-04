@@ -265,7 +265,7 @@
                     </section>
 
                     <section class="form-actions">
-                        <div class="form-actions">
+                        <div class="form-actions" v-if="!pdfUrl">
                             <button type="button" class="cancel-button" @click="showCancelConfirmation = true">
                                 Cancelar
                             </button>                         
@@ -275,7 +275,7 @@
                         </div>
 
                         <!-- Diálogo de confirmación para cancelar -->
-                        <div v-if="showCancelConfirmation" class="modal-overlay">
+                        <div v-if="showCancelConfirmation && !pdfUrl" class="modal-overlay">
                             <div class="modal-content">
                                 <h3>Confirmar Cancelación</h3>
                                 <p>¿Estás seguro que deseas cancelar? Los cambios no guardados se perderán.</p>
@@ -291,7 +291,7 @@
                         </div>
 
                         <!-- Diálogo de confirmación para guardar -->
-                        <div v-if="showSaveConfirmation" class="modal-overlay">
+                        <div v-if="showSaveConfirmation && !pdfUrl" class="modal-overlay">
                             <div class="modal-content">
                                 <h3>Confirmar Guardado</h3>
                                 <p>¿Estás seguro que deseas guardar los cambios actuales?</p>

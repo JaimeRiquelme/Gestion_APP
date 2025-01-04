@@ -1,5 +1,12 @@
 <template>
     <div class="page-container">
+      <AlertPopup
+        :show="showAlert"
+        :title="alertTitle"
+        :message="alertMessage"
+        :type="alertType"
+        @confirm="handleAlertConfirm"
+      />
   
       <main class="main-content">
         <div class="title-content">
@@ -96,11 +103,18 @@
   import { reactive, ref } from 'vue';
   import { useAuthStore } from '../stores/auth';
   import { useProjectStore } from '../stores/project';
+  import AlertPopup from '../components/AlertPopup.vue';
   
   const loading = ref(false);
   const errorMessage = ref('');
   const AuthStore = useAuthStore();
   const ProjectStore = useProjectStore();
+  
+  const showAlert = ref(false);
+  const alertTitle = ref('');
+  const alertMessage = ref('');
+  const alertType = ref('info');
+  const pendingNavigation = ref('');
   
   const formData = reactive({
     nameProyect: '',
@@ -110,6 +124,14 @@
     estimatedEndDate: '',
   });
   
+  const handleAlertConfirm = () => {
+    showAlert.value = false;
+    if (pendingNavigation.value) {
+      navigateTo(pendingNavigation.value);
+      pendingNavigation.value = '';
+    }
+  };
+  
   const handleSubmit = async () => {
     try {
       loading.value = true;
@@ -117,11 +139,13 @@
   
       const userId = AuthStore.userId;
       const token = AuthStore.token;
-      const names = AuthStore.names;
   
-      if (!userId || !token ) {
-        alert('ALERTA: ¡Sesión no iniciada!, redirigiendo a login...')
-        await navigateTo('/login')
+      if (!userId || !token) {
+        alertTitle.value = 'Error de Sesión';
+        alertMessage.value = '¡Sesión no iniciada!, redirigiendo a login...';
+        alertType.value = 'error';
+        showAlert.value = true;
+        pendingNavigation.value = '/login';
         return;
       }
   
@@ -143,20 +167,25 @@
         const errorData = await response.json();
         throw new Error(errorData.message || 'Error al crear el proyecto');
       }
-
+  
       const project = await response.json();
       ProjectStore.setProjectData({
         projectId: project.idProyecto,
         projectName: project.nameProyect,
       });
       
+      alertTitle.value = 'Éxito';
+      alertMessage.value = `Proyecto "${formData.nameProyect}" creado exitosamente, redirigiendo a Dashboard...`;
+      alertType.value = 'success';
+      showAlert.value = true;
+      pendingNavigation.value = '/ConstitutionNotice';
   
-      // Redirigir al dashboard después de crear exitosamente
-      alert('Proyecto "' + formData.nameProyect + '" creado exitosametente, redirigiendo a Dashboard...');
-      await navigateTo('/ConstitutionNotice')
     } catch (error) {
       console.error('Error creating project:', error);
-      errorMessage.value = error.message || 'Error al crear el proyecto. Por favor, intenta nuevamente.';
+      alertTitle.value = 'Error';
+      alertMessage.value = error.message || 'Error al crear el proyecto. Por favor, intenta nuevamente.';
+      alertType.value = 'error';
+      showAlert.value = true;
     } finally {
       loading.value = false;
     }
