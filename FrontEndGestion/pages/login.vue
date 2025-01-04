@@ -56,7 +56,6 @@ const errorMessage = ref('');
 const isWarning = ref(false);
 const router = useRouter();
 const AuthStore = useAuthStore();
-const { fetch } = useFetchWithAuth();
 
 const handleSubmit = async () => {
   try {
