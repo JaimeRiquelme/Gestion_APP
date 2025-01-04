@@ -40,7 +40,7 @@
   }
   
   .main-content {
-    padding: 2rem;
+    padding:13rem;
   }
   
   .notice-container {

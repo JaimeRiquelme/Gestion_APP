@@ -183,6 +183,7 @@ onMounted(async () => {
             const managementData = await checkResponse.json();
             ManagementsStore.managementId = managementData.idManagement;
             ManagementsStore.managementName = managementData.nameManagement;
+            console.log('Management encontrado:', managementData);
         } else if (checkResponse.status === 404) {
             // Si no existe, creamos uno nuevo
             const createResponse = await fetch(
