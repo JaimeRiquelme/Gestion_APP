@@ -28,13 +28,26 @@ public class ManagementService {
         // Validar la existencia del proyecto asociado
         if (management.getProyect() != null && management.getProyect().getIdProyecto() != null) {
             Optional<Proyect> optionalProyect = proyectRepository.findById(management.getProyect().getIdProyecto());
-            if (optionalProyect.isPresent()) {
-                management.setProyect(optionalProyect.get());
-            } else {
+            if (!optionalProyect.isPresent()) {
                 throw new RuntimeException("Proyect not found with id " + management.getProyect().getIdProyecto());
+            }
+            management.setProyect(optionalProyect.get());
+
+            // Buscar si existe un management con el mismo nombre para este proyecto
+            Management existingManagement = findByNameManagementAndIdProyect(
+                management.getNameManagement(), 
+                management.getProyect().getIdProyecto()
+            );
+
+            if (existingManagement != null) {
+                // Actualizar el management existente
+                existingManagement.setDescription(management.getDescription());
+                existingManagement.setProcesses(management.getProcesses());
+                return managementRepository.save(existingManagement);
             }
         }
 
+        // Si no existe, crear uno nuevo
         return managementRepository.save(management);
     }
 

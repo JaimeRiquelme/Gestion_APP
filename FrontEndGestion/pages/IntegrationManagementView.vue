@@ -42,8 +42,8 @@ const ProcessStore = useProcessStore();
 const managementAreas = [
     {
         id: 1,
-        title: 'Acta de constitución del proyecto',
-        route: '/ConstitutionForm'
+        title: 'Acta de Constitución del Proyecto',
+        route: '/ActConstitutionView'
     },
     {
       id: 2,
