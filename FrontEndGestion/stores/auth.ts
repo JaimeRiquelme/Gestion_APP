@@ -7,6 +7,10 @@ export const useAuthStore = defineStore('auth', {
     names: null as string | null,
     refreshToken: null as string | null,
   }),
+  getters: {
+    getUserName: (state) => state.names,
+    isAuthenticated: (state) => !!state.token,
+  },
   actions: {
     setAuthData(data: { token: string; userId: string; names: string , refreshToken: string }) {
       this.token = data.token;
