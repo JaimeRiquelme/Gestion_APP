@@ -45,6 +45,7 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import { useProjectStore } from '../stores/project'
+const { fetch } = useFetchWithAuth();
 
 const router = useRouter()
 const AuthStore = useAuthStore()

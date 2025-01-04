@@ -38,6 +38,7 @@ const AuthStore = useAuthStore();
 const ProjectStore = useProjectStore();
 const ManagementsStore = useManagementsStore();
 const ProcessStore = useProcessStore();
+const { fetch } = useFetchWithAuth();
 
 const managementAreas = [
     {

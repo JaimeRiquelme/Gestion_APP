@@ -92,6 +92,7 @@ const activeMenu = ref(null);
 const showDeleteModal = ref(false);
 const showAccessModal = ref(false);
 const selectedProject = ref(null);
+const { fetch } = useFetchWithAuth();
 
 onMounted(async () => {
   if (!AuthStore.token) {

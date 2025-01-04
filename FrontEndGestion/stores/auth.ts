@@ -5,23 +5,26 @@ export const useAuthStore = defineStore('auth', {
     token: null as string | null,
     userId: null as string | null,
     names: null as string | null,
+    refreshToken: null as string | null,
   }),
   actions: {
-    setAuthData(data: { token: string; userId: string; names: string }) {
+    setAuthData(data: { token: string; userId: string; names: string , refreshToken: string }) {
       this.token = data.token;
       this.userId = data.userId;
       this.names = data.names;
+      this.refreshToken = data.refreshToken;
     },
     clearAuthData() {
       this.token = null;
       this.userId = null;
       this.names = null;
+      this.refreshToken = null;
     },
   },
   persist: [
     {
-      pick: ['token', 'userId', 'names'], // Propiedades que quieres guardar
-      storage: localStorage, // O usa sessionStorage según lo que necesites
+      pick: ['token', 'userId', 'names','refreshToken'], 
+      storage: localStorage, 
     },
   ],
 });

@@ -359,6 +359,7 @@ const AuthStore = useAuthStore();
 const ProjectStore = useProjectStore();
 const ConstitutionFormStore = useConstitutionFormStore();
 const pdfUrl = ref(null);
+const { fetch } = useFetchWithAuth();
 
 const formData = reactive({
     proyectName: '',
