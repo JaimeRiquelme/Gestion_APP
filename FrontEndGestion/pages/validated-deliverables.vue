@@ -105,7 +105,7 @@
                 <div v-if="showPopup" class="popup-overlay">
                     <div class="popup">
                         <button @click="closePopup" class="close-button">&times;</button>
-                        <form @submit.prevent="handleEverything" class="validation-form">
+                        <form @submit.prevent="addDeliverable" class="validation-form">
                             <section class="form-section">
                                 <h2 class="section-title">{{ isEditing ? 'Editar ENT' : 'Nueva ENT' }}</h2>
                                 <div class="form-group">
@@ -177,6 +177,7 @@ const nextCode = ref(1);
 
 // Initial form data
 const formData = reactive({
+    lastENT: 0,
     deliverableCriteria: []
 });
 
@@ -345,6 +346,10 @@ onMounted(async () => {
                 // Mapear los parametros a los campos del formulario
                 parameters.forEach(param => {
                     switch (param.nameParameter) {
+                        case 'lastENT':
+                            formData.lastENT = param.content;
+                            console.log(`Processing parameter: ${param.nameParameter}`, param.content);
+                            break;
                         case 'deliverableCriteria':
                             const criterias = parseCriterias(param.content);
                             formData.deliverableCriteria = [...criterias];
@@ -492,8 +497,10 @@ const handleAlertConfirm = () => {
 
 const addDeliverable = () => {
     // Crear nuevo entregable con código automático
+    formData.lastENT++;
+    
     const newDeliverable = {
-        code: `ENT-${String(formData.deliverableCriteria.length + 1).padStart(3, '0')}`,
+        code: `ENT-${String(formData.lastENT).padStart(3, '0')}`,
         name: currentDeliverable.name,
         criteria: currentDeliverable.criteria,
         validationDate: currentDeliverable.validationDate
@@ -503,7 +510,7 @@ const addDeliverable = () => {
     formData.deliverableCriteria.push({ ...newDeliverable })
 
     // Incrementar el contador de código
-    nextCode.value++
+    console.log(formData.lastENT);
 
     // Limpiar el formulario
     resetForm()
