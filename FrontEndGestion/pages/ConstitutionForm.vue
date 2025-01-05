@@ -546,8 +546,30 @@ const fetchProjectData = async () => {
     }
 };
 
-onMounted(() => {
-    fetchProjectData();
+
+
+onMounted(async() => {
+    
+    const AuthStore = useAuthStore();
+    const ProjectStore = useProjectStore();
+    const projectId = ProjectStore.projectId;
+    const token = AuthStore.token;
+
+
+    const response = await fetch(
+      `http://localhost:8080/api/v1/exit/actInstitution/ByProyectId/${projectId}`,
+      {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        }
+      }
+    )
+
+    if(!response.ok){
+        fetchProjectData();
+    }else{
+        navigateTo('/ProjectManagementAreas');
+    }
 });
 
 const handleSubmit = async () => {
@@ -595,6 +617,8 @@ const handleSubmit = async () => {
         // Procesar la respuesta del PDF
         const pdfBlob = await responseConstitution.blob();
         pdfUrl.value = URL.createObjectURL(pdfBlob);
+
+        ConstitutionFormStore.ContitutionCreation = true;
 
     } catch (error) {
         showAlert('Error', error.message || 'Error al crear el acta de constitución. Por favor, intenta nuevamente.', 'error');

@@ -2,25 +2,19 @@ import { defineStore } from 'pinia';
 
 export const useConstitutionFormStore = defineStore('ConstitutionForm', {
     state: () => ({
-        idManagement: null as string | null,
-        idProcess: null as string | null,
-        idExit: null as string | null,
+        ContitutionCreation: false as boolean | null,
     }),
     actions: {
-        setConstitutionFormData(data: { idManagement: string; idProcess: string; idExit: string }) {
-            this.idManagement = data.idManagement;
-            this.idProcess = data.idProcess;
-            this.idExit = data.idExit;
+        setConstitutionFormData(data: { ContitutionCreation: boolean }) {
+            this.ContitutionCreation = data.ContitutionCreation;
         },
         clearConstitutionFormData() {
-            this.idManagement = null;
-            this.idProcess = null;
-            this.idExit = null;
+            this.ContitutionCreation = null;
         },
     },
     persist: [
         {
-            pick: ['idManagement', 'idProcess', 'idExit'],
+            pick: ['ContitutionCreation'],
             storage: localStorage,
         },
     ],
