@@ -27,7 +27,6 @@
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '../stores/auth';
 import { useProjectStore } from '../stores/project';
-import { onMounted, reactive } from 'vue';
 import { useManagementsStore } from '../stores/Managements';
 import { useProcessStore } from '../stores/Process';
 
@@ -89,11 +88,11 @@ const handleAreaClick = async (area) => {
 
         if (!token || !idProyecto || !idGestion) {
             console.error('No hay token, idProyecto o idGestion');
-            router.push('/ScopeManagementView');
+            router.push('/login');
             return;
         }
 
-        // Primero verificamos si ya existe el área
+        // Verificamos si ya existe el área
         const response = await fetch(`http://localhost:8080/api/v1/process/getByIdManagementAndNameProcess?idManagement=${idGestion}&nameProcess=${area.title}`, {
             headers: {
                 'Authorization': `Bearer ${token}`,
@@ -130,17 +129,6 @@ const handleAreaClick = async (area) => {
                 }),
             });
 
-            console.log('Json:', JSON.stringify({
-                idManagement: idGestion,
-                nameProcess: area.title,
-                description: area.title,
-                stateProcess: "Activo",
-                startDatePlanned: currentDate,
-                endDatePlanned: currentDate,
-                startDateReal: currentDate,
-                endDateReal: currentDate
-            }));
-
             if (createResponse.ok) {
                 const newProcess = await createResponse.json();
                 ProcessStore.processId = newProcess.idProcess;
@@ -155,67 +143,6 @@ const handleAreaClick = async (area) => {
         console.error('Error en la gestión del proceso:', error);
     }
 };
-
-onMounted(async () => {
-    try {
-        // Verificar si hay token y projectId
-        if (!AuthStore.token || !ProjectStore.projectId) {
-            console.error('No hay token o projectId');
-            router.push('/login');
-            return;
-        }
-
-        // Codificar los parámetros de la URL
-        const nameManagement = ManagementsStore.managementName;
-        const idProyect = ProjectStore.projectId;
-
-        // Primera petición para verificar si existe el management
-        const checkResponse = await fetch(
-            `http://localhost:8080/api/v1/management/getByNameAndIdProyect?nameManagement=${nameManagement}&idProyect=${idProyect}`,
-            {
-                headers: {
-                    'Authorization': `Bearer ${AuthStore.token}`,
-                    'Content-Type': 'application/json',
-                },
-            }
-        );
-
-        if (checkResponse.status === 200) {
-            const managementData = await checkResponse.json();
-            ManagementsStore.managementId = managementData.idManagement;
-            ManagementsStore.managementName = managementData.nameManagement;
-            console.log('Management encontrado:', managementData);
-        } else if (checkResponse.status === 404) {
-            // Si no existe, creamos uno nuevo
-            const createResponse = await fetch(
-                'http://localhost:8080/api/v1/management/create',
-                {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${AuthStore.token}`,
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        idProyecto: ProjectStore.projectId,
-                        nameManagement: "Gestion del Alcance",
-                        description: "Gestion del Alcance del Proyecto"
-                    })
-                }
-            );
-
-            if (createResponse.ok) {
-                const newManagementData = await createResponse.json();
-                ManagementsStore.managementId = newManagementData.idManagement;  
-                ManagementsStore.managementName = newManagementData.nameManagement;
-                console.log('Management creado:', newManagementData);
-            } else {
-                console.error('Error al crear el management');
-            }
-        }
-    } catch (error) {
-        console.error('Error en la gestión del management:', error);
-    }
-});
 </script>
 
 <style scoped>
