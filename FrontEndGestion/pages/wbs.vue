@@ -224,6 +224,7 @@ const errorMessage = ref('');
 const pdfUrl = ref(null);
 const showCancelConfirmation = ref(false);
 const showSaveConfirmation = ref(false);
+const { fetch } = useFetchWithAuth();
 
 const tableFieldsWithSpecialSymbol = ref(new Map());
 
