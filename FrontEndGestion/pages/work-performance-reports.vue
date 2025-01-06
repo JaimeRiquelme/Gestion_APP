@@ -166,6 +166,7 @@ const ProjectStore = useProjectStore();
 const ProcessStore = useProcessStore();
 const ExitStore = useExitStore();
 const router = useRouter();
+const { fetch } = useFetchWithAuth();
 
 // Reactive state
 const loading = ref(false);

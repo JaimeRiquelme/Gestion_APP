@@ -44,6 +44,8 @@
 import { reactive, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '../stores/auth';
+import { useFetchWithAuth } from '~/composables/useNewFetch';
+
 
 const formData = reactive({
   email: '',
@@ -52,7 +54,6 @@ const formData = reactive({
 
 const errorMessage = ref('');
 const isWarning = ref(false);
-
 const router = useRouter();
 const AuthStore = useAuthStore();
 
@@ -93,7 +94,7 @@ const handleSubmit = async () => {
       token: data.accessToken,
       userId: data.userId,
       names: data.names,
-      secondNames: data.secondNames,
+      refreshToken: data.refreshToken,
     })
 
     router.push('/principalView');

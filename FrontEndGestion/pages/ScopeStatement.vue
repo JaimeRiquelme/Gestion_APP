@@ -331,6 +331,7 @@ const loading = ref(false);
 const errorMessage = ref('');
 const showCancelConfirmation = ref(false);
 const showSaveConfirmation = ref(false);
+const { fetch } = useFetchWithAuth();
 
 // Initial form data
 const formData = reactive({
