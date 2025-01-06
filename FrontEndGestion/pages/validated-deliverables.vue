@@ -6,98 +6,59 @@
             </div>
 
             <div class="form-container">
+                <div class="title-content">
+                    <h1 class="title-content-text">Entregables Validados</h1>
+                </div>
+
+                <div class="text-container">
+                    <p class="text-block">
+                        Los entregables validados son productos, servicios o resultados que han sido revisados y confirmados como conformes a los requisitos especificados del proyecto.
+                    </p>
+                </div>
+
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th class="id-column">ID</th>
+                                <th class="name-column">Nombre del Entregable</th>
+                                <th class="criteria-column">Criterios de Aceptación</th>
+                                <th class="date-column">Fecha de Aceptación</th>
+                                <th class="action-column">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="item in formData.deliverableCriteria" :key="item.code">
+                                <td class="id-column">{{ item.code }}</td>
+                                <td class="name-column">{{ item.name }}</td>
+                                <td class="criteria-column">
+                                    <div class="criteria-content">{{ item.criteria }}</div>
+                                </td>
+                                <td class="date-column">{{ item.validationDate }}</td>
+                                <td class="action-column">
+                                    <!--
+                                    <button @click="editDeliverable(item.code)" class="edit-button">
+                                        <span class="edit-icon">✎</span>
+                                    </button>
+                                    -->
+
+                                    <button @click="deleteDeliverable(item.code)" class="delete-button">
+                                        <span class="delete-icon">&times;</span>
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <br/>
+                    <br/>
+                    <br/>
+                </div>
+                
+                <button type="button" @click="openPopup" class="submit-button"><strong>Agregar Entregable</strong></button>
+            </div>
+
+            <div class="form-container">
                 <form @submit.prevent="handleSubmit" class="performanceReview-form">
-                    <!-- Información básica -->
-                    <section class="form-section">
-                        <h2 class="section-title">Información Básica</h2>
-                        <div class="form-group">
-                            <label for="proyectName">Nombre del Proyecto <span class="red-text">*</span></label>
-                            <input id="proyectName" v-model="formData.proyectName" type="text"
-                                :class="['form-input', { 'invalid-input': isFieldInvalid('proyectName') }]" readonly
-                                required />
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="idProject">ID del Proyecto <span class="red-text">*</span></label>
-                                <input id="idProject" v-model="formData.idProject"
-                                    class="form-input" readonly required></input>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="elaborationDate">Fecha de Elaboración <span class="red-text">*</span></label>
-                                <input id="elaborationDate" v-model="formData.elaborationDate" type="date"
-                                    class="form-input" readonly required></input>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="projectLeader">Líder del Proyecto <span class="red-text">*</span></label>
-                            <input id="projectLeader" v-model="formData.projectLeader" type="text"
-                                class="form-input" readonly required />
-                        </div>
-                    </section>
-
-                    <!-- Resumen del Alcance -->
-                    <section class="form-section">
-                        <h2 class="section-title">Resumen del Alcance <span class="red-text">*</span></h2>
-                        <div class="form-group">
-                            <label for="scopeSummary">En esta sección se describe brevemente el propósito y los objetivos principales del proyecto, con un enfoque en el alcance aprobado. Se debe incluir una descripción de los entregables planificados, las actividades clave que se deben realizar para lograrlos y cualquier criterio de éxito acordado. Este resumen ayuda a contextualizar el progreso evaluado y a recordar los límites del alcance del proyecto.</label>
-                            <textarea id="scopeSummary" v-model="formData.scopeSummary"
-                                class="form-input form-textarea" required></textarea>
-                        </div>
-                    </section>
-
-                    <!-- Progreso Actual -->
-                    <section class="form-section">
-                        <h2 class="section-title">Progreso actual <span class="red-text">*</span></h2>
-                        <div class="form-group">
-                            <label for="progress">Comentarios: Esta sección detalla los avances logrados en el proyecto en términos de tareas completadas, entregables producidos y el porcentaje de avance global. También se deben incluir métricas clave como el índice de desempeño del cronograma (SPI) y cualquier desviación respecto a lo planificado.</label>
-                            <textarea id="progress" v-model="formData.progress"
-                                class="form-input form-textarea" required></textarea>
-                        </div>
-                    </section>
-
-                    <!-- Progreso Actual -->
-                    <section class="form-section">
-                        <h2 class="section-title">Progreso actual <span class="red-text">*</span></h2>
-                        <div class="form-group">
-                            <label for="deviationsDetected">Comentarios: Esta sección detalla los avances logrados en el proyecto en términos de tareas completadas, entregables producidos y el porcentaje de avance global. También se deben incluir métricas clave como el índice de desempeño del cronograma (SPI) y cualquier desviación respecto a lo planificado.</label>
-                            <textarea id="deviationsDetected" v-model="formData.deviationsDetected"
-                                class="form-input form-textarea" required></textarea>
-                        </div>
-                    </section>
-
-                    <!-- Desviaciones Detectadas -->
-                    <section class="form-section">
-                        <h2 class="section-title">Desviaciones detectadas <span class="red-text">*</span></h2>
-                        <div class="form-group">
-                            <label for="analysisOfCauses">En esta sección se identifican y describen las desviaciones del plan de alcance, junto con las actividades o entregables afectados. Es importante detallar si estas desviaciones fueron causadas por factores internos (como problemas de recursos) o externos (como cambios en los requisitos).</label>
-                            <textarea id="analysisOfCauses" v-model="formData.analysisOfCauses"
-                                class="form-input form-textarea" required></textarea>
-                        </div>
-                    </section>
-
-                    <!-- Análisis de causas -->
-                    <section class="form-section">
-                        <h2 class="section-title">Análisis de causas <span class="red-text">*</span></h2>
-                        <div class="form-group">
-                            <label for="correctiveActions">En esta sección se analizan las causas raíz de las desviaciones detectadas. Esto ayuda a comprender por qué ocurrieron y a identificar patrones que podrían prevenirse en el futuro.</label>
-                            <textarea id="correctiveActions" v-model="formData.correctiveActions"
-                                class="form-input form-textarea" required></textarea>
-                        </div>
-                    </section>
-
-                    <!-- Acciones correctivas -->
-                    <section class="form-section">
-                        <h2 class="section-title">Acciones correctivas <span class="red-text">*</span></h2>
-                        <div class="form-group">
-                            <label for="nextSteps">Aquí se describen las acciones tomadas o planificadas para resolver los problemas detectados y asegurar el cumplimiento del alcance. Es fundamental detallar quién será responsable de implementar estas medidas y los plazos esperados para su ejecución.</label>
-                            <textarea id="nextSteps" v-model="formData.nextSteps"
-                                class="form-input form-textarea" required></textarea>
-                        </div>
-                    </section>
-
                     <!-- Botones de acción -->
                     <section class="form-actions">
                         <button type="button" class="cancel-button" @click="showCancelConfirmation = true">
@@ -106,9 +67,6 @@
                         <button type="button" class="save-button" :disabled="loading"
                             @click="showSaveConfirmation = true">
                             {{ loading ? 'Guardando...' : 'Guardar' }}
-                        </button>
-                        <button type="submit" class="submit-button" :disabled="loading">
-                            {{ loading ? 'Creando...' : 'Crear Documento' }}
                         </button>
                     </section>
                 </form>
@@ -143,6 +101,46 @@
                         </div>
                     </div>
                 </div>
+
+                <div v-if="showPopup" class="popup-overlay">
+                    <div class="popup">
+                        <button @click="closePopup" class="close-button">&times;</button>
+                        <form @submit.prevent="addDeliverable" class="validation-form">
+                            <section class="form-section">
+                                <h2 class="section-title">{{ isEditing ? 'Editar ENT' : 'Nueva ENT' }}</h2>
+                                <div class="form-group">
+                                    <label for="name">Nombre del Entregable <span class="red-text">*</span></label>
+                                    <input 
+                                    id="name" 
+                                    v-model="currentDeliverable.name"
+                                    class="form-input" 
+                                    required
+                                    />
+                                </div>
+                                <div class="form-group">
+                                    <label for="criteria">Criterios de Aceptación del Entregable <span class="red-text">*</span></label>
+                                    <textarea 
+                                    id="criteria" 
+                                    v-model="currentDeliverable.criteria"
+                                    class="form-input form-textarea" 
+                                    required
+                                    ></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label for="validationDate">Fecha de Aceptación <span class="red-text">*</span></label>
+                                    <input 
+                                    id="validationDate" 
+                                    v-model="currentDeliverable.validationDate" 
+                                    type="date"
+                                    class="form-input" 
+                                    required
+                                    />
+                                </div>
+                            </section>
+                            <button class="submit-button" @click="addDeliverable"><strong>Guardar y Cerrar</strong></button>
+                        </form>
+                    </div>
+                </div>
                 <AlertPopup :show="alert.show" :title="alert.title" :message="alert.message" :type="alert.type"
                     @confirm="handleAlertConfirm" />
             </div>
@@ -166,27 +164,29 @@ const ProjectStore = useProjectStore();
 const ProcessStore = useProcessStore();
 const ExitStore = useExitStore();
 const router = useRouter();
-const { fetch } = useFetchWithAuth();
 
 // Reactive state
 const loading = ref(false);
 const errorMessage = ref('');
 const showCancelConfirmation = ref(false);
 const showSaveConfirmation = ref(false);
+const showPopup = ref(false);
+const isEditing = ref(false);
+const showTraceabilityPopup = ref(false);
+const nextCode = ref(1);
 
 // Initial form data
 const formData = reactive({
-    proyectName: '',
-    idProject: '',
-    projectLeader: '',
-    elaborationDate: new Date().toISOString().split('T')[0],
-    scopeSummary: '',
-    progress: '',
-    deviationsDetected: '',
-    analysisOfCauses: '',
-    correctiveActions: '',
-    nextSteps: ''
+    lastENT: 0,
+    deliverableCriteria: []
 });
+
+const currentDeliverable = reactive({
+    code: '',
+    name: '',
+    criteria: '',
+    validationDate: ''
+})
 
 const alert = reactive({
     show: false,
@@ -194,6 +194,34 @@ const alert = reactive({
     message: '',
     type: 'info',
 });
+
+function openPopup() {
+    resetForm();
+    isEditing.value = false;
+    showPopup.value = true;
+}
+
+const openEditPopup = (item) => {
+    isEditing.value = true;
+    currentDeliverable.code = item.code;
+    currentDeliverable.name = item.name;
+    currentDeliverable.criteria = item.criteria;
+    currentDeliverable.validationDate = item.validationDate;
+    showPopup.value = true;
+}
+  
+function closePopup() {
+    showPopup.value = false;
+    resetForm();
+}
+
+function openTraceabilityPopup() {
+    showTraceabilityPopup.value = true;
+}
+  
+function closeTraceabilityPopup() {
+    showTraceabilityPopup.value = false;
+}
 
 // API Functions
 const createNewExit = async (processId, nameUser, token) => {
@@ -205,13 +233,13 @@ const createNewExit = async (processId, nameUser, token) => {
         },
         body: JSON.stringify({
             idProcess: processId,
-            nameExit: 'Informes de desempeño del trabajo',
+            nameExit: 'Entregables validados',
             state: 'Activo',
             dateCreation: new Date().toISOString().split('T')[0],
             dateValidation: new Date().toISOString().split('T')[0],
             priority: 'Alta',
             responsible: nameUser,
-            description: 'Informes de desempeño del trabajo'
+            description: 'Entregables validados'
         })
     });
 
@@ -230,7 +258,7 @@ const createNewExit = async (processId, nameUser, token) => {
 
 const getExistingExit = async (processId, token) => {
     const response = await fetch(
-        `http://localhost:8080/api/v1/exit/getByIdProcessAndNameExit?idProcess=${processId}&nameExit=Informes de desempeño del trabajo`,
+        `http://localhost:8080/api/v1/exit/getByIdProcessAndNameExit?idProcess=${processId}&nameExit=Entregables validados`,
         {
             headers: { 'Authorization': `Bearer ${token}` },
         }
@@ -250,7 +278,16 @@ const getExistingExit = async (processId, token) => {
 const invalidFields = ref(new Set());
 
 const validateForm = () => {
-    return true;
+    invalidFields.value.clear();
+
+    // Validar campos
+    Object.entries(currentDeliverable).forEach(([key, value]) => {
+        if (typeof value === 'string' && !value.trim()) {
+            invalidFields.value.add(key);
+        }
+    });
+
+    return invalidFields.value.size === 0;
 };
 
 const isFieldInvalid = (fieldName) => {
@@ -262,6 +299,26 @@ const handleCancel = () => {
     navigateTo('/principalView');
 };
 
+const handleEverything = async () => {
+    if (isEditing.value) {
+        // Actualizar el entregable existente
+        const index = formData.deliverableCriteria.findIndex(
+        item => item.code === currentDeliverable.code
+        )
+        if (index !== -1) {
+            formData.deliverableCriteria[index] = { ...currentDeliverable }
+        }
+    } else {
+        // Agregar nuevo entregable
+        const newDeliverable = {
+        ...currentDeliverable,
+        code: generateNewCode() // Asumiendo que tienes esta función
+        }
+        formData.deliverableCriteria.push(newDeliverable)
+    }
+    closePopup()
+};
+
 onMounted(async () => {
     try {
         loading.value = true;
@@ -269,87 +326,80 @@ onMounted(async () => {
         const userId = AuthStore.userId;
         const token = AuthStore.token;
 
-        const response = await fetch(`http://localhost:8080/api/v1/proyect/getById/${projectId}`, {
-            headers: {
-                'Authorization': `Bearer ${token}`,
-            },
-        });
+        // Obtener el exitId
+        const exitId = await getExistingExit(ProcessStore.processId, token);
 
-        const respondeUser = await fetch(`http://localhost:8080/api/v1/user/getById/${userId}`, {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json',
+        if (exitId) {
+            // Segunda peticion
+            const parametersResponse = await fetch(
+                `http://localhost:8080/api/v1/exit/${exitId}/parameters`,
+                {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                    }
+                }
+            );
+
+            if (parametersResponse.ok) {
+                const parameters = await parametersResponse.json();
+
+                // Mapear los parametros a los campos del formulario
+                parameters.forEach(param => {
+                    switch (param.nameParameter) {
+                        case 'lastENT':
+                            formData.lastENT = param.content;
+                            console.log(`Processing parameter: ${param.nameParameter}`, param.content);
+                            break;
+                        case 'deliverableCriteria':
+                            const criterias = parseCriterias(param.content);
+                            formData.deliverableCriteria = [...criterias];
+                            console.log(`Processing parameter: ${param.nameParameter}`, param.content);
+                            console.log('Parsed Criterias:', formData.deliverableCriteria);
+                            break;
+                        default:
+                            break;
+                    }                    
+                });
             }
-        });
-
-        const userDataResponse = await respondeUser.json();
-
-        if (response.ok && respondeUser.ok) {
-            const data = await response.json();
-            formData.proyectName = data.nameProyect;
-            formData.idProject = data.idProyecto;
-            formData.projectLeader = `${userDataResponse.names} ${userDataResponse.secondNames}`;
-            formData.elaborationDate = data.startDate;
         }
     } catch (error) {
         showAlert('Error', 'Error al cargar los datos del proyecto', 'error');
+        console.error('Error:', error);
     } finally {
         loading.value = false;
     }
 });
 
-const handleSubmit = async () => {
-    if (!validateForm()) return;
-
+const parseCriterias = (content) => {
     try {
-        loading.value = true;
-        const { userId, token, name: nameUser } = AuthStore;
-        const processId = ProcessStore.processId;
+        const rows = content.split('&');
+        // Ignorar la fila de encabezados y el ultimo elemento vacio
+        const dataRows = rows.slice(2,-1);
 
-        if (!userId || !token) {
-            showAlert('Error de Sesión', '¡Sesión no iniciada!, redirigiendo a login...', 'error');
-            router.push('/login');
-            return;
+        if (dataRows.lenght === 0) {
+            return [{
+                id: '',
+                description: ''
+            }];
         }
 
-        // Get or create exit
-        let exitId = await getExistingExit(processId, token);
-        if (!exitId) {
-            exitId =  await createNewExit(processId, nameUser, token);
-        }
-
-        // Convertir los arrays al formato requerido
-        const formattedData = {
-            ...formData,
-            //employeeCharacteristicsEvaluations: formatCharacteristicToString(formData),
-        }
-
-        // Ahora solo necesitamos hacer una única llamada al endpoint actualizado
-        const response = await fetch(`http://localhost:8080/api/documents/work-performance-review/generate?idExit=${exitId}`, 
-            {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(formattedData),
-            }
-        );
-
-        if (!response.ok) {
-            throw new Error(await response.text());
-        }
-
-        // Procesar la respuesta del PDF
-        const blob = await response.blob();
-        window.open(URL.createObjectURL(blob));
-        router.push('/ScopeManagementView');
-
+        return dataRows.map(row => {
+            const [code, name, criteria, validationDate] = row.split(',');
+            return {
+                code: code || '',
+                name: name || '',
+                criteria: criteria || '',
+                validationDate: validationDate || ''
+            };
+        });
     } catch (error) {
-        showAlert('Error', error.message, 'error');
-    } finally {
-        loading.value = false;
+        console.error('Error parsing criterias:', error);
+        return [{
+            code: code || '',
+            name: name || '',
+            criteria: criteria || '',
+            validationDate: validationDate || ''
+        }];
     }
 };
 
@@ -360,25 +410,21 @@ const confirmSave = async () => {
         await handleSave();
         showAlert('Éxito', 'Los datos se han guardado correctamente', 'success');
     } catch (error) {
-        showAlert('Error', 'Error al guardar los datos.', 'error');
+        showAlert('Error', error.message || 'Error al guardar los datos.', 'error');
     } finally {
         loading.value = false;
     }
 };
 
+const formatDeliverableCriteriaToString = (data) => {
+    let result = '&Código,Nombre,Criterios,Fecha&';
+    data.deliverableCriteria.forEach(criterias => {
+        result += `${criterias.code},${criterias.name},${criterias.criteria},${criterias.validationDate}&`;
+    });
+    return result;
+};
+
 const handleSave = async () => {
-    const userId = AuthStore.userId;
-    const token = AuthStore.token;
-    const projectId = ProjectStore.projectId;
-
-    const dataToSend = {
-        ...formData,
-        //employeeCharacteristicsEvaluations: formatCharacteristicToString(formData)
-    }
-
-    console.log("JSON para Postman:", JSON.stringify(dataToSend, null, 2));
-
-    /*
     try {
         const userId = AuthStore.userId;
         const token = AuthStore.token;
@@ -386,32 +432,53 @@ const handleSave = async () => {
 
         const dataToSend = {
             ...formData,
-            employeeCharacteristicsEvaluations: formatCharacteristicToString(formData)
+            deliverableCriteria: formatDeliverableCriteriaToString(formData)
+        };
+
+        const exitId = await getExistingExit(ProcessStore.processId, token);
+        let finalExitId = exitId;
+
+        if (!exitId) {
+            finalExitId = await createNewExit(ProcessStore.processId, AuthStore.name, token);
         }
 
-        const saveData = await fetch(`http://localhost:8080/api/v1/parameters/saveParametersList?idExit=${ProjectStore.projectId}`, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                ...formData,
-                employeeCharacteristicsEvaluations: formattedCharacteristics,
-            }),
-        }); 
+        const response = await fetch(
+            `http://localhost:8080/api/v1/parameters/saveParametersList?idExit=${finalExitId}`, 
+            {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(dataToSend),
+            }
+        );
 
-        if (!saveData.ok) {
-            const errorData = await saveData.json();
-            throw new Error(errorData.message || 'Error al guardar los datos');
+        if (!response.ok) {
+            throw new Error('Error al guardad los datos');
         }
 
-        return await saveData.json();
+        const responseText = await response.text();
+
+        // Si la respuesta esta vacia
+        if (response.ok && (!responseText || responseText.trim() === '')) {
+            return { success: true, message: 'Datos guardados correctamente' };
+        }
+
+        try {
+            const responseData = JSON.parse(responseText);
+            return responseData;
+        } catch (e) {
+            if (response.ok) {
+                return { success: true, message: 'Datos guardados correctamente' };
+            }
+            throw new Error('Respuesta inválida del servidor');
+        }
+
     } catch (error) {
-        showAlert('Error', 'Error al guardar los datos. Por favor, intenta nuevamente.', 'error');
+        showAlert('Error en handleSave:',error);
         throw error;
     }
-    */
 };
 
 const showAlert = (title, message, type = 'info') => {
@@ -427,6 +494,51 @@ const handleAlertConfirm = () => {
         navigateTo('/login');
     }
 };
+
+const addDeliverable = () => {
+    // Crear nuevo entregable con código automático
+    formData.lastENT++;
+    
+    const newDeliverable = {
+        code: `ENT-${String(formData.lastENT).padStart(3, '0')}`,
+        name: currentDeliverable.name,
+        criteria: currentDeliverable.criteria,
+        validationDate: currentDeliverable.validationDate
+    }
+
+    // Agregar al array de entregables
+    formData.deliverableCriteria.push({ ...newDeliverable })
+
+    // Incrementar el contador de código
+    console.log(formData.lastENT);
+
+    // Limpiar el formulario
+    resetForm()
+
+    // Cerrar el popup
+    closePopup()
+};
+
+const deleteDeliverable = (code) => {
+  const index = formData.deliverableCriteria.findIndex(item => item.code === code)
+  if (index !== -1) {
+    formData.deliverableCriteria.splice(index, 1)
+  }
+}
+
+// TODO: Entender como hacer que se pueda editar abriendo el popup
+const editDeliverable = (item) => {
+    openEditPopup(item);
+    console.log('Editando entregable:', item);
+}
+
+const resetForm = () => {
+    currentDeliverable.code = '';
+    currentDeliverable.name = '';
+    currentDeliverable.criteria = '';
+    currentDeliverable.validationDate = '';
+};
+
 </script>
 
 <style scoped>
@@ -442,6 +554,7 @@ const handleAlertConfirm = () => {
 .title-content {
     background-color: #f5f5f5;
     padding: 1.5rem 3rem;
+    border-radius: 24px;
 }
 
 .title-content-text {
@@ -451,8 +564,44 @@ const handleAlertConfirm = () => {
     font-size: 1.5rem;
 }
 
+.text-container {
+  margin: 20px 0;
+  padding: 15px;
+  background-color: #fff;
+  border-radius: 16px;
+}
+
+.text-block {
+  line-height: 1.6;
+  color: #333;
+}
+
+.edit-button {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  width: 30px;
+  height: 30px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.3s;
+}
+
+.edit-button:hover {
+  background-color: #45a049;
+}
+
+.edit-icon {
+  font-size: 16px;
+  line-height: 1;
+}
+
+
 .form-container {
-    max-width: 800px;
+    max-width: 1200px;
     margin: 2rem auto;
     background: white;
     padding: 2rem;
@@ -625,6 +774,29 @@ select.form-input option {
     transition: background-color 0.3s;
 }
 
+.delete-button {
+  background-color: #ff4444;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  width: 30px;
+  height: 30px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.3s;
+}
+
+.delete-button:hover {
+  background-color: #cc0000;
+}
+
+.delete-icon {
+  font-size: 18px;
+  line-height: 1;
+}
+
 .add-characteristics-button:hover {
     background-color: #009B94;
 }
@@ -682,6 +854,11 @@ select.form-input option {
 .save-button:disabled {
     opacity: 0.7;
     cursor: not-allowed;
+}
+
+.action-column {
+  width: 80px;
+  text-align: center;
 }
 
 .modal-overlay {
@@ -823,6 +1000,77 @@ select.form-input option {
   color: red;
 }
 
+.popup input::placeholder {
+    color: black;
+}
+
+.popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.popup {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    width: 800px;
+    overflow-y: auto;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    color: black;
+    position: relative;
+}
+
+.table-container {
+    width: 100%;
+    overflow-x: auto;
+    margin: 1rem 0;
+    border-radius: 16px;
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: white;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    table-layout: fixed;
+}
+
+.data-table th,
+.data-table td {
+    padding: 12px;
+    border: 1px solid #ddd;
+    vertical-align: top;
+}
+
+.criteria-content {
+  white-space: pre-wrap; /* Mantiene los saltos de línea y espacios */
+  word-wrap: break-word; /* Rompe palabras largas */
+  overflow-wrap: break-word;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.data-table th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+    color: #333;
+}
+
+.data-table tr:hover {
+    background-color: #f5f5f5;
+}
+
+.data-table td {
+    color: #666;
+}
+
 @media (max-width: 768px) {
     .characteristics-inputs {
         grid-template-columns: 1fr;
@@ -874,12 +1122,34 @@ select.form-input option {
         margin-bottom: 8px;
     }
 
+    .data-table {
+        font-size: 14px;
+    }
+
+    .id-column {
+        width: 80px;
+    }
+
+    .date-column {
+        width: 120px;
+    }
+
+    .data-table th,
+    .data-table td {
+        padding: 8px;
+        font-size: 0.9rem;
+    }
+
     .remove-characteristics-button:hover {
         background-color: #c82333;
     }
 
     .add-characteristics-container {
         margin-top: 1rem;
+    }
+
+    .action-column {
+        width: 60px;
     }
 
     .add-characteristics-button {
@@ -952,6 +1222,30 @@ select.form-input option {
     background-color: #218838;
 }
 
+/* Nuevo estilo para el botón de cierre */
+.close-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 30px;
+  height: 30px;
+  border: none;
+  background-color: transparent;
+  font-size: 24px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #666;
+  transition: color 0.3s ease;
+  padding: 0;
+  line-height: 1;
+}
+
+.close-button:hover {
+  color: #000;
+}
+
 .form-check-group {
     display: flex;
     gap: 50px; /*Espacio horizontal entre las opciones */
@@ -1001,6 +1295,29 @@ select.form-input option {
 
 .custom-radio-box:hover {
     border-color: #666; /* Cambia el borde al pasar el cursor */
+}
+
+.validation-form {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+/* Definir anchos específicos para cada columna */
+.id-column {
+  width: 100px;
+}
+
+.name-column {
+  width: 20%;
+}
+
+.criteria-column {
+  width: 40%;
+}
+
+.date-column {
+  width: 150px;
 }
 
 </style>

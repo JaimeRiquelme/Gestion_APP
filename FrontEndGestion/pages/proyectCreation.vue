@@ -104,6 +104,7 @@
   import { useAuthStore } from '../stores/auth';
   import { useProjectStore } from '../stores/project';
   import AlertPopup from '../components/AlertPopup.vue';
+  const { fetch } = useFetchWithAuth();
   
   const loading = ref(false);
   const errorMessage = ref('');
