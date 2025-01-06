@@ -11,12 +11,15 @@
             <v-progress-linear v-model="progress" color="dark green" height="4"></v-progress-linear>
           </v-snackbar>
 
+          <!-- ^[A-Za-zÀ-ÖØ-öø-ÿ]+([ '-][A-Za-zÀ-ÖØ-öø-ÿ]+)*$ Validated any number of names with valid special characters in them--> 
           <form @submit.prevent="handleSubmit" class="form">
             <input
               v-model="formData.names"
               type="text"
               placeholder="Nombres"
               class="input"
+              pattern="[A-Za-zÀ-ÖØ-öø-ÿ]+([ '-][A-Za-zÀ-ÖØ-öø-ÿ]+)*"
+              maxlength="1000"
               required="true"
             />
 
@@ -25,14 +28,17 @@
               type="text"
               placeholder="Apellidos"
               class="input"
+              pattern="[A-Za-zÀ-ÖØ-öø-ÿ]+([ '-][A-Za-zÀ-ÖØ-öø-ÿ]+)*"
+              maxlength="1000"
               required="true"
             />
   
             <input
               v-model="formData.email"
               type="email"
-              placeholder="Correo electrónico"
+              placeholder="Correo electrónico (ej: name@example.cl)"
               class="input"
+              maxlength="1000"
               required="true"
             />
   
@@ -42,6 +48,7 @@
               placeholder="Contraseña"
               class="input"
               required="true"
+              maxlength="1000"
               minlength="8"
               @input="triggerConfirmPasswordValidation"
             />
@@ -52,6 +59,7 @@
               placeholder="Confirmar Contraseña"
               :class="['input', { invalid: !passwordsMatch }]"
               required="true"
+              maxlength="1000"
               @input="validatePasswords($event)"
               ref="confirmPasswordInput"
             />
@@ -59,8 +67,9 @@
             <input
               v-model="formData.phoneNumber"
               type="tel"
-              placeholder="Número de Telefono"
+              placeholder="Número de Telefono (ej: +56 9 1234 5678)"
               class="input"
+              pattern="^((\+|00)[1-9]{2}[1-9]?)( ?[1-9][1-9]?)( ?[0-9]){8}$"
               required="true"
             />
   
@@ -102,6 +111,26 @@
   const errorMessage = ref('');
 
   const url = "http://localhost:8080/api/v1/auth";
+
+  // Validating name (both first and second names)
+  function isNameValid(name) {
+    const nameRegex = /^[A-Za-zÀ-ÖØ-öø-ÿ]+([ '-][A-Za-zÀ-ÖØ-öø-ÿ]+)*$/;
+    if (!nameRegex.test(name)) {
+      errorMessage.value = 'El nombre o apellido no es válido.';
+      return false;
+    }
+    return true;
+  }
+  
+  // Validating phone number using regex
+  function isPhoneNumberValid(phoneNumber) {
+    const phoneRegex = /^((\+|00)[1-9]{2}[1-9]?)( ?[1-9][1-9]?)( ?[0-9]){8}$/;
+    if (!phoneRegex.test(phoneNumber)) {
+      errorMessage.value = 'Número de teléfono no válido.';
+      return false;
+    } 
+    return true;
+  }
 
   const checkPasswordsMatch = () => {
     passwordsMatch.value = formData.password === formData.confirm_password;
@@ -150,14 +179,19 @@
   
   const handleSubmit = async () => {
     if (! checkPasswordsMatch()) {
-      errorMessage.value = '';
       triggerConfirmPasswordValidation(); // Ensure passwords are validated before submission
       triggerValidationMessage();
+      return
     }
-    else {
-      try {
-        console.log('Form submitted:', formData)
+    if (! isNameValid(formData.names) || ! isNameValid(formData.secondNames)){ // Ensure names are valid
+      return
+    }
+    if (! isPhoneNumberValid(formData.phoneNumber)) { // Ensure phone is valid
+      return
+    }
+    try {
         try {
+          errorMessage.value = '';
           const response = await $fetch(url + '/register', {
             method: 'POST',
             body: { 
@@ -168,7 +202,6 @@
               phoneNumber: formData.phoneNumber
             }
           })
-          errorMessage.value = '';
           console.log('Registered successfully');
 
           // Succesful login snackbar and progress bar
@@ -195,14 +228,15 @@
                 break;
             }
           } 
-          else { 
+          else {
+            errorMessage.value = 'Error de conexion, pruebe más tarde'
             console.error('Connection error:', error); 
           }
         }
       } catch (error) {
+        errorMessage.value = 'Ha ocurrido un error, intente más tarde'
         console.error('Registration error:', error)
       }
-    }
   }
 
   </script>
