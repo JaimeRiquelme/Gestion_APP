@@ -46,7 +46,7 @@ public class Management {
         }
     }
 
-    @Column(name = "name_management", unique = true)
+    @Column(name = "name_management")
     //ponemos que sea unico
     private String nameManagement;
 

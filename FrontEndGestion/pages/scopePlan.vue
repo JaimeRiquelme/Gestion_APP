@@ -241,6 +241,7 @@ const errorMessage = ref('');
 const AuthStore = useAuthStore();
 const ProjectStore = useProjectStore();
 const pdfUrl = ref(null);
+const { fetch } = useFetchWithAuth();
 
 const formData = reactive({
     proyectName: '',
