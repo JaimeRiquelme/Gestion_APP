@@ -117,6 +117,7 @@ const ProjectStore = useProjectStore();
 const ManagementStore = useManagementsStore();
 const loading = ref(false);
 const errorMessage = ref('');
+const { fetch } = useFetchWithAuth();
 
 const alert = reactive({
   show: false,

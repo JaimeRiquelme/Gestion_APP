@@ -1,5 +1,5 @@
 <template>
-    <v-header v-if="!isLandingPage && !isLoginPage" class="appheader">
+    <v-header v-if="!isLandingPage && !isLoginPage && !isRegisterPage" class="appheader">
         <div class="header-content">
             <div class="logotype">
                 <img src="assets/usach-logo.png" alt="USACH Logo" class="logo" />
@@ -84,10 +84,11 @@
  const route = useRoute();
  const authStore = useAuthStore();
  const showUserMenu = ref(false);
- const userName = authStore.names;
+ const userName = computed(() => authStore.names);
  
  const isLandingPage = computed(() => route.path === '/');
  const isLoginPage = computed(() => route.path === '/login');
+ const isRegisterPage = computed(() => route.path === '/register');
  
  const goBack = () => {
     router.back();

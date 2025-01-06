@@ -196,6 +196,7 @@
   const invalidFields = ref(new Set());
   const showCancelConfirmation = ref(false);
   const tableFieldsWithComma = ref(new Map());
+  const { fetch } = useFetchWithAuth();
 
   const url_doc_generator = "http://localhost:8080/api/documents/requirements-management-plan"
   const url_exit = "http://localhost:8080/api/v1/exit"

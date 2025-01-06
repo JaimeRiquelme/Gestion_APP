@@ -124,6 +124,7 @@
   import { useProjectStore } from '../stores/project';
   const AuthStore = useAuthStore();
   const ProjectStore = useProjectStore();
+  const { fetch } = useFetchWithAuth();
   
   const idExit = ref(null);
   const formData = ref({
