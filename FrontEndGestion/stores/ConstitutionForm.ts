@@ -8,8 +8,9 @@ export const useConstitutionFormStore = defineStore('ConstitutionForm', {
         setConstitutionFormData(data: { ContitutionCreation: boolean }) {
             this.ContitutionCreation = data.ContitutionCreation;
         },
-        clearConstitutionFormData() {
-            this.ContitutionCreation = null;
+        clearConstitutionData() {
+            this.ContitutionCreation = false;
+            this.$reset();
         },
     },
     persist: [

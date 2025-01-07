@@ -5,23 +5,11 @@
     <section class="form-section">
       <div class="form-container">
         <h1 class="form-title">Inicia Sesión</h1>
-        
-        <form @submit.prevent="handleSubmit" class="form">
-          <input
-            v-model="formData.email"
-            type="email"
-            placeholder="Correo electrónico"
-            class="input"
-            required="true"
-          />
 
-          <input
-            v-model="formData.password"
-            type="password"
-            placeholder="Contraseña"
-            class="input"
-            required="true"
-          />
+        <form @submit.prevent="handleSubmit" class="form">
+          <input v-model="formData.email" type="email" placeholder="Correo electrónico" class="input" required="true" />
+
+          <input v-model="formData.password" type="password" placeholder="Contraseña" class="input" required="true" />
 
           <button type="submit" class="submit-button">
             Ingresar
@@ -44,7 +32,12 @@
 import { reactive, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '../stores/auth';
-import { useFetchWithAuth } from '~/composables/useNewFetch';
+import { useConstitutionFormStore } from '../stores/ConstitutionForm';
+import { useExitStore } from '../stores/Exit';
+import { useManagementsStore } from '../stores/Managements';
+import { useProcessStore } from '../stores/Process';
+import { useProjectStore } from '../stores/project';
+
 
 
 const formData = reactive({
@@ -56,6 +49,11 @@ const errorMessage = ref('');
 const isWarning = ref(false);
 const router = useRouter();
 const AuthStore = useAuthStore();
+const constitutionStore = useConstitutionFormStore();
+const exitStore = useExitStore();
+const managementsStore = useManagementsStore();
+const processStore = useProcessStore();
+const projectStore = useProjectStore();
 
 const handleSubmit = async () => {
   try {
@@ -74,7 +72,7 @@ const handleSubmit = async () => {
 
     if (!response.ok) {
       isWarning.value = response.status === 423; // Locked status
-      
+
       switch (response.status) {
         case 400: // Bad Request
           throw new Error(data.message || 'Por favor, verifica los datos ingresados.');
@@ -97,6 +95,12 @@ const handleSubmit = async () => {
       refreshToken: data.refreshToken,
     })
 
+    constitutionStore.clearConstitutionData();
+    exitStore.clearExitData();
+    managementsStore.clearManagementData();
+    processStore.clearProcessData();
+    projectStore.clearProjectData();
+
     router.push('/principalView');
 
   } catch (error) {
@@ -109,10 +113,12 @@ const handleSubmit = async () => {
 
 <style scoped>
 /* Ensure no extra space causes overflow */
-html, body {
+html,
+body {
   margin: 0;
   padding: 0;
-  overflow: hidden; /* Prevent scrollbars */
+  overflow: hidden;
+  /* Prevent scrollbars */
 }
 
 /* Apply border-box for consistent sizing */
