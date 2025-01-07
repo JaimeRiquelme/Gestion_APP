@@ -77,6 +77,11 @@ const managementAreas = [
         id: 8,
         title: 'Informes de desempeño del trabajo',
         route: '/work-performance-reports'
+    },
+    {
+        id: 9,
+        title: 'Documentacion y matriz de trazabilidad',
+        route: '/DocumentationTraceabilityMatrix'
     }
 ];
 
