@@ -269,13 +269,13 @@ onMounted(async () => {
         const userId = AuthStore.userId;
         const token = AuthStore.token;
 
-        const response = await fetch(`http://localhost:8080/api/v1/proyect/getById/${projectId}`, {
+        const projectResponse = await fetch(`http://localhost:8080/api/v1/proyect/getById/${projectId}`, {
             headers: {
                 'Authorization': `Bearer ${token}`,
             },
-        });
+        })
 
-        const respondeUser = await fetch(`http://localhost:8080/api/v1/user/getById/${userId}`, {
+        const userResponse = await fetch(`http://localhost:8080/api/v1/user/getById/${userId}`, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${token}`,
@@ -283,17 +283,65 @@ onMounted(async () => {
             }
         });
 
-        const userDataResponse = await respondeUser.json();
-
-        if (response.ok && respondeUser.ok) {
-            const data = await response.json();
+        if (projectResponse.ok && userResponse.ok) {
+            const data = await projectResponse.json();
+            const userDataResponse = await userResponse.json();
             formData.proyectName = data.nameProyect;
             formData.idProject = data.idProyecto;
             formData.projectLeader = `${userDataResponse.names} ${userDataResponse.secondNames}`;
             formData.elaborationDate = data.startDate;
         }
+
+        const exitId = await getExistingExit(ProcessStore.processId, token);
+
+        if (exitId) {
+            const parametersResponse = await fetch(
+                `http://localhost:8080/api/v1/exit/${exitId}/parameters`,
+                {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                    },
+                }
+            );
+
+            if (parametersResponse.ok) {
+                const parameters = await parametersResponse.json();
+
+                parameters.forEach(param => {
+                    console.log(`Processing parameter: ${param.nameParameter}`, param.content);
+                    switch (param.nameParameter) {
+                        case 'scopeSummary':
+                            formData.scopeSummary = param.content;
+                            console.log(`Processing parameter: ${param.nameParameter}`, param.content);
+                            break;
+                        case 'progress':
+                            formData.progress = param.content;
+                            console.log(`Processing parameter: ${param.nameParameter}`, param.content);
+                            break;
+                        case 'deviationsDetected':
+                            formData.deviationsDetected = param.content;
+                            console.log(`Processing parameter: ${param.nameParameter}`, param.content);
+                            break;
+                        case 'analysisOfCauses':
+                            formData.analysisOfCauses = param.content;
+                            console.log(`Processing parameter: ${param.nameParameter}`, param.content);
+                            break;
+                        case 'correctiveActions':
+                            formData.correctiveActions = param.content;
+                            console.log(`Processing parameter: ${param.nameParameter}`, param.content);
+                            break;
+                        case 'nextSteps':
+                            formData.nextSteps = param.content;
+                            console.log(`Processing parameter: ${param.nameParameter}`, param.content);
+                            break;
+                    }
+                });
+            }
+        }
+
     } catch (error) {
         showAlert('Error', 'Error al cargar los datos del proyecto', 'error');
+        console.error('Error:', error);
     } finally {
         loading.value = false;
     }
@@ -322,7 +370,6 @@ const handleSubmit = async () => {
         // Convertir los arrays al formato requerido
         const formattedData = {
             ...formData,
-            //employeeCharacteristicsEvaluations: formatCharacteristicToString(formData),
         }
 
         // Ahora solo necesitamos hacer una única llamada al endpoint actualizado
@@ -367,18 +414,6 @@ const confirmSave = async () => {
 };
 
 const handleSave = async () => {
-    const userId = AuthStore.userId;
-    const token = AuthStore.token;
-    const projectId = ProjectStore.projectId;
-
-    const dataToSend = {
-        ...formData,
-        //employeeCharacteristicsEvaluations: formatCharacteristicToString(formData)
-    }
-
-    console.log("JSON para Postman:", JSON.stringify(dataToSend, null, 2));
-
-    /*
     try {
         const userId = AuthStore.userId;
         const token = AuthStore.token;
@@ -386,32 +421,52 @@ const handleSave = async () => {
 
         const dataToSend = {
             ...formData,
-            employeeCharacteristicsEvaluations: formatCharacteristicToString(formData)
         }
 
-        const saveData = await fetch(`http://localhost:8080/api/v1/parameters/saveParametersList?idExit=${ProjectStore.projectId}`, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                ...formData,
-                employeeCharacteristicsEvaluations: formattedCharacteristics,
-            }),
-        }); 
+        const exitId = await getExistingExit(ProcessStore.processId, token);
+        let finalExitId = exitId;
 
-        if (!saveData.ok) {
-            const errorData = await saveData.json();
-            throw new Error(errorData.message || 'Error al guardar los datos');
+        if (!exitId) {
+                finalExitId = await createNewExit(ProcessStore.processId, AuthStore.name, token);
         }
 
-        return await saveData.json();
+        const response = await fetch(
+            `http://localhost:8080/api/v1/parameters/saveParametersList?idExit=${finalExitId}`, 
+            {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(dataToSend),
+            }
+        );
+
+        if (!response.ok) {
+            throw new Error('Error al guardad los datos');
+        }
+
+        const responseText = await response.text();
+
+        // Si la respuesta esta vacia
+        if (response.ok && (!responseText || responseText.trim() === '')) {
+            return { success: true, message: 'Datos guardados correctamente' };
+        }
+
+        try {
+            const responseData = JSON.parse(responseText);
+            return responseData;
+        } catch (e) {
+            if (response.ok) {
+                return { success: true, message: 'Datos guardados correctamente' };
+            }
+            throw new Error('Respuesta inválida del servidor');
+        }
+
     } catch (error) {
-        showAlert('Error', 'Error al guardar los datos. Por favor, intenta nuevamente.', 'error');
+        showAlert('Error en handleSave:',error);
         throw error;
     }
-    */
 };
 
 const showAlert = (title, message, type = 'info') => {
