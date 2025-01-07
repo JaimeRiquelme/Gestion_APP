@@ -13,78 +13,72 @@
         <!-- Contenedor de PDFs -->
         <div class="pdf-container">
           <div class="pdf-wrapper">
-            <span class="pdf-label top-left">Ultima EDT aprobada</span>
-            <iframe 
-              v-for="(pdf, index) in pdfBlobs" 
-              :key="index" 
-              :src="pdf" 
-              class="pdf-viewer" 
-              frameborder="0">
-            </iframe>
+            <span class="pdf-label top-left">Última EDT aprobada</span>
+            <iframe
+              v-if="pdfBlobs[0]"
+              :src="pdfBlobs[0]"
+              class="pdf-viewer"
+              frameborder="0"
+            ></iframe>
           </div>
   
           <div class="pdf-wrapper">
             <span class="pdf-label top-right">EDT actual</span>
-            <iframe 
-              v-for="(pdf, index) in pdfBlobs" 
-              :key="index" 
-              :src="pdf" 
-              class="pdf-viewer" 
-              frameborder="0">
-            </iframe>
+            <iframe
+              v-if="pdfBlobs[1]"
+              :src="pdfBlobs[1]"
+              class="pdf-viewer"
+              frameborder="0"
+            ></iframe>
           </div>
   
           <div class="pdf-wrapper">
-            <span class="pdf-label bottom-left">Ultimo enunciado del alcance del proyecto</span>
-            <iframe 
-              v-for="(pdf, index) in pdfBlobs" 
-              :key="index" 
-              :src="pdf" 
-              class="pdf-viewer" 
-              frameborder="0">
-            </iframe>
+            <span class="pdf-label bottom-left">Último enunciado del alcance del proyecto</span>
+            <iframe
+              v-if="pdfBlobs[2]"
+              :src="pdfBlobs[2]"
+              class="pdf-viewer"
+              frameborder="0"
+            ></iframe>
           </div>
   
           <div class="pdf-wrapper">
             <span class="pdf-label bottom-right">Enunciado del alcance actual</span>
-            <iframe 
-              v-for="(pdf, index) in pdfBlobs" 
-              :key="index" 
-              :src="pdf" 
-              class="pdf-viewer" 
-              frameborder="0">
-            </iframe>
+            <iframe
+              v-if="pdfBlobs[3]"
+              :src="pdfBlobs[3]"
+              class="pdf-viewer"
+              frameborder="0"
+            ></iframe>
           </div>
         </div>
   
         <!-- Botón para recargar documentos -->
-        <button class="action-button" @click="fetchPdfs">
-          Recargar Documentos
+        <button class="action-button" @click="createExit">
+          Autorizar Documento
         </button>
       </main>
     </div>
   </template>
   
   <script setup>
-  import { ref } from 'vue';
+  import { ref, onMounted } from 'vue';
   import { useAuthStore } from '../stores/auth';
   import axios from 'axios';
   
   const AuthStore = useAuthStore();
-  const pdfBlobs = ref([]); // URLs de los PDFs cargados
-  const pdfIds = ref([1, 2, 3, 5]); // IDs de los documentos que deseas cargar
+  const pdfBlobs = ref([]);
+  const pdfIds = ref([1, 2, 3, 5]);
   
   async function fetchPdfs() {
     try {
       const token = AuthStore.token;
-  
       if (!token) {
         alert('ALERTA: ¡Sesión no iniciada! Redirigiendo a login...');
         await router.push('/login');
         return;
       }
   
-      // Solicitar PDFs al backend
       const pdfPromises = pdfIds.value.map((id) =>
         axios.get(`http://localhost:8080/api/v1/exit/${id}/document`, {
           headers: { Authorization: `Bearer ${token}` },
@@ -94,18 +88,51 @@
   
       const responses = await Promise.all(pdfPromises);
   
-      // Crear URLs Blob para los PDFs
       pdfBlobs.value = responses.map((response) =>
         URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }))
       );
     } catch (error) {
       console.error('Error al cargar los documentos:', error);
-      alert('Hubo un problema al cargar los documentos. Por favor, intenta nuevamente.');
+      alert('Hubo un problema al cargar los documentos.');
     }
   }
   
-  // Cargar PDFs al montar el componente
-  fetchPdfs();
+  async function createExit() {
+    try {
+      const token = AuthStore.token;
+  
+      if (!pdfBlobs.value[1]) {
+        alert('El PDF no está cargado.');
+        return;
+      }
+  
+      const response = await axios.post(
+        'http://localhost:8080/api/v1/exit/create',
+        {
+          document: pdfBlobs.value[1], // Ajusta según el formato esperado
+          state: '1',
+          nameExit: 'Nombre del Exit',
+          description: 'Descripción de prueba',
+          priority: 'Alta',
+          responsible: 'Usuario Responsable',
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+  
+      alert('Exit creado exitosamente');
+    } catch (error) {
+      console.error('Error al crear el Exit:', error);
+      alert('Hubo un problema al crear el Exit.');
+    }
+  }
+  
+  onMounted(() => {
+    fetchPdfs();
+  });
   </script>
   
   <style scoped>
