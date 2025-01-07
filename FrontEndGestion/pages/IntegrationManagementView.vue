@@ -1,28 +1,27 @@
 <template>
-  <div class="page-container">
-      <header class="header">
-          <div class="logo">
-              <img src="../assets/usach-logo.png" alt="USACH" class="usach-logo" />
-          </div>
-      </header>
+    <div class="page-container">
+        <header class="header">
+            <div class="logo">
+                <img src="../assets/usach-logo.png" alt="USACH" class="usach-logo" />
+            </div>
+        </header>
 
-      <main class="main-content">
-          <div class="management-container">
-              <h1 class="section-title">Gestión de la integración</h1>
-              <p class="section-subtitle">Selecciona que área quieres abordar.</p>
+        <main class="main-content">
+            <div class="management-container">
+                <h1 class="section-title">Gestión de la integración</h1>
+                <p class="section-subtitle">Selecciona que área quieres abordar.</p>
 
-              <div class="management-areas">
-                  <button v-for="area in managementAreas" :key="area.id" class="area-button"
-                      :class="{ 'area-button-disabled': area.disabled }"
-                      :disabled="area.disabled"
-                      @click="area.disabled ? null : handleAreaClick(area)">
-                      <span class="area-number">{{ area.id }}.</span>
-                      <span class="area-title">{{ area.title }}</span>
-                  </button>
-              </div>
-          </div>
-      </main>
-  </div>
+                <div class="management-areas">
+                    <button v-for="area in managementAreas" :key="area.id" class="area-button"
+                        :class="{ 'area-button-disabled': area.disabled }" :disabled="area.disabled"
+                        @click="area.disabled ? null : handleAreaClick(area)">
+                        <span class="area-number">{{ area.id }}.</span>
+                        <span class="area-title">{{ area.title }}</span>
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
 </template>
 
 <script setup>
@@ -47,9 +46,9 @@ const managementAreas = [
         route: '/ActConstitutionView'
     },
     {
-      id: 2,
-      title: 'Secciones por ser implementadas',
-      disabled: true
+        id: 2,
+        title: 'Secciones por ser implementadas',
+        disabled: true
     }
 ];
 
@@ -176,7 +175,7 @@ onMounted(async () => {
 
             if (createResponse.ok) {
                 const newManagementData = await createResponse.json();
-                ManagementsStore.managementId = newManagementData.idManagement;  
+                ManagementsStore.managementId = newManagementData.idManagement;
                 ManagementsStore.managementName = newManagementData.nameManagement;
                 console.log('Management creado:', newManagementData);
             } else {

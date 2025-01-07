@@ -10,7 +10,8 @@
       <h2 class="section-title">Áreas de gestión del proyecto: {{ projectName }}</h2>
 
       <div class="management-grid">
-        <button @click="handleManagementArea('Gestion de Integracion', '/IntegrationManagementView')" class="management-card">
+        <button @click="handleManagementArea(MANAGEMENT_AREAS.INTEGRATION, '/IntegrationManagementView')"
+          class="management-card">
           <div class="management-header">
             <span class="management-number">1</span>
           </div>
@@ -19,7 +20,7 @@
           </div>
         </button>
 
-        <button @click="handleManagementArea('Gestion del Alcance', '/ScopeManagementView')" class="management-card">
+        <button @click="handleManagementArea(MANAGEMENT_AREAS.SCOPE, '/ScopeManagementView')" class="management-card">
           <div class="management-header">
             <span class="management-number">2</span>
           </div>
@@ -109,6 +110,7 @@ import { useAuthStore } from '../stores/auth';
 import { useProjectStore } from '../stores/project';
 import { useManagementsStore } from '../stores/Managements';
 import AlertPopup from '../components/AlertPopup.vue';
+import { MANAGEMENT_AREAS } from '../constants/managementAreas';
 
 const router = useRouter();
 const projectName = ref('Cargando...');
@@ -197,7 +199,15 @@ async function fetchProjectData() {
 }
 
 async function handleManagementArea(managementName, redirectPath) {
+  console.log('Valores antes de guardar en store:', {
+    managementName,
+    redirectPath,
+    currentStoreName: ManagementStore.nameManagement
+  });
+
   try {
+    console.log('Nombre de gestión recibido:', managementName);
+    
     const token = AuthStore.token;
     const projectId = ProjectStore.projectId;
 
@@ -206,23 +216,30 @@ async function handleManagementArea(managementName, redirectPath) {
       return;
     }
 
-    // First, try to get existing management
-    const response = await fetch(
-      `http://localhost:8080/api/v1/management/getByNameAndIdProyect?nameManagement=${managementName}&idProyect=${projectId}`,
-      {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
+    // Establecer el nombre en el store ANTES de hacer la petición
+    ManagementStore.setManagementData({
+      managementId: null,
+      managementName: managementName
+    });
+
+    const url = `http://localhost:8080/api/v1/management/getByNameAndIdProyect?nameManagement=${managementName}&idProyect=${projectId}`;
+    console.log('URL antes de fetch:', url);
+
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
       }
-    );
+    });
 
     if (response.ok) {
       const data = await response.json();
-      // Store management data and redirect
-      ManagementStore.idManagement = data.idManagement;
-      ManagementStore.nameManagement = data.nameManagement;
+      // Actualizar el store con los datos completos
+      ManagementStore.setManagementData({
+        managementId: data.idManagement,
+        managementName: data.nameManagement
+      });
       router.push(redirectPath);
     } else if (response.status === 404) {
       // Create new management if not found
@@ -241,18 +258,19 @@ async function handleManagementArea(managementName, redirectPath) {
 
       if (createResponse.ok) {
         const newManagement = await createResponse.json();
-
-        ManagementStore.idManagement = newManagement.idManagement;
-        ManagementStore.nameManagement = newManagement.nameManagement;
-
+        // Actualizar el store con los datos del nuevo management
+        ManagementStore.setManagementData({
+          managementId: newManagement.idManagement,
+          managementName: newManagement.nameManagement
+        });
         router.push(redirectPath);
       } else {
         showAlert('Error', 'No se pudo crear la gestión', 'error');
       }
     }
   } catch (error) {
+    console.error('Error completo:', error);
     showAlert('Error', 'Error al procesar la solicitud', 'error');
-    console.error(error);
   }
 }
 
