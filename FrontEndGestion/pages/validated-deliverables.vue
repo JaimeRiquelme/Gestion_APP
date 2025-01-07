@@ -112,19 +112,23 @@
                                     <label for="name">Nombre del Entregable <span class="red-text">*</span></label>
                                     <input 
                                     id="name" 
+                                    class="form-input"
                                     v-model="currentDeliverable.name"
-                                    class="form-input" 
+                                    @input="e => filterPipeCharacter(e, 'name')"
                                     required
                                     />
+                                    <span v-if="hasPipe(currentDeliverable.name)" class="invalid-feedback">No se permiten "|" en este campo</span>
                                 </div>
                                 <div class="form-group">
                                     <label for="criteria">Criterios de Aceptación del Entregable <span class="red-text">*</span></label>
                                     <textarea 
                                     id="criteria" 
-                                    v-model="currentDeliverable.criteria"
                                     class="form-input form-textarea" 
+                                    v-model="currentDeliverable.criteria"
+                                    @input="e => filterPipeCharacter(e, 'criteria')"
                                     required
                                     ></textarea>
+                                    <span v-if="hasPipe(currentDeliverable.criteria)" class="invalid-feedback">No se permiten "|" en este campo</span>
                                 </div>
                                 <div class="form-group">
                                     <label for="validationDate">Fecha de Aceptación <span class="red-text">*</span></label>
@@ -281,11 +285,19 @@ const validateForm = () => {
     invalidFields.value.clear();
 
     // Validar campos
-    Object.entries(currentDeliverable).forEach(([key, value]) => {
-        if (typeof value === 'string' && !value.trim()) {
-            invalidFields.value.add(key);
+    const requiredFields = ['name', 'criteria', 'validationDate'];
+  
+    // Solo validar los campos requeridos
+    requiredFields.forEach(field => {
+        if (!currentDeliverable[field]?.trim()) {
+        invalidFields.value.add(field);
         }
     });
+
+    // Validar caracteres pipe
+    if (hasPipe(currentDeliverable.name) || hasPipe(currentDeliverable.criteria)) {
+        invalidFields.value.add('pipe');
+    }
 
     return invalidFields.value.size === 0;
 };
@@ -384,7 +396,7 @@ const parseCriterias = (content) => {
         }
 
         return dataRows.map(row => {
-            const [code, name, criteria, validationDate] = row.split(',');
+            const [code, name, criteria, validationDate] = row.split('|');
             return {
                 code: code || '',
                 name: name || '',
@@ -417,9 +429,9 @@ const confirmSave = async () => {
 };
 
 const formatDeliverableCriteriaToString = (data) => {
-    let result = '&Código,Nombre,Criterios,Fecha&';
+    let result = '&Código|Nombre|Criterios|Fecha&';
     data.deliverableCriteria.forEach(criterias => {
-        result += `${criterias.code},${criterias.name},${criterias.criteria},${criterias.validationDate}&`;
+        result += `${criterias.code}|${criterias.name}|${criterias.criteria}|${criterias.validationDate}&`;
     });
     return result;
 };
@@ -496,6 +508,11 @@ const handleAlertConfirm = () => {
 };
 
 const addDeliverable = () => {
+    if (!validateForm()) {
+        errorMessage.value = 'Por favor, complete todos los campos obligatorios';
+        return;
+    }
+
     // Crear nuevo entregable con código automático
     formData.lastENT++;
     
@@ -507,36 +524,47 @@ const addDeliverable = () => {
     }
 
     // Agregar al array de entregables
-    formData.deliverableCriteria.push({ ...newDeliverable })
+    formData.deliverableCriteria.push({ ...newDeliverable });
 
     // Incrementar el contador de código
     console.log(formData.lastENT);
 
     // Limpiar el formulario
-    resetForm()
+    resetForm();
 
     // Cerrar el popup
-    closePopup()
+    closePopup();
 };
 
 const deleteDeliverable = (code) => {
-  const index = formData.deliverableCriteria.findIndex(item => item.code === code)
+  const index = formData.deliverableCriteria.findIndex(item => item.code === code);
   if (index !== -1) {
-    formData.deliverableCriteria.splice(index, 1)
+    formData.deliverableCriteria.splice(index, 1);
   }
-}
+};
 
 // TODO: Entender como hacer que se pueda editar abriendo el popup
 const editDeliverable = (item) => {
     openEditPopup(item);
     console.log('Editando entregable:', item);
-}
+};
 
 const resetForm = () => {
     currentDeliverable.code = '';
     currentDeliverable.name = '';
     currentDeliverable.criteria = '';
     currentDeliverable.validationDate = '';
+};
+
+const filterPipeCharacter = (event, field) => {
+    // Reemplaza cualquier carácter "|" con una cadena vacía
+    const filteredValue = event.target.value.replace(/\|/g, '');
+    // Actualiza el valor directamente en el objeto reactivo
+    currentDeliverable[field] = filteredValue;
+};
+
+const hasPipe = (value) => {
+    return value && value.includes('|');
 };
 
 </script>
