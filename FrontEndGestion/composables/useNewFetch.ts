@@ -7,7 +7,11 @@ export const useFetchWithAuth = () => {
   const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
     // Configurar headers básicos
     const headers = new Headers(options.headers || {})
-    
+
+    console.log('URL original:', url);
+    console.log('URL encoded:', encodeURI(url));
+    console.log('Parámetros de URL:', new URL(url).searchParams.toString());
+
     if (authStore.token) {
       headers.set('Authorization', `Bearer ${authStore.token}`)
     }
@@ -17,9 +21,9 @@ export const useFetchWithAuth = () => {
       ...options,
       headers
     })
-    
+
     // Si es 403 y tenemos refresh token, intentar refrescar el token
-    if (response.status === 403 && authStore.refreshToken) {  
+    if (response.status === 403 && authStore.refreshToken) {
       try {
         const refreshResponse = await fetch('http://localhost:8080/api/v1/auth/refresh-token', {
           method: 'POST',
@@ -33,7 +37,7 @@ export const useFetchWithAuth = () => {
 
         if (refreshResponse.ok) {
           const refreshData = await refreshResponse.json()
-          
+
           // Actualizar tokens en el store
           authStore.setAuthData({
             token: refreshData.accessToken,
@@ -48,7 +52,7 @@ export const useFetchWithAuth = () => {
             ...options,
             headers
           })
-          
+
         } else {
           authStore.clearAuthData()
           navigateTo('/login')
