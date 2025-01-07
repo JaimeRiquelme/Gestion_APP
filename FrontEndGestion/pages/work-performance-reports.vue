@@ -145,6 +145,14 @@
                 </div>
                 <AlertPopup :show="alert.show" :title="alert.title" :message="alert.message" :type="alert.type"
                     @confirm="handleAlertConfirm" />
+                <div v-if="pdfUrl" class="pdf-container">
+                    <iframe :src="pdfUrl" class="pdf-iframe"></iframe>
+                </div>
+                <div class="pdf-footer">
+                <button @click="navigateTo('/principalView')" class="pdf-button return-button">
+                    Volver al Dashboard
+                </button>
+            </div>
             </div>
         </main>
     </div>
@@ -173,6 +181,7 @@ const loading = ref(false);
 const errorMessage = ref('');
 const showCancelConfirmation = ref(false);
 const showSaveConfirmation = ref(false);
+const pdfUrl = ref(null);
 
 // Initial form data
 const formData = reactive({
@@ -390,8 +399,7 @@ const handleSubmit = async () => {
 
         // Procesar la respuesta del PDF
         const blob = await response.blob();
-        window.open(URL.createObjectURL(blob));
-        router.push('/ScopeManagementView');
+        pdfUrl.value = URL.createObjectURL(blob);
 
     } catch (error) {
         showAlert('Error', error.message, 'error');
@@ -481,6 +489,10 @@ const handleAlertConfirm = () => {
     if (alert.type === 'error' && alert.message.includes('Sesión no iniciada')) {
         navigateTo('/login');
     }
+};
+
+const goToDashboard = () => {
+    router.push('/dashboard');
 };
 </script>
 
@@ -588,6 +600,14 @@ label {
     font-size: 1rem;
     cursor: pointer;
     transition: all 0.3s;
+}
+
+.pdf-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #eee;
 }
 
 .submit-button {
