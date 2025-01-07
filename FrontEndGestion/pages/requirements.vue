@@ -128,7 +128,7 @@
                 <button type="button" class="cancel-button" @click="showCancelConfirmation = true">
                     Cancelar
                 </button>
-                <button type="button" class="save-button" :disabled="loading" @click="handleSave">
+                <button type="button" class="save-button" :disabled="loading" @click="showSaveConfirmation = true">
                     {{ loading ? 'Guardando...' : 'Guardar' }}
                 </button>
                 <button type="submit" class="submit-button" :disabled="loading" @click="handleSubmit">
@@ -149,6 +149,20 @@
                         </button>
                     </div>
                 </div>
+            </div>
+            <div v-if="showSaveConfirmation" class="modal-overlay">
+              <div class="modal-content">
+                <h3 class="section-title">Confirmar Guardado</h3>
+                <label>¿Estás seguro que deseas guardar los cambios actuales?</label>
+                <div class="modal-actions">
+                  <button class="cancel-button" @click="showSaveConfirmation = false">
+                      No, seguir editando
+                  </button>
+                  <button class="save-button" @click="handleSave">
+                      Sí, guardar
+                  </button>
+                </div>
+              </div>
             </div>
           </form>
 
@@ -172,7 +186,7 @@
               </div>
 
               <div class="pdf-footer">
-                  <button @click="navigateTo('/dashboard')" class="pdf-button return-button">
+                  <button @click="navigateTo('/principalView')" class="pdf-button return-button">
                       Volver al Dashboard
                   </button>
               </div>
@@ -181,26 +195,40 @@
 
         </div>
     </div>
+    <AlertPopup
+    :show="alert.show"
+    :title="alert.title"
+    :message="alert.message"
+    :type="alert.type"
+    @confirm="handleAlertConfirm"
+    />
   </template>
   
   <script setup>
   import { ref, reactive, onMounted } from 'vue';
   import { useAuthStore } from '../stores/auth';
   import { useProjectStore } from '../stores/project';
+  import { useProcessStore } from '../stores/Process';
+  import { useExitStore } from '../stores/Exit';
   
   const loading = ref(false);
   const errorMessage = ref('');
+
   const AuthStore = useAuthStore();
   const ProjectStore = useProjectStore();
+  const ProcessStore = useProcessStore();
+  const ExitStore = useExitStore();
+
   const pdfUrl = ref(null);
   const invalidFields = ref(new Set());
   const showCancelConfirmation = ref(false);
+  const showSaveConfirmation = ref(false);
   const tableFieldsWithComma = ref(new Map());
   const { fetch } = useFetchWithAuth();
 
   const url_doc_generator = "http://localhost:8080/api/documents/requirements-management-plan"
   const url_exit = "http://localhost:8080/api/v1/exit"
-  const url_process = "http://localhost:8080/api/v1/process"
+  const url_parameters = "http://localhost:8080/api/v1/parameters"
   
   const formData = reactive({
     proyectName: "",
@@ -224,6 +252,29 @@
     performance: "",
   });
 
+  // Alert popup handling START
+  const alert = reactive({
+      show: false,
+      title: '',
+      message: '',
+      type: 'info',
+  });
+  
+  const showAlert = (title, message, type = 'info') => {
+      alert.title = title;
+      alert.message = message;
+      alert.type = type;
+      alert.show = true;
+  };
+  
+  const handleAlertConfirm = () => {
+      alert.show = false;
+      if (alert.type === 'error' && alert.message.includes('Sesión no iniciada')) {
+        navigateTo('/login');
+      }
+  };
+  // Alert popoup handling END
+
   const validateForm = () => {
     invalidFields.value.clear();
     
@@ -244,6 +295,18 @@
     return invalidFields.value.size === 0;
   };
 
+  const addRequirement = () => {
+    formData.requirementsPrioritization.push({
+        id: '',
+        priority: ''
+    });
+  };
+
+  const removeRequirement = (index) => {
+    cleanMapList('requirementPriorization'); // Remove "no comma allowed" messages to avoid desynchronization
+    formData.requirementsPrioritization.splice(index, 1);
+  };
+
   const formatRequirementsToString = (requirements) => {
     if (!requirements || requirements.length === 0) return '';
 
@@ -256,22 +319,254 @@
     return result;
   };
 
-  const handleCancel = () => {
-      showCancelConfirmation.value = false;
-      navigateTo('/principalView');
+  const parseRequirementsPrioritization = (content) => {
+      try {
+          const rows = content.split('&');
+          // Ignorar la fila de encabezados y el último elemento vacío
+          const dataRows = rows.slice(2, -1);
+  
+          if (dataRows.length === 0) {
+              return [{
+                  id: '',
+                  priority: ''
+              }];
+          }
+  
+          return dataRows.map(row => {
+              const [id, priority] = row.split(',');
+              return {
+                  id: id || '',
+                  priority: priority || ''
+              };
+          });
+      } catch (error) {
+          console.error('Error parsing requirements priorization:', error);
+          return [{
+              id: '',
+              priority: ''
+          }];
+      }
   };
 
-  const addRequirement = () => {
-    formData.requirementsPrioritization.push({
-        id: '',
-        priority: ''
-    });
+  const getExistingExit = async () => {
+    const nameExit = "Requirement_Managment_Plan";
+    const idProcess = ProcessStore.processId;
+    if (!idProcess) {
+        showAlert('Error de Sesión', 'Proceso no pudo ser identificado, redirigiendo a vista principal...', 'error');
+        navigateTo('/principalView');
+        return;
+    }
+  
+    const checkResponse = await fetch(
+        url_exit + `/getByIdProcessAndNameExit?idProcess=${idProcess}&nameExit=${nameExit}`,
+        {
+            headers: {
+                'Authorization': `Bearer ${AuthStore.token}`,
+                'Content-Type': 'application/json',
+            },
+        }
+    );
+  
+    if (checkResponse.ok) {
+      const responseBody = await checkResponse.text()
+      if (responseBody.trim()) {
+        const exitData = JSON.parse(responseBody);
+        ExitStore.exitId = exitData.idExit;
+        ExitStore.exitName = exitData.nameExit;
+        return true;
+      }
+    } 
+    return false;
+  }
+
+  const createNewExit = async () => {
+    const idProcess = ProcessStore.processId;
+    if (!idProcess) {
+        showAlert('Error de Sesión', 'Proceso no pudo ser identificado, redirigiendo a vista principal...', 'error');
+        navigateTo('/principalView');
+        return;
+    }
+    const createResponse = await fetch(
+        url_exit + '/create',
+        {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${AuthStore.token}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                idProcess: ProcessStore.processId,
+                nameExit: "Requirement_Managment_Plan",
+                state: "Activo",
+                dateCreation: formData.elaborationDate,
+                dateValidation: new Date().toISOString().split('T')[0],
+                priority: "Media",
+                responsible: formData.proyectLeader,
+                description: "El Plan de Gestion de los Requisitos"
+            })
+        }
+    );
+    const responseText = await createResponse.text();
+    if (!responseText.trim()) {
+        throw new Error('No se recibió ningún contenido JSON');
+    }
+    if (!createResponse.ok) {
+        throw new Error(`Error al crear la salida: ${responseText}`);
+    }
+  
+    const newExitData = JSON.parse(responseText);
+    ExitStore.exitId = newExitData.idExit;
+    ExitStore.exitName = newExitData.nameExit;
+  }
+  
+  const getOrGenerateExit = async () => {
+    try {
+      if (!await getExistingExit()) {
+        await createNewExit();
+      }
+    } catch (error) {
+      console.error('Error en la gestión del Exit:', error);
+    }
+  }
+
+  const saveData = async () => {
+      try {
+          const userId = AuthStore.userId;
+          const token = AuthStore.token;
+          const projectId = ProjectStore.projectId;
+  
+          if (!userId || !token || !projectId) {
+              showAlert('Error de Sesión', '¡Sesión no iniciada!, redirigiendo a login...', 'error');
+              return;
+          }
+  
+          await getOrGenerateExit(); // Puts exitId in ExitStore
+  
+          // Formatting table data
+          const formattedRequirementPriorization = formatRequirementsToString(formData.requirementsPrioritization);
+  
+          const saveData = await fetch(url_parameters + `/saveParametersList?idExit=${ExitStore.exitId}`, {
+              method: 'POST',
+              headers: {
+                  'Authorization': `Bearer ${token}`,
+                  'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                  ...formData,
+                  requirementsPrioritization: formattedRequirementPriorization,
+              }),
+          }); 
+  
+          if (!saveData.ok) {
+              const errorData = await saveData.json();
+              throw new Error(errorData.message || 'Error al guardar los datos');
+          }
+  
+          const responseText = await saveData.text();
+  
+          // If JSON empty but status is ok, then it's a success
+          if (saveData.ok && (!responseText || responseText.trim() === '')) {
+              return { success: true, message: 'Datos guardados correctamente' };
+          }
+  
+          try {
+              const responseData = JSON.parse(responseText);
+              return responseData;
+          } catch (e) {
+              // If JSON invalid but status is ok, then it's a success
+              if (saveData.ok) {
+                  return { success: true, message: 'Datos guardados correctamente' };
+              }
+              throw new Error('Respuesta inválida del servidor');
+          }
+      } catch (error) {
+          showAlert('Error', 'Error al guardar los datos. Por favor, intenta nuevamente.', 'error');
+          throw error;
+      }
   };
 
-  const removeRequirement = (index) => {
-    cleanMapList('requirementPriorization'); // Remove "no comma allowed" messages to avoid desynchronization
-    formData.requirementsPrioritization.splice(index, 1);
-  };
+  const fetchParameterData = async () => {
+  try {
+    const userId = AuthStore.userId;
+    const token = AuthStore.token;
+    const projectId = ProjectStore.projectId;
+    if (!userId || !token || !projectId) {
+      showAlert('Error de Sesión', '¡Sesión no iniciada o proyecto no seleccionado!', 'error');
+      return;
+    }
+
+    await getOrGenerateExit();
+    const exitId = ExitStore.exitId;
+    if (exitId) {
+        const parametersResponse = await fetch(
+            `http://localhost:8080/api/v1/exit/${exitId}/parameters`,
+            {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                },
+            }
+        );
+        if (parametersResponse.ok) {
+            const parameters = await parametersResponse.json();
+            // Mapear los parámetros a los campos del formulario
+            parameters.forEach(param => {
+                console.log(`Processing parameter: ${param.nameParameter}`, param.content);
+                switch (param.nameParameter) {
+                    case 'proyectName':
+                        formData.proyectName = param.content;
+                        break;
+                    case 'idProyect':
+                        formData.idProyect = param.content;
+                        break;
+                    case 'proyectLeader':
+                        formData.proyectLeader = param.content;
+                        break;
+                    case 'qaLeader':
+                        formData.qaLeader = param.content;
+                        break;
+                    case 'elaborationDate':
+                        formData.elaborationDate = param.content;
+                        break;
+                    case 'requirementsIdentification':
+                        formData.requirementsIdentification = param.content;
+                        break;
+                    case 'requirementsAnalysis':
+                        formData.requirementsAnalysis = param.content;
+                        break;
+                    case 'continuousRequirements':
+                        formData.continuousRequirements = param.content;
+                        break;
+                    case 'documentationAndVersionControl':
+                        formData.documentationAndVersionControl = param.content;
+                        break;
+                    case 'changeControl':
+                        formData.changeControl = param.content;
+                        break;
+                    case 'requirementsPrioritization':
+                        const requirementsPrior = parseRequirementsPrioritization(param.content);
+                        formData.requirementsPrioritization = [...requirementsPrior];
+                        console.log('Parsed Requirement Priorization:', formData.requirementsPrioritization);
+                        break;
+                    case 'cost':
+                        formData.cost = param.content;
+                        break;
+                    case 'quality':
+                        formData.quality = param.content;
+                        break;
+                    case 'performance':
+                        formData.performance = param.content;
+                        break;
+                    default:
+                        console.log(`Parámetro no manejado: ${param.nameParameter}`);
+                        break;
+                }
+            });
+        }
+    }
+    } catch {
+      throw new Error('Error en la obtencion de Parametros');
+    }
+  }
 
   const fetchProjectData = async () => {
     try {
@@ -319,6 +614,7 @@
         formData.elaborationDate = projectDataResponse.startDate;
         formData.proyectLeader = `${userDataResponse.names} ${userDataResponse.secondNames}`;
 
+        await fetchParameterData();
     } catch (error) {
         console.error('Error fetching data:', error);
         errorMessage.value = 'Error al obtener la información. Por favor, intenta nuevamente.';
@@ -384,23 +680,29 @@
 
   //----- END OF COMMA VALIDATION AND ERROR MESSAGE CONTROL -----
 
-  const handleSave = () => {
-    const formattedRequirementPriorization = formatRequirementsToString(formData.requirementsPrioritization);
+  const handleCancel = () => {
+      showCancelConfirmation.value = false;
+      navigateTo('/principalView');
+  };
 
-    const formattedData = {
-        ...formData,
-        requirementsPrioritization: formattedRequirementPriorization,
-    };
+  const handleSave = async () => {
+    try {
+        loading.value = true;
+        showSaveConfirmation.value = false;
 
-    console.log('Datos del formulario (raw):', formData);
-    console.log('Datos formateados para envío:', formattedData);
-    console.log('Requirement Priorizations formateados:', formattedRequirementPriorization);
-    console.log('JSON completo:', JSON.stringify(formattedData, null, 2));
+        await saveData();
+        showAlert('Éxito', 'Los datos se han guardado correctamente', 'success');
+
+    } catch (error) {
+        showAlert('Error', 'Error al guardar los datos. Por favor, intenta nuevamente.', 'error');
+    } finally {
+        loading.value = false;
+    }
   };
 
   const handleSubmit = async () => {
     if (!validateForm()) {
-        errorMessage.value = 'Por favor, complete todos los campos obligatorios';
+        errorMessage.value = 'Por favor, complete correctamente todos los campos obligatorios';
         return;
     }
     
@@ -413,39 +715,18 @@
         const projectId = ProjectStore.projectId;
 
         if (!userId || !token || !projectId) {
-            alert('ALERTA: ¡Sesión no iniciada!, redirigiendo a login...')
-            await navigateTo('/login')
+            showAlert('Error de Sesión', '¡Sesión no iniciada!, redirigiendo a login...', 'error');
             return;
         }
 
-        // Generating respective Exit in backend
-        const responseExit = await fetch(url_exit + "/create", {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                nameExit: "Plan de Gestion de Requisitos",
-                description: "Plan donde se explican los metodos y herramientas para gestionar los requisitos",
-                dateCreation: formData.elaborationDate,
-                priority: "Alta",
-                responsible: formData.proyectLeader,
-                state: "Activo",
-                idProcess: "", // FALTA RECUPERAR DE UN STORE
-            }),
-        });
-
-        if (!responseExit.ok) {
-            const errorData = await responseExit.json();
-            throw new Error(errorData.message || 'Error al crear la salida: Plan de Gestión de Requisitos');
-        }
-        const exitResponse = await responseExit.json();
+        // Getting Exit Id
+        await getOrGenerateExit();
+        const exitId = ExitStore.exitId;
 
         const formattedRequirementsPrioritization = formatRequirementsToString(formData.requirementsPrioritization);
 
         // Endpoint call to generate pdf document
-        const responseRequirementManagmentPlan = await fetch(url_doc_generator + `/generate?idExit=${exitResponse.idExit}`, {
+        const responseRequirementManagmentPlan = await fetch(url_doc_generator + `/generate?idExit=${exitId}`, {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${token}`,
@@ -466,8 +747,7 @@
         pdfUrl.value = URL.createObjectURL(pdfBlob);
 
     } catch (error) {
-        console.error('Error creating requirement managment plan:', error);
-        errorMessage.value = error.message || 'Error al crear el Plan de Gestión de Requisitos. Por favor, intenta nuevamente.';
+        showAlert('Error', error.message || 'Error al crear el Plan de Gestión de Requisitos. Por favor, intenta nuevamente.', 'error');
     } finally {
         loading.value = false;
     }
