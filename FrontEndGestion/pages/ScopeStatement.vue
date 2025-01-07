@@ -306,6 +306,15 @@
                 <AlertPopup :show="alert.show" :title="alert.title" :message="alert.message" :type="alert.type"
                     @confirm="handleAlertConfirm" />
             </div>
+            <!-- Add a container to display the PDF -->
+            <div v-if="pdfUrl" class="pdf-container">
+                <iframe :src="pdfUrl" class="pdf-iframe"></iframe>
+            </div>
+            <div class="pdf-footer">
+                <button @click="navigateTo('/principalView')" class="pdf-button return-button">
+                    Volver al Dashboard
+                </button>
+            </div>
         </main>
     </div>
 </template>
@@ -333,6 +342,8 @@ const showCancelConfirmation = ref(false);
 const showSaveConfirmation = ref(false);
 const { fetch } = useFetchWithAuth();
 
+const pdfUrl = ref(null);
+
 // Initial form data
 const formData = reactive({
     proyectName: '',
@@ -349,7 +360,7 @@ const formData = reactive({
     deliverables: '',
     acceptanceCriteria: '',
     restrictions: '',
-    costEstimation: [{  
+    costEstimation: [{
         expense: '',
         estimatedBudget: 0,
         spentToDate: 0,
@@ -477,8 +488,7 @@ const handleSubmit = async () => {
         }
 
         const blob = await response.blob();
-        window.open(URL.createObjectURL(blob));
-        router.push('/ScopeManagementView');
+        pdfUrl.value = URL.createObjectURL(blob);
 
     } catch (error) {
         showAlert('Error', error.message, 'error');
@@ -940,7 +950,7 @@ const parseCostBenefitAnalysis = (content) => {
         lines.forEach((line, index) => {
             // Dividir la línea por comas y limpiar espacios en blanco
             const parts = line.split(',').map(part => part.trim());
-            
+
             // Verificar que la línea tenga suficientes partes
             if (parts.length < 2) {
                 console.log(`Línea ${index + 1} no tiene suficientes partes:`, line);
@@ -996,7 +1006,7 @@ const parseCostBenefitAnalysis = (content) => {
 
         // Log final del objeto resultante
         console.log('Objeto costBenefit final:', JSON.stringify(costBenefit, null, 2));
-        
+
         return costBenefit;
     } catch (error) {
         console.error('Error en parseCostBenefitAnalysis:', error);
@@ -1399,6 +1409,14 @@ label {
 .pdf-actions {
     display: flex;
     gap: 1rem;
+}
+
+.pdf-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #eee;
 }
 
 .pdf-button {
