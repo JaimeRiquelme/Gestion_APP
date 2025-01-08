@@ -1,135 +1,161 @@
 <template>
-    <div class="page-container">
-      <div class="form-container">
-        <h1 style="color: black;"><strong>Generar Documento de trazabilidad y sus matrices</strong></h1>
+  <div class="page-container">
+    <div class="form-container">
+      <h1 style="color: black;"><strong>Generar Documento de trazabilidad y sus matrices</strong></h1>
 
-        <form @submit.prevent="submitForm">
-          <div class="form-group">
-            <label for="idExit"><strong>ID de Salida:</strong></label>
-            <input type="number" id="idExit" v-model="idExit" placeholder="Ingrese el ID de salida" required />
-          </div>
-  
-          <div class="form-group">
-            <label for="proyectName"><strong>Nombre del Proyecto:</strong></label>
-            <input type="text" id="proyectName" v-model="formData.proyectName" placeholder="Ingrese el nombre del proyecto" required />
-          </div>
-  
-          <div class="form-group">
-            <label for="idProyect"><strong>ID del Proyecto:</strong></label>
-            <input type="text" id="idProyect" v-model="formData.idProyect" placeholder="Ingrese el ID del proyecto" required />
-          </div>
-  
-          <div class="form-group">
-            <label for="proyectLeader"><strong>Líder del Proyecto:</strong></label>
-            <input type="text" id="proyectLeader" v-model="formData.proyectLeader" placeholder="Ingrese el líder del proyecto" required />
-          </div>
-  
-          <div class="form-group">
-            <label for="qaLeader"><strong>Líder de QA:</strong></label>
-            <input type="text" id="qaLeader" v-model="formData.qaLeader" placeholder="Ingrese el líder de QA" required />
-          </div>
-  
-          <div class="form-group">
-            <label for="elaborationDate"><strong>Fecha de Elaboración:</strong></label>
-            <input type="date" id="elaborationDate" v-model="formData.elaborationDate" required />
-          </div>
-  
-          <button type="button" @click="openPopup" class="submit-button"><strong>Añadir Documentación de Requisitos</strong></button>
-          <button type="button" @click="openTraceabilityPopup" class="submit-button"><strong>Añadir Matriz de Trazabilidad</strong></button>
-          <button type="submit" class="submit-button"><strong>Generar Documento</strong></button>
-        </form>
-      </div>
-  
-      <!-- Popup para Documentación de Requisitos -->
-      <div v-if="showPopup" class="popup-overlay">
-        <div class="popup">
-          <h2><strong>Documentación de Requisitos</strong></h2>
-          <table>
-            <thead>
-              <tr>
-                <th><strong>Identificador de Requisitos</strong></th>
-                <th><strong>Descripción del Requisito</strong></th>
-                <th><strong>Responsable</strong></th>
-                <th><strong>Eliminar</strong></th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="(row, index) in documentationAndVersionControl" :key="index">
-                <td><input type="text" v-model="row.idRequirement" placeholder="ID del requisito" /></td>
-                <td><input type="text" v-model="row.description" placeholder="Descripción" /></td>
-                <td><input type="text" v-model="row.responsible" placeholder="Responsable" /></td>
-                <td>
-                  <button @click="removeRow(index)" class="submit-button">Eliminar</button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-          <button @click="addRow" class="submit-button"><strong>Añadir Fila</strong></button>
-          <button @click="closePopup" class="submit-button"><strong>Guardar y Cerrar</strong></button>
+      <form @submit.prevent="submitForm">
+        <div class="form-group">
+          <label for="idExit"><strong>ID de Salida:</strong></label>
+          <input type="number" id="idExit" v-model="idExit" placeholder="Ingrese el ID de salida" required />
         </div>
-      </div>
-  
-      <!-- Popup para Matriz de Trazabilidad -->
-      <div v-if="showTraceabilityPopup" class="popup-overlay">
-        <div class="popup">
-          <h2><strong>Matriz de Trazabilidad de Requisitos</strong></h2>
-          <table>
-            <thead>
-              <tr>
-                <th><strong>Identificador del Requerimiento</strong></th>
-                <th><strong>Sustento de Inclusión</strong></th>
-                <th><strong>Fecha de Inclusión</strong></th>
-                <th><strong>Propietario</strong></th>
-                <th><strong>Fuente</strong></th>
-                <th><strong>Prioridad</strong></th>
-                <th><strong>Estado Actual</strong></th>
-                <th><strong>Criterio de Aceptación</strong></th>
-                <th><strong>Entregable del WSB</strong></th>
-                <th><strong>Eliminar</strong></th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="(row, index) in requirementsTraceabilityMatrix" :key="index">
-                <td><input type="text" v-model="row.idRequirement" placeholder="ID del requerimiento" /></td>
-                <td><input type="text" v-model="row.sustento" placeholder="Sustento de inclusión" /></td>
-                <td><input type="date" v-model="row.fechaInclusion" placeholder="Fecha de inclusión" /></td>
-                <td><input type="text" v-model="row.propietario" placeholder="Propietario" /></td>
-                <td><input type="text" v-model="row.fuente" placeholder="Fuente" /></td>
-                <td>
-                  <select v-model="row.prioridad">
-                    <option value="alta">Alta</option>
-                    <option value="media">Media</option>
-                    <option value="baja">Baja</option>
-                  </select>
-                </td>
-                <td><input type="text" v-model="row.estadoActual" placeholder="Estado actual" /></td>
-                <td><input type="text" v-model="row.criterioAceptacion" placeholder="Criterio de aceptación" /></td>
-                <td><input type="text" v-model="row.entregableWSB" placeholder="Entregable del WSB" /></td>
-                <td>
-                  <button @click="removeTraceabilityRow(index)" class="submit-button">Eliminar</button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-          <button @click="addTraceabilityRow" class="submit-button"><strong>Añadir Fila</strong></button>
-          <button @click="closeTraceabilityPopup" class="submit-button"><strong>Guardar y Cerrar</strong></button>
+
+        <div class="form-group">
+          <label for="proyectName"><strong>Nombre del Proyecto:</strong></label>
+          <input type="text" id="proyectName" v-model="formData.proyectName" placeholder="Ingrese el nombre del proyecto" required />
         </div>
+
+        <div class="form-group">
+          <label for="idProyect"><strong>ID del Proyecto:</strong></label>
+          <input type="text" id="idProyect" v-model="formData.idProyect" placeholder="Ingrese el ID del proyecto" required />
+        </div>
+
+        <div class="form-group">
+          <label for="proyectLeader"><strong>Líder del Proyecto:</strong></label>
+          <input type="text" id="proyectLeader" v-model="formData.proyectLeader" placeholder="Ingrese el líder del proyecto" required />
+        </div>
+
+        <div class="form-group">
+          <label for="qaLeader"><strong>Líder de QA:</strong></label>
+          <input type="text" id="qaLeader" v-model="formData.qaLeader" placeholder="Ingrese el líder de QA" required />
+        </div>
+
+        <div class="form-group">
+          <label for="elaborationDate"><strong>Fecha de Elaboración:</strong></label>
+          <input type="date" id="elaborationDate" v-model="formData.elaborationDate" required />
+        </div>
+
+        <button type="button" @click="openPopup" class="submit-button"><strong>Añadir Documentación de Requisitos</strong></button>
+        <button type="button" @click="openTraceabilityPopup" class="submit-button"><strong>Añadir Matriz de Trazabilidad</strong></button>
+        <button type="submit" class="submit-button"><strong>Generar Documento</strong></button>
+      </form>
+
+      <!-- Botón para guardar los datos -->
+      <button type="button" @click="saveData" class="submit-button"><strong>Guardar Datos</strong></button>
+    </div>
+
+    <!-- Popup para Documentación de Requisitos -->
+    <div v-if="showPopup" class="popup-overlay">
+      <div class="popup">
+        <h2><strong>Documentación de Requisitos</strong></h2>
+        <table>
+          <thead>
+            <tr>
+              <th><strong>Identificador de Requisitos</strong></th>
+              <th><strong>Descripción del Requisito</strong></th>
+              <th><strong>Responsable</strong></th>
+              <th><strong>Eliminar</strong></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="(row, index) in documentationAndVersionControl" :key="index">
+              <td><input type="text" v-model="row.idRequirement" placeholder="ID del requisito" /></td>
+              <td><input type="text" v-model="row.description" placeholder="Descripción" /></td>
+              <td><input type="text" v-model="row.responsible" placeholder="Responsable" /></td>
+              <td>
+                <button @click="removeRow(index)" class="submit-button">Eliminar</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <button @click="addRow" class="submit-button"><strong>Añadir Fila</strong></button>
+        <button @click="closePopup" class="submit-button"><strong>Guardar y Cerrar</strong></button>
       </div>
     </div>
-  </template>
+
+    <!-- Popup para Matriz de Trazabilidad -->
+    <div v-if="showTraceabilityPopup" class="popup-overlay">
+      <div class="popup">
+        <h2><strong>Matriz de Trazabilidad de Requisitos</strong></h2>
+        <table>
+          <thead>
+            <tr>
+              <th><strong>Identificador del Requerimiento</strong></th>
+              <th><strong>Sustento de Inclusión</strong></th>
+              <th><strong>Fecha de Inclusión</strong></th>
+              <th><strong>Propietario</strong></th>
+              <th><strong>Fuente</strong></th>
+              <th><strong>Prioridad</strong></th>
+              <th><strong>Estado Actual</strong></th>
+              <th><strong>Criterio de Aceptación</strong></th>
+              <th><strong>Entregable del WSB</strong></th>
+              <th><strong>Eliminar</strong></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="(row, index) in requirementsTraceabilityMatrix" :key="index">
+              <td><input type="text" v-model="row.idRequirement" placeholder="ID del requerimiento" /></td>
+              <td><input type="text" v-model="row.sustento" placeholder="Sustento de inclusión" /></td>
+              <td><input type="date" v-model="row.fechaInclusion" /></td>
+              <td><input type="text" v-model="row.propietario" placeholder="Propietario" /></td>
+              <td><input type="text" v-model="row.fuente" placeholder="Fuente" /></td>
+              <td>
+                <select v-model="row.prioridad">
+                  <option value="alta">Alta</option>
+                  <option value="media">Media</option>
+                  <option value="baja">Baja</option>
+                </select>
+              </td>
+              <td><input type="text" v-model="row.estadoActual" placeholder="Estado actual" /></td>
+              <td><input type="text" v-model="row.criterioAceptacion" placeholder="Criterio de aceptación" /></td>
+              <td><input type="text" v-model="row.entregableWSB" placeholder="Entregable del WSB" /></td>
+              <td>
+                <button @click="removeTraceabilityRow(index)" class="submit-button">Eliminar</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <button @click="addTraceabilityRow" class="submit-button"><strong>Añadir Fila</strong></button>
+        <button @click="closeTraceabilityPopup" class="submit-button"><strong>Guardar y Cerrar</strong></button>
+      </div>
+    </div>
+  </div>
+</template>
   
   <script setup>
   import { ref } from 'vue';
   import { useAuthStore } from '../stores/auth';
   import { useProjectStore } from '../stores/project';
+  import { useExitStore } from '../stores/Exit';
+  import { useProcessStore } from '../stores/Process';
+  
+
+  // Alert popup handling START
+const alert = reactive({
+    show: false,
+    title: '',
+    message: '',
+    type: 'info',
+});
+
+const showAlert = (title, message, type = 'info') => {
+    alert.title = title;
+    alert.message = message;
+    alert.type = type;
+    alert.show = true;
+};
+
+
   const AuthStore = useAuthStore();
   const ProjectStore = useProjectStore();
   const { fetch } = useFetchWithAuth();
-  
-  const idExit = ref(null);
+  const ExitStore = useExitStore();
+  const ProcessStore = useProcessStore();
+
+  const url_parameters = "http://localhost:8080/api/v1/parameters"
+  const idExit = ExitStore.exitId;
   const formData = ref({
-    proyectName: '',
-    idProyect: '',
+    proyectName: ProjectStore.projectName,
+    idProyect: ProjectStore.projectId,
     proyectLeader: '',
     qaLeader: '',
     elaborationDate: '',
@@ -213,7 +239,7 @@
     }
 
     // Validación del ID de Salida
-    if (!idExit.value) {
+    if (!ExitStore.exitId) {
       alert('Por favor, ingrese un ID de Salida válido.');
       return;
     }
@@ -224,7 +250,7 @@
 
     // Enviar datos al backend
     const response = await fetch(
-      `http://localhost:8080/api/documents/TraceabilityMatrix/generate?idExit=${idExit.value}`, 
+      `http://localhost:8080/api/documents/TraceabilityMatrix/generate?idExit=${ExitStore.exitId}`, 
       {
         method: 'POST',
         headers: {
@@ -255,6 +281,142 @@
     alert('Hubo un error al generar el documento. Por favor, revise los datos ingresados.');
   }
 }
+
+
+
+const saveData = async () => {
+    try {
+        const userId = AuthStore.userId;
+        const token = AuthStore.token;
+        const projectId = ProjectStore.projectId;
+
+        if (!userId || !token || !projectId) {
+            return;
+        }
+
+        await getOrGenerateExit(); // Puts exitId in ExitStore
+
+        const saveData = await fetch(url_parameters + `/saveParametersList?idExit=${ExitStore.exitId}`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                ...formData.value
+            }),
+        }); 
+
+        if (!saveData.ok) {
+            const errorData = await saveData.json();
+            throw new Error(errorData.message || 'Error al guardar los datos');
+        }
+
+        const responseText = await saveData.text();
+
+        // If JSON empty but status is ok, then it's a success
+        if (saveData.ok && (!responseText || responseText.trim() === '')) {
+            return { success: true, message: 'Datos guardados correctamente' };
+        }
+
+        try {
+            const responseData = JSON.parse(responseText);
+            return responseData;
+        } catch (e) {
+            // If JSON invalid but status is ok, then it's a success
+            if (saveData.ok) {
+                return { success: true, message: 'Datos guardados correctamente' };
+            }
+            throw new Error('Respuesta inválida del servidor');
+        }
+    } catch (error) {
+        throw error;
+    }
+};
+
+const getOrGenerateExit = async () => {
+  try {
+    if (!await getExistingExit()) {
+      await createNewExit();
+    }
+  } catch (error) {
+    console.error('Error en la gestión del Exit:', error);
+  }
+}
+
+
+const createNewExit = async () => {
+  const idProcess = ProcessStore.processId;
+  if (!idProcess) {
+      showAlert('Error de Sesión', 'Proceso no pudo ser identificado, redirigiendo a vista principal...', 'error');
+      navigateTo('/principalView');
+      return;
+  }
+  const createResponse = await fetch(
+      url_exit + '/create',
+      {
+          method: 'POST',
+          headers: {
+              'Authorization': `Bearer ${AuthStore.token}`,
+              'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+              idProcess: ProcessStore.processId,
+              nameExit: "Matriz de trazabilidad",
+              state: "1",
+              dateCreation: formData.elaborationDate,
+              dateValidation: new Date().toISOString().split('T')[0],
+              priority: "Media",
+              responsible: formData.proyectLeader,
+              description: "Matriz de trazabilidad del proyecto"
+          })
+      }
+  );
+  const responseText = await createResponse.text();
+  if (!responseText.trim()) {
+      throw new Error('No se recibió ningún contenido JSON');
+  }
+  if (!createResponse.ok) {
+      throw new Error(`Error al crear la salida: ${responseText}`);
+  }
+
+  const newExitData = JSON.parse(responseText);
+  ExitStore.exitId = newExitData.idExit;
+  ExitStore.exitName = newExitData.nameExit;
+}
+
+
+const getExistingExit = async () => {
+  const nameExit = 'EDT';
+  const idProcess = ProcessStore.processId;
+  if (!idProcess) {
+      showAlert('Error de Sesión', 'Proceso no pudo ser identificado, redirigiendo a vista principal...', 'error');
+      navigateTo('/principalView');
+      return;
+  }
+
+  const checkResponse = await fetch(
+      url_exit + `/getByIdProcessAndNameExit?idProcess=${idProcess}&nameExit=${nameExit}`,
+      {
+          headers: {
+              'Authorization': `Bearer ${AuthStore.token}`,
+              'Content-Type': 'application/json',
+          },
+      }
+  );
+
+  if (checkResponse.ok) {
+    const responseBody = await checkResponse.text()
+    if (responseBody.trim()) {
+      const exitData = JSON.parse(responseBody);
+      ExitStore.exitId = exitData.idExit;
+      ExitStore.exitName = exitData.nameExit;
+      return true;
+    }
+  } 
+  return false;
+}
+
 
   </script>
   

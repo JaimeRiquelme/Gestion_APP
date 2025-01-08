@@ -20,7 +20,8 @@
           </div>
         </button>
 
-        <button @click="handleManagementArea(MANAGEMENT_AREAS.SCOPE, '/ScopeManagementView')" class="management-card">
+        <button @click="handleManagementArea(MANAGEMENT_AREAS.SCOPE, '/ScopeManagementView')"
+         class="management-card">
           <div class="management-header">
             <span class="management-number">2</span>
           </div>
