@@ -170,7 +170,7 @@
           <iframe :src="pdfUrl" class="pdf-iframe"></iframe>
         </div>
         <div class="pdf-footer">
-          <button @click="navigateTo('/ScopeManagementView')" class="pdf-button return-button">
+          <button @click="navigateTo('/principalView')" class="pdf-button return-button">
             Volver al Dashboard
           </button>
         </div>
@@ -829,7 +829,7 @@ const handleAlertConfirm = () => {
 // Handlers START
 const handleCancel = () => {
   showCancelConfirmation.value = false;
-  navigateTo('/principalView');
+  navigateTo('/ScopeManagementView');
 };
 
 
