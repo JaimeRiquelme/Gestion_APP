@@ -41,7 +41,7 @@ const managementAreas = [
     {
         id: 1,
         title: 'Plan de gestión del alcance',
-        route: '/scope-planning'
+        route: '/scopeManagementPlan'
     },
     {
         id: 2,
