@@ -66,7 +66,7 @@ const managementAreas = [
     {
         id: 6,
         title: 'Línea base del alcance',
-        route: '/ScopeBaseline'
+        route: '/Scope-Baseline-block'
     },
     {
         id: 7,
