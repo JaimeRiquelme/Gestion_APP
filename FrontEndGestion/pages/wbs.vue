@@ -586,7 +586,7 @@ const fetchProjectData = async () => {
   try {
     loading.value = true;
     errorMessage.value = '';
-    
+
     // Validar datos necesarios
     const userId = AuthStore.userId;
     const token = AuthStore.token;
@@ -642,12 +642,41 @@ const fetchProjectData = async () => {
       const process = await responseWbs.json();
       ProcessStore.processId = process.idProcess;
       ProcessStore.processName = process.nameProcess;
-      
+
       await getOrGenerateExit();
       await fetchParameterData();
     } else if (responseWbs.status === 404) {
-      // Crear nuevo proceso si no existe
-      await createNewProcess(token, idGestion);
+      const currentDate = new Date().toISOString().split('T')[0];
+
+      // Si no existe, creamos uno nuevo
+      const createResponse = await fetch('http://localhost:8080/api/v1/process/create', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          idManagement: idGestion,
+          nameProcess: "Estructura de desglose del trabajo (EDT)",
+          description: "Estructura de desglose del trabajo (EDT)",
+          stateProcess: "Activo",
+          startDatePlanned: currentDate,
+          endDatePlanned: currentDate,
+          startDateReal: currentDate,
+          endDateReal: currentDate
+        }),
+      });
+
+      if (createResponse.ok) {
+        const newProcess = await createResponse.json();
+        ProcessStore.processId = newProcess.idProcess;
+        ProcessStore.processName = newProcess.nameProcess;
+        console.log('Proceso creado:', newProcess);
+        router.push(area.route);
+      } else {
+        console.error('Error al crear el proceso');
+      }
+
     } else {
       throw new Error('Error al obtener proceso WBS');
     }

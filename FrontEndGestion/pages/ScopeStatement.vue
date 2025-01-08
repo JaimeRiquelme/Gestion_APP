@@ -327,6 +327,7 @@ import { useProcessStore } from '../stores/Process';
 import { useExitStore } from '../stores/Exit';
 import AlertPopup from '../components/AlertPopup.vue';
 import { useRouter } from 'vue-router';
+import { useManagementsStore } from '../stores/Managements';
 
 // Store instantiation
 const AuthStore = useAuthStore();
@@ -334,6 +335,8 @@ const ProjectStore = useProjectStore();
 const ProcessStore = useProcessStore();
 const ExitStore = useExitStore();
 const router = useRouter();
+const ManagementsStore = useManagementsStore();
+
 
 // Reactive state
 const loading = ref(false);
@@ -732,6 +735,7 @@ onMounted(async () => {
         loading.value = true;
         const projectId = ProjectStore.projectId;
         const token = AuthStore.token;
+        const idGestion = ManagementsStore.managementId;
 
         // Primera petición para obtener datos del proyecto
         const projectResponse = await fetch(`http://localhost:8080/api/v1/proyect/getById/${projectId}`, {
@@ -747,6 +751,55 @@ onMounted(async () => {
             formData.elaborationDate = projectData.startDate;
         }
 
+        const respondeScopeStat = await fetch(
+            `http://localhost:8080/api/v1/process/getByIdManagementAndNameProcess?idManagement=${idGestion}&nameProcess=Enunciado del alcance del proyecto`,
+            {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+            }
+        );
+
+        if (respondeScopeStat.ok) {
+            const process = await respondeScopeStat.json();
+            ProcessStore.processId = process.idProcess;
+            ProcessStore.processName = process.nameProcess;
+
+            await getOrGenerateExit();
+        } else if (respondeScopeStat.status === 404) {
+            const currentDate = new Date().toISOString().split('T')[0];
+
+            // Si no existe, creamos uno nuevo
+            const createResponse = await fetch('http://localhost:8080/api/v1/process/create', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    idManagement: idGestion,
+                    nameProcess: "Enunciado del alcance del proyecto",
+                    description: "Enunciado del alcance del proyecto",
+                    stateProcess: "Activo",
+                    startDatePlanned: currentDate,
+                    endDatePlanned: currentDate,
+                    startDateReal: currentDate,
+                    endDateReal: currentDate
+                }),
+            });
+
+            if (createResponse.ok) {
+                const newProcess = await createResponse.json();
+                ProcessStore.processId = newProcess.idProcess;
+                ProcessStore.processName = newProcess.nameProcess;
+                console.log('Proceso creado:', newProcess);
+            } else {
+                console.error('Error al crear el proceso');
+            }
+        } else {
+            throw new Error('Error al obtener proceso WBS');
+        }
         // Obtener el exitId
         const exitId = await getExistingExit(ProcessStore.processId, token);
 
@@ -853,6 +906,16 @@ onMounted(async () => {
         loading.value = false;
     }
 });
+
+const getOrGenerateExit = async () => {
+    try {
+        if (!await getExistingExit()) {
+            await createNewExit();
+        }
+    } catch (error) {
+        console.error('Error en la gestión del Exit:', error);
+    }
+}
 
 const parseHighLevelRequirements = (content) => {
     try {
