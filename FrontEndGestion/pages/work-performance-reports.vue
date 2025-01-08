@@ -52,28 +52,18 @@
                     <section class="form-section">
                         <h2 class="section-title">Progreso actual <span class="red-text">*</span></h2>
                         <div class="form-group">
-                            <label for="progress">Comentarios: Esta sección detalla los avances logrados en el proyecto en términos de tareas completadas, entregables producidos y el porcentaje de avance global. También se deben incluir métricas clave como el índice de desempeño del cronograma (SPI) y cualquier desviación respecto a lo planificado.</label>
+                            <label for="progress">Esta sección detalla los avances logrados en el proyecto en términos de tareas completadas, entregables producidos y el porcentaje de avance global. También se deben incluir métricas clave como el índice de desempeño del cronograma (SPI) y cualquier desviación respecto a lo planificado.</label>
                             <textarea id="progress" v-model="formData.progress"
-                                class="form-input form-textarea" required></textarea>
-                        </div>
-                    </section>
-
-                    <!-- Progreso Actual -->
-                    <section class="form-section">
-                        <h2 class="section-title">Progreso actual <span class="red-text">*</span></h2>
-                        <div class="form-group">
-                            <label for="deviationsDetected">Comentarios: Esta sección detalla los avances logrados en el proyecto en términos de tareas completadas, entregables producidos y el porcentaje de avance global. También se deben incluir métricas clave como el índice de desempeño del cronograma (SPI) y cualquier desviación respecto a lo planificado.</label>
-                            <textarea id="deviationsDetected" v-model="formData.deviationsDetected"
                                 class="form-input form-textarea" required></textarea>
                         </div>
                     </section>
 
                     <!-- Desviaciones Detectadas -->
                     <section class="form-section">
-                        <h2 class="section-title">Desviaciones detectadas <span class="red-text">*</span></h2>
+                        <h2 class="section-title">Desviaciones Detectadas <span class="red-text">*</span></h2>
                         <div class="form-group">
-                            <label for="analysisOfCauses">En esta sección se identifican y describen las desviaciones del plan de alcance, junto con las actividades o entregables afectados. Es importante detallar si estas desviaciones fueron causadas por factores internos (como problemas de recursos) o externos (como cambios en los requisitos).</label>
-                            <textarea id="analysisOfCauses" v-model="formData.analysisOfCauses"
+                            <label for="deviationsDetected">En esta sección se identifican y describen las desviaciones del plan de alcance, junto con las actividades o entregables afectados. Es importante detallar si estas desviaciones fueron causadas por factores internos (como problemas de recursos) o externos (como cambios en los requisitos).</label>
+                            <textarea id="deviationsDetected" v-model="formData.deviationsDetected"
                                 class="form-input form-textarea" required></textarea>
                         </div>
                     </section>
@@ -82,8 +72,8 @@
                     <section class="form-section">
                         <h2 class="section-title">Análisis de causas <span class="red-text">*</span></h2>
                         <div class="form-group">
-                            <label for="correctiveActions">En esta sección se analizan las causas raíz de las desviaciones detectadas. Esto ayuda a comprender por qué ocurrieron y a identificar patrones que podrían prevenirse en el futuro.</label>
-                            <textarea id="correctiveActions" v-model="formData.correctiveActions"
+                            <label for="analysisOfCauses">En esta sección se analizan las causas raíz de las desviaciones detectadas. Esto ayuda a comprender por qué ocurrieron y a identificar patrones que podrían prevenirse en el futuro.</label>
+                            <textarea id="analysisOfCauses" v-model="formData.analysisOfCauses"
                                 class="form-input form-textarea" required></textarea>
                         </div>
                     </section>
@@ -92,7 +82,17 @@
                     <section class="form-section">
                         <h2 class="section-title">Acciones correctivas <span class="red-text">*</span></h2>
                         <div class="form-group">
-                            <label for="nextSteps">Aquí se describen las acciones tomadas o planificadas para resolver los problemas detectados y asegurar el cumplimiento del alcance. Es fundamental detallar quién será responsable de implementar estas medidas y los plazos esperados para su ejecución.</label>
+                            <label for="correctiveActions">Aquí se describen las acciones tomadas o planificadas para resolver los problemas detectados y asegurar el cumplimiento del alcance. Es fundamental detallar quién será responsable de implementar estas medidas y los plazos esperados para su ejecución.</label>
+                            <textarea id="correctiveActions" v-model="formData.correctiveActions"
+                                class="form-input form-textarea" required></textarea>
+                        </div>
+                    </section>
+
+                    <!-- Próximos pasos -->
+                    <section class="form-section">
+                        <h2 class="section-title">Próximos pasos <span class="red-text">*</span></h2>
+                        <div class="form-group">
+                            <label for="nextSteps">En esta sección se enumeran las actividades pendientes más importantes y los planes inmediatos para su ejecución. También se puede incluir una breve mención de los riesgos asociados y las medidas preventivas previstas.</label>
                             <textarea id="nextSteps" v-model="formData.nextSteps"
                                 class="form-input form-textarea" required></textarea>
                         </div>
