@@ -308,7 +308,7 @@ const isFieldInvalid = (fieldName) => {
 
 const handleCancel = () => {
     showCancelConfirmation.value = false;
-    navigateTo('/principalView');
+    navigateTo('/ScopeManagementView');
 };
 
 const handleEverything = async () => {

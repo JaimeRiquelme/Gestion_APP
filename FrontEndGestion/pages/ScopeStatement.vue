@@ -536,7 +536,7 @@ const isFieldInvalid = (fieldName) => {
 // Funciones de manejo de eventos
 const handleCancel = () => {
     showCancelConfirmation.value = false;
-    router.push('/ProjectManagementAreas');
+    router.push('/ScopeManagementView');
 };
 
 // Formato para Estimación de Costos 
