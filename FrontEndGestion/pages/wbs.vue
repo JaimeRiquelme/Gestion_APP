@@ -219,6 +219,7 @@ const ProjectStore = useProjectStore();
 const ProcessStore = useProcessStore();
 const ExitStore = useExitStore();
 
+
 const loading = ref(false);
 const errorMessage = ref('');
 const pdfUrl = ref(null);

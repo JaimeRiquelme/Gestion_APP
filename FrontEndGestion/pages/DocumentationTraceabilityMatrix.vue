@@ -38,6 +38,9 @@
         <button type="button" @click="openTraceabilityPopup" class="submit-button"><strong>Añadir Matriz de Trazabilidad</strong></button>
         <button type="submit" class="submit-button"><strong>Generar Documento</strong></button>
       </form>
+
+      <!-- Botón para guardar los datos -->
+      <button type="button" @click="saveData" class="submit-button"><strong>Guardar Datos</strong></button>
     </div>
 
     <!-- Popup para Documentación de Requisitos -->
@@ -129,6 +132,7 @@
   const { fetch } = useFetchWithAuth();
   const ExitStore = useExitStore();
 
+  const url_parameters = "http://localhost:8080/api/v1/parameters"
   const idExit = ExitStore.exitId;
   const formData = ref({
     proyectName: ProjectStore.projectName,
@@ -258,6 +262,58 @@
     alert('Hubo un error al generar el documento. Por favor, revise los datos ingresados.');
   }
 }
+
+
+
+const saveData = async () => {
+    try {
+        const userId = AuthStore.userId;
+        const token = AuthStore.token;
+        const projectId = ProjectStore.projectId;
+
+        if (!userId || !token || !projectId) {
+            return;
+        }
+
+
+        const saveData = await fetch(url_parameters + `/saveParametersList?idExit=${ExitStore.exitId}`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                ...formData,
+                edtWbs: formattedWBS,
+            }),
+        }); 
+
+        if (!saveData.ok) {
+            const errorData = await saveData.json();
+            throw new Error(errorData.message || 'Error al guardar los datos');
+        }
+
+        const responseText = await saveData.text();
+
+        // If JSON empty but status is ok, then it's a success
+        if (saveData.ok && (!responseText || responseText.trim() === '')) {
+            return { success: true, message: 'Datos guardados correctamente' };
+        }
+
+        try {
+            const responseData = JSON.parse(responseText);
+            return responseData;
+        } catch (e) {
+            // If JSON invalid but status is ok, then it's a success
+            if (saveData.ok) {
+                return { success: true, message: 'Datos guardados correctamente' };
+            }
+            throw new Error('Respuesta inválida del servidor');
+        }
+    } catch (error) {
+        throw error;
+    }
+};
 
   </script>
   

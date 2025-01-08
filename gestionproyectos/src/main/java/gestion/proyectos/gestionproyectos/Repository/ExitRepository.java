@@ -17,4 +17,7 @@ public interface ExitRepository extends JpaRepository<Exit, Long> {
             "JOIN proyects pr ON m.id_proyect = pr.id_proyecto " +
             "WHERE pr.id_proyecto = :idProyecto AND e.name_exit = 'Acta de Constitución del Proyecto'", nativeQuery = true)
     Exit findActInstitutionByIdProyect(Long idProyecto);
+    Exit findByNameExitAndState(String nameExit, String state);
+
+
 }

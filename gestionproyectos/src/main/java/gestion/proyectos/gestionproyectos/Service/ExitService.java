@@ -166,4 +166,20 @@ public class ExitService {
         return document;
     }
 
+    public byte[] getActInstitutionByNameAndState(String nameExit, String state) {
+        Exit exit = exitRepository.findByNameExitAndState(nameExit, state);
+        if (exit == null) {
+            throw new RuntimeException("Exit not found for name: " + nameExit + " and state: " + state);
+        }
+
+        byte[] document = exit.getDocument();
+        if (document == null) {
+            throw new RuntimeException("Document not found for exit with name: " + nameExit + " and state: " + state);
+        }
+
+        return document;
+    }
+
+
+
 }
