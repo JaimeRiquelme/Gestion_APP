@@ -37,23 +37,12 @@ public class ScopeManagementPlanDocumentService implements DocumentService {
             "productLeader",
             "projectLeader",
             "elaborationDate",
-            "scopeApproach",
-            "scopePlanObjectives",
+            "introduction",
+            "scopeManagementApproach",
+            "rolesAndResponsibilities",
             "scopeDefinition",
-            "scopeExclusions",
-            "scopeLimitations",
-            "scopeStatement",
-            "scopeOutputs",
-            "projectAssumptions",
-            "requirementGathering",
-            "requirementsGatheringStrategy",
-            "requirementsAnalysis",
-            "requirementsDocumentation",
-            "verificationAndControlOfScope",
-            "scopeApproval",
-            "stakeholdersApproval",
-            "changeControlSystem",
-            "edtApproval"
+            "scopeVerification",
+            "scopeControl"
     ));
 
     /**
