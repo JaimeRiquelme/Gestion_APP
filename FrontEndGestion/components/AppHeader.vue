@@ -91,8 +91,12 @@
  const isRegisterPage = computed(() => route.path === '/register');
  
  const goBack = () => {
-    router.back();
- };
+   if (route.path === '/wbs') {
+      router.push('/principalView');
+   } else {
+      router.back();
+   }
+};
  
  const goToMenu = () => {
     router.push('/principalView');
