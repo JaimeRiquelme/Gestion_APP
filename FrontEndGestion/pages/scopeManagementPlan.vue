@@ -28,7 +28,7 @@
             </div>
             <div class="form-group">
               <label for="productLeader">Líder del Producto *</label>
-              <input id="productLeader" v-model="formData.productLeader" type="text" class="form-input" required />
+              <input id="productLeader" v-model="formData.productLeader" type="text" :class="['form-input', { 'input-error': invalidFields.has('productLeader') }]" required />
             </div>
 
             <div class="form-group">
@@ -51,8 +51,7 @@
             </p>
             <div class="form-group">
               <label for="introduction">Introducción del Proyecto *</label>
-              <textarea id="introduction" v-model="formData.introduction" class="form-textarea"
-                placeholder="Describa la introducción del proyecto..." rows="6" required></textarea>
+              <textarea id="introduction" v-model="formData.introduction" :class="['form-textarea', { 'input-error': invalidFields.has('introduction') }]" placeholder="Describa la introducción del proyecto..." rows="6" required></textarea>
             </div>
           </div>
         </section>
@@ -68,15 +67,14 @@
             </p>
             <div class="form-group">
               <label for="scopeManagementApproach">Enfoque de Gestión *</label>
-              <textarea id="scopeManagementApproach" v-model="formData.scopeManagementApproach" class="form-textarea"
-                placeholder="Describa el enfoque de gestión..." rows="6" required></textarea>
+              <textarea id="scopeManagementApproach" v-model="formData.scopeManagementApproach" :class="['form-textarea', { 'input-error': invalidFields.has('scopeManagementApproach') }]" placeholder="Describa el enfoque de gestión..." rows="6" required></textarea>
             </div>
           </div>
         </section>
 
         <!-- Sección de rolesAndResponsibilities y Responsabilidades -->
         <section v-if="count === 2" class="form-section">
-          <h2 class="section-title">rolesAndResponsibilities y Responsabilidades</h2>
+          <h2 class="section-title">Roles y Responsabilidades</h2>
           <div class="content">
             <div class="rolesAndResponsibilities-container">
               <table class="rolesAndResponsibilities-table">
@@ -91,13 +89,13 @@
                 <tbody>
                   <tr v-for="(role, index) in rolesAndResponsibilities" :key="index" class="role-row">
                     <td>
-                      <input v-model="role.name" placeholder="Nombre" class="form-input" />
+                      <input v-model="role.name" :class="['form-input', { 'input-error': invalidFields.has(`role-${index}-name`) }]" placeholder="Nombre" />
                     </td>
                     <td>
-                      <input v-model="role.role" placeholder="Rol" class="form-input" />
+                      <input v-model="role.role" :class="['form-input', { 'input-error': invalidFields.has(`role-${index}-role`) }]" placeholder="Rol" />
                     </td>
                     <td>
-                      <input v-model="role.responsibilities" placeholder="Responsabilidades" class="form-input" />
+                      <input v-model="role.responsibilities" :class="['form-input', { 'input-error': invalidFields.has(`role-${index}-responsibilities`) }]" placeholder="Responsabilidades" />
                     </td>
                     <td>
                       <button @click="removeRole(index)" class="delete-button" :disabled="rolesAndResponsibilities.length === 1">
@@ -124,8 +122,7 @@
             </p>
             <div class="form-group">
               <label for="scopeDefinition">Definición del Alcance *</label>
-              <textarea id="scopeDefinition" v-model="formData.scopeDefinition" class="form-textarea"
-                placeholder="Describa la definición del alcance..." rows="6" required></textarea>
+              <textarea id="scopeDefinition" v-model="formData.scopeDefinition" :class="['form-textarea', { 'input-error': invalidFields.has('scopeDefinition') }]" placeholder="Describa la definición del alcance..." rows="6" required></textarea>
             </div>
           </div>
         </section>
@@ -159,8 +156,7 @@
             </p>
             <div class="form-group">
               <label for="scopeVerification">Verificación del Alcance *</label>
-              <textarea id="scopeVerification" v-model="formData.scopeVerification" class="form-textarea"
-                placeholder="Describa la verificación del alcance..." rows="6" required></textarea>
+              <textarea id="scopeVerification" v-model="formData.scopeVerification" :class="['form-textarea', { 'input-error': invalidFields.has('scopeVerification') }]" placeholder="Describa la verificación del alcance..." rows="6" required></textarea>
             </div>
           </div>
         </section>
@@ -175,8 +171,7 @@
             </p>
             <div class="form-group">
               <label for="scopeControl">Control del Alcance *</label>
-              <textarea id="scopeControl" v-model="formData.scopeControl" class="form-textarea"
-                placeholder="Describa el control del alcance..." rows="6" required></textarea>
+              <textarea id="scopeControl" v-model="formData.scopeControl" :class="['form-textarea', { 'input-error': invalidFields.has('scopeControl') }]" placeholder="Describa el control del alcance..." rows="6" required></textarea>
             </div>
           </div>
         </section>
@@ -227,6 +222,22 @@
           </div>
         </div>
 
+        <!-- Modal de Confirmación de Guardado -->
+        <div v-if="showSaveConfirmation" class="modal-overlay">
+          <div class="modal-content">
+            <h3 class="modal-title">Confirmar Guardado</h3>
+            <p class="modal-message">¿Estás seguro que deseas guardar el progreso actual?</p>
+            <div class="modal-actions">
+              <button class="modal-button secondary" @click="showSaveConfirmation = false">
+                No, seguir editando
+              </button>
+              <button class="modal-button save" @click="confirmSave">
+                Sí, guardar
+              </button>
+            </div>
+          </div>
+        </div>
+
         <!-- Mensaje de Error -->
         <div v-if="errorMessage" class="error-message">
           {{ errorMessage }}
@@ -271,6 +282,7 @@ const ProjectStore = useProjectStore();
 const pdfUrl = ref(null);
 const invalidFields = ref(new Set());
 const showCancelConfirmation = ref(false);
+const showSaveConfirmation = ref(false);
 const count = ref(0);
 const ProcessStore = useProcessStore();
 const { fetch } = useFetchWithAuth();
@@ -354,8 +366,76 @@ const getExistingExit = async (processId, token) => {
   return null;
 };
 
+// Modificar handleSubmit para mostrar mejor los campos vacíos y navegar a la sección correspondiente
 const handleSubmit = async () => {
-  if (!validateForm()) return;
+  const emptyFields = [];
+  let firstEmptySection = null;
+  invalidFields.value.clear(); // Limpiar campos inválidos anteriores
+  
+  // Validar sección 0
+  if (!formData.productLeader) {
+    emptyFields.push('Líder del Producto');
+    invalidFields.value.add('productLeader');
+    firstEmptySection = 0;
+  }
+  if (!formData.introduction) {
+    emptyFields.push('Introducción del Proyecto');
+    invalidFields.value.add('introduction');
+    firstEmptySection = firstEmptySection ?? 0;
+  }
+
+  // Validar sección 1
+  if (!formData.scopeManagementApproach) {
+    emptyFields.push('Enfoque de Gestión');
+    invalidFields.value.add('scopeManagementApproach');
+    firstEmptySection = firstEmptySection ?? 1;
+  }
+
+  // Validar sección 2 (Roles y Responsabilidades)
+  rolesAndResponsibilities.forEach((role, index) => {
+    if (!role.name || !role.role || !role.responsibilities) {
+      emptyFields.push(`Roles y Responsabilidades (Rol ${index + 1})`);
+      if (!role.name) invalidFields.value.add(`role-${index}-name`);
+      if (!role.role) invalidFields.value.add(`role-${index}-role`);
+      if (!role.responsibilities) invalidFields.value.add(`role-${index}-responsibilities`);
+      firstEmptySection = firstEmptySection ?? 2;
+    }
+  });
+
+  // Validar sección 3
+  if (!formData.scopeDefinition) {
+    emptyFields.push('Definición del Alcance');
+    invalidFields.value.add('scopeDefinition');
+    firstEmptySection = firstEmptySection ?? 3;
+  }
+
+  // Validar sección 5
+  if (!formData.scopeVerification) {
+    emptyFields.push('Verificación del Alcance');
+    invalidFields.value.add('scopeVerification');
+    firstEmptySection = firstEmptySection ?? 5;
+  }
+
+  // Validar sección 6
+  if (!formData.scopeControl) {
+    emptyFields.push('Control del Alcance');
+    invalidFields.value.add('scopeControl');
+    firstEmptySection = firstEmptySection ?? 6;
+  }
+
+  // Si hay campos vacíos, mostrar alerta y navegar a la primera sección con campos vacíos
+  if (emptyFields.length > 0) {
+    if (firstEmptySection !== null) {
+      count.value = firstEmptySection;
+    }
+    const fieldsText = emptyFields.join(', ');
+    showAlert(
+      'Campos Requeridos',
+      `Para generar el documento, complete los siguientes campos: ${fieldsText}`,
+      'warning'
+    );
+    return;
+  }
 
   try {
     loading.value = true;
@@ -431,7 +511,12 @@ const formatrolesAndResponsibilities = (data) => {
   return role;
 };
 
-const handleSave = async () => {
+// Modificar handleSave para eliminar la validación
+const handleSave = () => {
+  showSaveConfirmation.value = true;
+};
+
+const confirmSave = async () => {
   try {
     const userId = AuthStore.userId;
     const token = AuthStore.token;
@@ -460,24 +545,25 @@ const handleSave = async () => {
       }
     );
     console.log('Response:', response);
-    // Modificación aquí para manejar la respuesta
+
     if (!response.ok) {
       throw new Error('Error al guardar los datos');
     }
 
     const responseText = await response.text();
+    showSaveConfirmation.value = false; // Close the confirmation modal
 
-    // Si la respuesta está vacía pero el status es 201/200, consideramos que fue exitoso
+    // Show success alert
+    showAlert('Éxito', 'Datos guardados correctamente', 'success');
+
     if (response.ok && (!responseText || responseText.trim() === '')) {
       return { success: true, message: 'Datos guardados correctamente' };
     }
 
-    // Solo intentamos parsear como JSON si hay contenido
     try {
       const responseData = JSON.parse(responseText);
       return responseData;
     } catch {
-      // Si hay contenido pero no es JSON válido, igual consideramos exitoso si el status es ok
       if (response.ok) {
         return { success: true, message: 'Datos guardados correctamente' };
       }
@@ -486,24 +572,10 @@ const handleSave = async () => {
 
   } catch (error) {
     console.error('Error en handleSave:', error);
+    showSaveConfirmation.value = false; // Close the confirmation modal on error
+    showAlert('Error', error.message, 'error'); // Show error alert
     throw error;
   }
-};
-
-const validateForm = () => {
-  if (
-    !formData.productLeader ||
-    !formData.introduction ||
-    !formData.scopeManagementApproach ||
-    !formData.scopeDefinition ||
-    !formData.scopeVerification ||
-    !formData.scopeControl
-  ) {
-    return false;
-  }
-  return rolesAndResponsibilities.every(
-    role => role.name && role.role && role.responsibilities
-  );
 };
 
 onMounted(async () => {
@@ -622,6 +694,8 @@ const alert = reactive({
   message: '',
   type: 'info'
 });
+
+
 
 // Añade la función showAlert
 const showAlert = (title, message, type = 'info') => {
@@ -1144,5 +1218,25 @@ const parserolesAndResponsibilities = (content) => {
     flex-direction: column;
   }
 }
+
+/* Agregar estilos para el botón de guardar en el modal */
+.modal-button.save {
+  background-color: #10b981;
+  color: white;
+  border: none;
+}
+
+.modal-button.save:hover {
+  background-color: #059669;
+}
+
+/* Añadir estilos para campos inválidos */
+.input-error {
+  border-color: #dc2626 !important;
+  background-color: #fef2f2 !important;
+}
+
+.input-error:focus {
+  box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.1) !important;
+}
 </style>
-``` 
