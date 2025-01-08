@@ -91,7 +91,7 @@
  const isRegisterPage = computed(() => route.path === '/register');
  
  const goBack = () => {
-   if (route.path === '/wbs') {
+   if (route.path === '/wbs' || route.path === '/ScopeStatement') {
       router.push('/principalView');
    } else {
       router.back();
