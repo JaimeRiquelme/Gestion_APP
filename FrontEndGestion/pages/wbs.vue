@@ -586,92 +586,75 @@ const fetchProjectData = async () => {
   try {
     loading.value = true;
     errorMessage.value = '';
+    
+    // Validar datos necesarios
     const userId = AuthStore.userId;
     const token = AuthStore.token;
     const projectId = ProjectStore.projectId;
     const idGestion = ManagementsStore.managementId;
-    if (!userId || !token || !projectId) {
-      showAlert('Error de Sesión', '¡Sesión no iniciada o proyecto no seleccionado!', 'error');
-      return;
+
+    if (!userId || !token || !projectId || !idGestion) {
+      throw new Error('Faltan datos necesarios para la operación');
     }
-    // Obtain proyect data
-    const respondeProyect = await fetch(`http://localhost:8080/api/v1/proyect/getById/${projectId}`, {
-      method: 'GET',
+
+    // Obtener datos del proyecto
+    const responseProject = await fetch(`http://localhost:8080/api/v1/proyect/getById/${projectId}`, {
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',
       }
     });
-    // Obtain user data
-    const respondeUser = await fetch(`http://localhost:8080/api/v1/user/getById/${userId}`, {
-      method: 'GET',
+
+    // Obtener datos del usuario
+    const responseUser = await fetch(`http://localhost:8080/api/v1/user/getById/${userId}`, {
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',
       }
     });
-    if (!respondeProyect.ok || !respondeUser.ok) {
-      throw new Error('Error al obtener la información necesaria');
+
+    if (!responseProject.ok || !responseUser.ok) {
+      throw new Error('Error al obtener datos de proyecto o usuario');
     }
-    const projectDataResponse = await respondeProyect.json();
-    const userDataResponse = await respondeUser.json();
-    // Updating form data
-    formData.proyectName = projectDataResponse.nameProyect;
-    formData.idProyect = projectDataResponse.idProyecto;
-    formData.company = projectDataResponse.organization;
-    formData.proyectLeader = `${userDataResponse.names} ${userDataResponse.secondNames}`;
-    formData.elaborationDate = projectDataResponse.startDate;
 
-    const responsewbs = await fetch(`http://localhost:8080/api/v1/process/getByIdManagementAndNameProcess?idManagement=${idGestion}&nameProcess=Estructura de desglose del trabajo (EDT)`, {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-    });
+    const projectData = await responseProject.json();
+    const userData = await responseUser.json();
 
-    if (responsewbs.ok) {
-      const process = await response.json();
+    // Actualizar form data
+    formData.proyectName = projectData.nameProyect;
+    formData.idProyect = projectData.idProyecto;
+    formData.company = projectData.organization;
+    formData.proyectLeader = `${userData.names} ${userData.secondNames}`;
+    formData.elaborationDate = projectData.startDate;
+
+    // Obtener proceso WBS
+    const responseWbs = await fetch(
+      `http://localhost:8080/api/v1/process/getByIdManagementAndNameProcess?idManagement=${idGestion}&nameProcess=Estructura de desglose del trabajo (EDT)`,
+      {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+
+    if (responseWbs.ok) {
+      const process = await responseWbs.json();
       ProcessStore.processId = process.idProcess;
       ProcessStore.processName = process.nameProcess;
-      console.log('Proceso encontrado:', process);
-      router.push(area.route);
-    }else if (response.status === 404) {
-            // Formatear la fecha actual en YYYY-MM-DD
-            const currentDate = new Date().toISOString().split('T')[0];
+      
+      await getOrGenerateExit();
+      await fetchParameterData();
+    } else if (responseWbs.status === 404) {
+      // Crear nuevo proceso si no existe
+      await createNewProcess(token, idGestion);
+    } else {
+      throw new Error('Error al obtener proceso WBS');
+    }
 
-            // Si no existe, creamos uno nuevo
-            const createResponse = await fetch('http://localhost:8080/api/v1/process/create', {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    idManagement: idGestion,
-                    nameProcess: "Estructura de desglose del trabajo (EDT)",
-                    description: "Estructura de desglose del trabajo (EDT)",
-                    stateProcess: "Activo",
-                    startDatePlanned: currentDate,
-                    endDatePlanned: currentDate,
-                    startDateReal: currentDate,
-                    endDateReal: currentDate
-                }),
-            });
-
-            if (createResponse.ok) {
-                const newProcess = await createResponse.json();
-                ProcessStore.processId = newProcess.idProcess;
-                ProcessStore.processName = newProcess.nameProcess;
-                console.log('Proceso creado:', newProcess);
-                router.push(area.route);
-            } else {
-                console.error('Error al crear el proceso');
-            }
-        }
-    await fetchParameterData();
   } catch (error) {
     console.error('Error fetching data:', error);
-    errorMessage.value = 'Error al obtener la información. Por favor, intenta nuevamente.';
+    errorMessage.value = `Error al obtener la información: ${error.message}`;
   } finally {
     loading.value = false;
   }
