@@ -5,7 +5,8 @@
         <v-col>
           <h1 class="form-title">Estructura de Desglose del Trabajo</h1>
           <p class="text-body-1 text-grey-darken-1">
-            La EDT y su diccionario son elementos clave para la gestión efectiva del alcance. Esta herramienta permite separar las fases de un proyecto en tareas más manejables.
+            La EDT y su diccionario son elementos clave para la gestión efectiva del alcance. Esta herramienta permite
+            separar las fases de un proyecto en tareas más manejables.
           </p>
         </v-col>
       </v-row>
@@ -16,83 +17,70 @@
 
           <div class="form-group">
             <label>Nombre del Proyecto *</label>
-            <input v-model="formData.proyectName" class="form-input" type="text" placeholder="Ingrese el nombre del proyecto" required disabled />
+            <input v-model="formData.proyectName" class="form-input" type="text"
+              placeholder="Ingrese el nombre del proyecto" required disabled />
           </div>
-      
+
           <div class="flex-row">
             <div class="form-group half-width">
               <label>Identificador del Proyecto *</label>
-              <input v-model="formData.idProyect" class="form-input" type="text" placeholder="Ingrese el identificador del proyecto" required disabled />
+              <input v-model="formData.idProyect" class="form-input" type="text"
+                placeholder="Ingrese el identificador del proyecto" required disabled />
             </div>
-        
+
             <div class="form-group half-width">
               <label>Fecha de Elaboración *</label>
-              <input v-model="formData.elaborationDate" class="form-input" type="date" placeholder="yyyy-mm-dd" required />
+              <input v-model="formData.elaborationDate" class="form-input" type="date" placeholder="yyyy-mm-dd"
+                required />
             </div>
           </div>
-          
+
           <div class="form-group half-width">
             <label>Líder del Proyecto *</label>
-            <input v-model="formData.proyectLeader" class="form-input" type="text" placeholder="Ingrese el líder del proyecto" required disabled />
+            <input v-model="formData.proyectLeader" class="form-input" type="text"
+              placeholder="Ingrese el líder del proyecto" required disabled />
           </div>
 
           <div class="form-group">
             <label>Promotor del Proyecto</label>
-            <input v-model="formData.proyectPromotor" class="form-input" type="text" placeholder="Ingrese el promotor del proyecto" required />
+            <input v-model="formData.proyectPromotor" class="form-input" type="text"
+              placeholder="Ingrese el promotor del proyecto" required />
           </div>
 
           <div class="form-group">
             <label>Declaración del alcance del proyecto</label>
-            <input v-model="formData.projectScopeStatement" class="form-input" type="text" placeholder="Ingrese una descripcion del alcance del proyecto" required />
+            <input v-model="formData.projectScopeStatement" class="form-input" type="text"
+              placeholder="Ingrese una descripcion del alcance del proyecto" required />
           </div>
           <h2 class="section-title">Diagrama EDT</h2>
         </section>
       </form>
-  
+
       <v-row class="mb-6">
         <v-col cols="12" md="8" class="mx-auto">
           <div class="wbs-tree">
             <div class="wbs-node level-0">
               <div class="d-flex align-center">
-                <v-text-field
-                  v-model="formData.proyectName"
-                  variant="outlined"
-                  density="compact"
-                  bg-color="grey-lighten-2"
-                  class="wbs-input"
-                  placeholder="Nombre del proyecto"
-                  disabled
-                ></v-text-field>
+                <v-text-field v-model="formData.proyectName" variant="outlined" density="compact"
+                  bg-color="grey-lighten-2" class="wbs-input" placeholder="Nombre del proyecto" disabled></v-text-field>
                 <div class="ms-2 button-container">
-                  <v-btn
-                    icon
-                    size="small"
-                    variant="text"
-                    @click="addPiece(null)"
-                  >
+                  <v-btn icon size="small" variant="text" @click="addPiece(null)">
                     <v-icon color="blue-darken-3">mdi-plus-circle</v-icon>
                   </v-btn>
                 </div>
               </div>
             </div>
             <TransitionGroup name="list" tag="div">
-              <WBSNode
-                v-for="piece in topLevelPieces"
-                :key="piece.id"
-                :piece="piece"
-                :all-pieces="wbsPieces"
-                @add-piece="addPiece"
-                @delete-piece="deletePiece"
-                @update-piece="updatePiece"
-              />
+              <WBSNode v-for="piece in topLevelPieces" :key="piece.id" :piece="piece" :all-pieces="wbsPieces"
+                @add-piece="addPiece" @delete-piece="deletePiece" @update-piece="updatePiece" />
             </TransitionGroup>
           </div>
         </v-col>
       </v-row>
-  
+
       <v-row>
         <v-col>
-          <v-table class="rounded-table":headers="headers" :items="items" :items-per-page="5">
+          <v-table class="rounded-table" :headers="headers" :items="items" :items-per-page="5">
             <thead>
               <TransitionGroup name="list">
                 <tr>
@@ -110,17 +98,12 @@
                   <td>{{ item.code }}</td>
                   <td>{{ item.name }}</td>
                   <td>
-                    <v-textarea
-                      class="table-textarea"
-                      v-if="item.level >= 2"
-                      v-model="item.description"
-                      variant="outlined"
-                      rows="1"
-                      hide-details
+                    <v-textarea class="table-textarea" v-if="item.level >= 2" v-model="item.description"
+                      variant="outlined" rows="1" hide-details
                       @input="validateNoSpecialSymbol($event, 'wbsPieceDictionary', item)"
-                      @update:model-value="updatePieceDescription(item.id, $event)"
-                    ></v-textarea>
-                    <span v-if="fieldHadSpecialSymbol('wbsPieceDictionary', item.id)" class="invalid-feedback">No se permite el simbolo en este campo</span>
+                      @update:model-value="updatePieceDescription(item.id, $event)"></v-textarea>
+                    <span v-if="fieldHadSpecialSymbol('wbsPieceDictionary', item.id)" class="invalid-feedback">No se
+                      permite el simbolo en este campo</span>
                   </td>
                 </tr>
               </TransitionGroup>
@@ -130,77 +113,72 @@
       </v-row>
 
       <div class="form-actions">
-          <button type="button" class="cancel-button" @click="showCancelConfirmation = true">
-              Cancelar
-          </button>
-          <button type="button" class="save-button" :disabled="loading" @click="showSaveConfirmation = true">
-              {{ loading ? 'Guardando...' : 'Guardar' }}
-          </button>
-          <button type="submit" class="submit-button" :disabled="loading" @click="handleSubmit">
-              {{ loading ? 'Creando...' : 'Crear Documento' }}
-          </button>
+        <button type="button" class="cancel-button" @click="showCancelConfirmation = true">
+          Cancelar
+        </button>
+        <button type="button" class="save-button" :disabled="loading" @click="showSaveConfirmation = true">
+          {{ loading ? 'Guardando...' : 'Guardar' }}
+        </button>
+        <button type="submit" class="submit-button" :disabled="loading" @click="handleSubmit">
+          {{ loading ? 'Creando...' : 'Crear Documento' }}
+        </button>
       </div>
       <div v-if="showCancelConfirmation" class="modal-overlay">
-          <div class="modal-content">
-              <h3 class="section-title">Confirmar Cancelación</h3>
-              <label>¿Estás seguro que deseas cancelar? Los cambios no guardados se perderán.</label>
-              <div class="modal-actions">
-                  <button class="cancel-button" @click="showCancelConfirmation = false">
-                      No, continuar editando
-                  </button>
-                  <button class="confirm-button" @click="handleCancel">
-                      Sí, cancelar
-                  </button>
-              </div>
+        <div class="modal-content">
+          <h3 class="section-title">Confirmar Cancelación</h3>
+          <label>¿Estás seguro que deseas cancelar? Los cambios no guardados se perderán.</label>
+          <div class="modal-actions">
+            <button class="cancel-button" @click="showCancelConfirmation = false">
+              No, continuar editando
+            </button>
+            <button class="confirm-button" @click="handleCancel">
+              Sí, cancelar
+            </button>
           </div>
+        </div>
       </div>
       <div v-if="showSaveConfirmation" class="modal-overlay">
-          <div class="modal-content">
-              <h3 class="section-title">Confirmar Guardado</h3>
-              <label>¿Estás seguro que deseas guardar los cambios actuales?</label>
-              <div class="modal-actions">
-                  <button class="cancel-button" @click="showSaveConfirmation = false">
-                      No, seguir editando
-                  </button>
-                  <button class="save-button" @click="handleSave">
-                      Sí, guardar
-                  </button>
-              </div>
+        <div class="modal-content">
+          <h3 class="section-title">Confirmar Guardado</h3>
+          <label>¿Estás seguro que deseas guardar los cambios actuales?</label>
+          <div class="modal-actions">
+            <button class="cancel-button" @click="showSaveConfirmation = false">
+              No, seguir editando
+            </button>
+            <button class="save-button" @click="handleSave">
+              Sí, guardar
+            </button>
           </div>
+        </div>
       </div>
 
       <div v-if="errorMessage" class="error-message">
-          {{ errorMessage }}
+        {{ errorMessage }}
       </div>
 
       <div v-if="pdfUrl" class="pdf-container">
-          <div class="pdf-header">
-              <h2 class="pdf-title">Vista previa del documento</h2>
-              <div class="pdf-actions">
-                  <a :href="pdfUrl" download="PlanGestionDeRequisitos.pdf" class="pdf-button download-button">
-                      <span class="button-icon">↓</span>
-                      Descargar PDF
-                  </a>
-              </div>
+        <div class="pdf-header">
+          <h2 class="pdf-title">Vista previa del documento</h2>
+          <div class="pdf-actions">
+            <a :href="pdfUrl" download="PlanGestionDeRequisitos.pdf" class="pdf-button download-button">
+              <span class="button-icon">↓</span>
+              Descargar PDF
+            </a>
           </div>
-          <div class="pdf-viewer">
-              <iframe :src="pdfUrl" class="pdf-iframe"></iframe>
-          </div>
-          <div class="pdf-footer">
-              <button @click="navigateTo('/ScopeManagementView')" class="pdf-button return-button">
-                  Volver al Dashboard
-              </button>
-          </div>
+        </div>
+        <div class="pdf-viewer">
+          <iframe :src="pdfUrl" class="pdf-iframe"></iframe>
+        </div>
+        <div class="pdf-footer">
+          <button @click="navigateTo('/ScopeManagementView')" class="pdf-button return-button">
+            Volver al Dashboard
+          </button>
+        </div>
       </div>
     </v-container>
   </div>
-  <AlertPopup
-    :show="alert.show"
-    :title="alert.title"
-    :message="alert.message"
-    :type="alert.type"
-    @confirm="handleAlertConfirm"
-  />
+  <AlertPopup :show="alert.show" :title="alert.title" :message="alert.message" :type="alert.type"
+    @confirm="handleAlertConfirm" />
 </template>
 
 <script setup>
@@ -209,6 +187,8 @@ import { useAuthStore } from '../stores/auth';
 import { useProjectStore } from '../stores/project';
 import { useProcessStore } from '../stores/Process';
 import { useExitStore } from '../stores/Exit';
+import { useManagementsStore } from '../stores/Managements';
+
 
 const projectName = ref('Nombre del proyecto')
 const wbsPieces = ref([])
@@ -218,6 +198,7 @@ const AuthStore = useAuthStore();
 const ProjectStore = useProjectStore();
 const ProcessStore = useProcessStore();
 const ExitStore = useExitStore();
+const ManagementsStore = useManagementsStore();
 
 
 const loading = ref(false);
@@ -234,15 +215,15 @@ const url_exit = "http://localhost:8080/api/v1/exit"
 const url_parameters = "http://localhost:8080/api/v1/parameters"
 
 const formData = reactive({
-    proyectName: "",
-    idProyect: "",
-    company: "",
-    proyectPromotor: "",
-    proyectLeader: "",
-    elaborationDate: new Date().toISOString().split('T')[0],
-    projectScopeStatement: "",
-    edtWbs: ""
-  });
+  proyectName: "",
+  idProyect: "",
+  company: "",
+  proyectPromotor: "",
+  proyectLeader: "",
+  elaborationDate: new Date().toISOString().split('T')[0],
+  projectScopeStatement: "",
+  edtWbs: ""
+});
 
 const topLevelPieces = computed(() => {
   return wbsPieces.value.filter(piece => piece.parentId === null)
@@ -354,7 +335,7 @@ function updatePieceDescription(pieceId, newDescription) {
   }
 }
 
-function formatWBS(){
+function formatWBS() {
   const fases = wbsPieceDictionary.value.filter(piece => piece.level === 1);
 
   const result = fases.map(fase => {
@@ -453,75 +434,75 @@ function validateWBSStructure() {
 }
 
 const validateForm = () => {
-    errorMessage.value = ''
+  errorMessage.value = ''
 
-    // Form data validation
-    Object.entries(formData).forEach(([key, value]) => {
-        if (typeof value === 'string' && !value.trim()) {
-          if (key != 'edtWbs') {
-            errorMessage.value = 'Por favor, rellene todos los campos';
-            return false;
-          };
-        };
-    });
-
-    // Escape if error occurs
-    if (errorMessage.value != '') {
-      return false;
-    }
-
-    // Special Symbol validation and empty validation
-    wbsPieces.value.forEach(p => {
-      if (!p.name.trim()) {
-        errorMessage.value = 'Todas las Fases y Tareas del EDT deben tener nombres';
+  // Form data validation
+  Object.entries(formData).forEach(([key, value]) => {
+    if (typeof value === 'string' && !value.trim()) {
+      if (key != 'edtWbs') {
+        errorMessage.value = 'Por favor, rellene todos los campos';
         return false;
-      }
-      if(hasSpecialSymbol(p.name) || hasSpecialSymbol(p.description)){
-        errorMessage.value = 'Los nombres y descripciones de Tareas o Fases no pueden contener los simbolos: | { } , ;'
-        return false;
-      }
-    })
+      };
+    };
+  });
 
-    // Escape if error occurs
-    if (errorMessage.value != '') {
+  // Escape if error occurs
+  if (errorMessage.value != '') {
+    return false;
+  }
+
+  // Special Symbol validation and empty validation
+  wbsPieces.value.forEach(p => {
+    if (!p.name.trim()) {
+      errorMessage.value = 'Todas las Fases y Tareas del EDT deben tener nombres';
       return false;
     }
-
-    // Verify EDT structure
-    if (!validateWBSStructure()){
+    if (hasSpecialSymbol(p.name) || hasSpecialSymbol(p.description)) {
+      errorMessage.value = 'Los nombres y descripciones de Tareas o Fases no pueden contener los simbolos: | { } , ;'
       return false;
     }
+  })
 
-    console.log("Validation succeeded");
-    return true;
+  // Escape if error occurs
+  if (errorMessage.value != '') {
+    return false;
+  }
+
+  // Verify EDT structure
+  if (!validateWBSStructure()) {
+    return false;
+  }
+
+  console.log("Validation succeeded");
+  return true;
 };
 
-//----- SPECIAL SYMBOL VALIDATION AND ERROR MESSAGE CONTROL -----
+
 const hasSpecialSymbol = (text) => {
   const forbiddenCharacters = /[|{},;]/g;
   return forbiddenCharacters.test(text);
 };
-  
-const validateNoSpecialSymbol = (event, type, item) => {
-    const forbiddenCharacters = /[|{},;]/g;
-    const fieldValue = event.target.value;
-    if (hasSpecialSymbol(fieldValue)) {
 
-      if (type === 'wbsPieceDictionary') {
-        addItemToListInMap('wbsPieceDictionary', item.id);
-        const piece = wbsPieces.value.find(p => p.id === item.id);
-        piece.description = item.description.replace(forbiddenCharacters, '');
-      }
-    } else {
-      if (type === 'wbsPieceDictionary') {
-        removeItemFromMapList('wbsPieceDictionary', item.id);
-      }
+const validateNoSpecialSymbol = (event, type, item) => {
+  const forbiddenCharacters = /[|{},;]/g;
+  const fieldValue = event.target.value;
+  if (hasSpecialSymbol(fieldValue)) {
+
+    if (type === 'wbsPieceDictionary') {
+      addItemToListInMap('wbsPieceDictionary', item.id);
+      const piece = wbsPieces.value.find(p => p.id === item.id);
+      piece.description = item.description.replace(forbiddenCharacters, '');
     }
+  } else {
+    if (type === 'wbsPieceDictionary') {
+      removeItemFromMapList('wbsPieceDictionary', item.id);
+    }
+  }
 };
 
 const addItemToListInMap = (key, item) => {
   if (tableFieldsWithSpecialSymbol.value.has(key)) {
-    if (! tableFieldsWithSpecialSymbol.value.get(key).includes(item)){
+    if (!tableFieldsWithSpecialSymbol.value.get(key).includes(item)) {
       tableFieldsWithSpecialSymbol.value.get(key).push(item);
     }
   } else {
@@ -549,7 +530,7 @@ const fieldHadSpecialSymbol = (key, item) => {
   }
 };
 
-//----- END OF COMMA VALIDATION AND ERROR MESSAGE CONTROL -----
+
 
 const fetchParameterData = async () => {
   try {
@@ -564,38 +545,38 @@ const fetchParameterData = async () => {
     await getOrGenerateExit();
     const exitId = ExitStore.exitId;
     if (exitId) {
-        const parametersResponse = await fetch(
-            `http://localhost:8080/api/v1/exit/${exitId}/parameters`,
-            {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                },
-            }
-        );
-        if (parametersResponse.ok) {
-            const parameters = await parametersResponse.json();
-            // Mapear los parámetros a los campos del formulario
-            parameters.forEach(param => {
-                console.log(`Processing parameter: ${param.nameParameter}`, param.content);
-                switch (param.nameParameter) {
-                    case 'proyectPromotor':
-                        formData.proyectPromotor = param.content;
-                        break;
-                    case 'elaborationDate':
-                        formData.elaborationDate = param.content;
-                        break;
-                    case 'projectScopeStatement':
-                        formData.projectScopeStatement = param.content;
-                        break;
-                    case 'edtWbs':
-                        parseWBSSyntaxString(param.content);
-                        break;
-                    default:
-                        console.log(`Parámetro no manejado: ${param.nameParameter}`);
-                        break;
-                }
-            });
+      const parametersResponse = await fetch(
+        `http://localhost:8080/api/v1/exit/${exitId}/parameters`,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
         }
+      );
+      if (parametersResponse.ok) {
+        const parameters = await parametersResponse.json();
+        // Mapear los parámetros a los campos del formulario
+        parameters.forEach(param => {
+          console.log(`Processing parameter: ${param.nameParameter}`, param.content);
+          switch (param.nameParameter) {
+            case 'proyectPromotor':
+              formData.proyectPromotor = param.content;
+              break;
+            case 'elaborationDate':
+              formData.elaborationDate = param.content;
+              break;
+            case 'projectScopeStatement':
+              formData.projectScopeStatement = param.content;
+              break;
+            case 'edtWbs':
+              parseWBSSyntaxString(param.content);
+              break;
+            default:
+              console.log(`Parámetro no manejado: ${param.nameParameter}`);
+              break;
+          }
+        });
+      }
     }
   } catch {
     throw new Error('Error en la obtencion de Parametros');
@@ -604,125 +585,155 @@ const fetchParameterData = async () => {
 
 const fetchProjectData = async () => {
   try {
-      loading.value = true;
-      errorMessage.value = '';
-      const userId = AuthStore.userId;
-      const token = AuthStore.token;
-      const projectId = ProjectStore.projectId;
-      if (!userId || !token || !projectId) {
-        showAlert('Error de Sesión', '¡Sesión no iniciada o proyecto no seleccionado!', 'error');
-        return;
-      }
-      // Obtain proyect data
-      const respondeProyect = await fetch(`http://localhost:8080/api/v1/proyect/getById/${projectId}`, {
-          method: 'GET',
-          headers: {
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'application/json',
-          }
-      });
-      // Obtain user data
-      const respondeUser = await fetch(`http://localhost:8080/api/v1/user/getById/${userId}`, {
-          method: 'GET',
-          headers: {
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'application/json',
-          }
-      });
-      if (!respondeProyect.ok || !respondeUser.ok) {
-          throw new Error('Error al obtener la información necesaria');
-      }
-      const projectDataResponse = await respondeProyect.json();
-      const userDataResponse = await respondeUser.json();
-      // Updating form data
-      formData.proyectName = projectDataResponse.nameProyect;
-      formData.idProyect = projectDataResponse.idProyecto;
-      formData.company = projectDataResponse.organization;
-      formData.proyectLeader = `${userDataResponse.names} ${userDataResponse.secondNames}`;
-      formData.elaborationDate = projectDataResponse.startDate;
+    loading.value = true;
+    errorMessage.value = '';
+    
+    // Validar datos necesarios
+    const userId = AuthStore.userId;
+    const token = AuthStore.token;
+    const projectId = ProjectStore.projectId;
+    const idGestion = ManagementsStore.managementId;
 
+    if (!userId || !token || !projectId || !idGestion) {
+      throw new Error('Faltan datos necesarios para la operación');
+    }
+
+    // Obtener datos del proyecto
+    const responseProject = await fetch(`http://localhost:8080/api/v1/proyect/getById/${projectId}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      }
+    });
+
+    // Obtener datos del usuario
+    const responseUser = await fetch(`http://localhost:8080/api/v1/user/getById/${userId}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      }
+    });
+
+    if (!responseProject.ok || !responseUser.ok) {
+      throw new Error('Error al obtener datos de proyecto o usuario');
+    }
+
+    const projectData = await responseProject.json();
+    const userData = await responseUser.json();
+
+    // Actualizar form data
+    formData.proyectName = projectData.nameProyect;
+    formData.idProyect = projectData.idProyecto;
+    formData.company = projectData.organization;
+    formData.proyectLeader = `${userData.names} ${userData.secondNames}`;
+    formData.elaborationDate = projectData.startDate;
+
+    // Obtener proceso WBS
+    const responseWbs = await fetch(
+      `http://localhost:8080/api/v1/process/getByIdManagementAndNameProcess?idManagement=${idGestion}&nameProcess=Estructura de desglose del trabajo (EDT)`,
+      {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+
+    if (responseWbs.ok) {
+      const process = await responseWbs.json();
+      ProcessStore.processId = process.idProcess;
+      ProcessStore.processName = process.nameProcess;
+      
+      await getOrGenerateExit();
       await fetchParameterData();
+    } else if (responseWbs.status === 404) {
+      // Crear nuevo proceso si no existe
+      await createNewProcess(token, idGestion);
+    } else {
+      throw new Error('Error al obtener proceso WBS');
+    }
+
   } catch (error) {
-      console.error('Error fetching data:', error);
-      errorMessage.value = 'Error al obtener la información. Por favor, intenta nuevamente.';
+    console.error('Error fetching data:', error);
+    errorMessage.value = `Error al obtener la información: ${error.message}`;
   } finally {
-      loading.value = false;
+    loading.value = false;
   }
 };
 
 const saveData = async () => {
-    try {
-        const userId = AuthStore.userId;
-        const token = AuthStore.token;
-        const projectId = ProjectStore.projectId;
+  try {
+    const userId = AuthStore.userId;
+    const token = AuthStore.token;
+    const projectId = ProjectStore.projectId;
 
-        if (!userId || !token || !projectId) {
-            showAlert('Error de Sesión', '¡Sesión no iniciada!, redirigiendo a login...', 'error');
-            return;
-        }
-
-        await getOrGenerateExit(); // Puts exitId in ExitStore
-
-        // Formatting WBS data
-        const formattedWBS = formatWBS();
-
-        const saveData = await fetch(url_parameters + `/saveParametersList?idExit=${ExitStore.exitId}`, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                ...formData,
-                edtWbs: formattedWBS,
-            }),
-        }); 
-
-        if (!saveData.ok) {
-            const errorData = await saveData.json();
-            throw new Error(errorData.message || 'Error al guardar los datos');
-        }
-
-        const responseText = await saveData.text();
-
-        // If JSON empty but status is ok, then it's a success
-        if (saveData.ok && (!responseText || responseText.trim() === '')) {
-            return { success: true, message: 'Datos guardados correctamente' };
-        }
-
-        try {
-            const responseData = JSON.parse(responseText);
-            return responseData;
-        } catch (e) {
-            // If JSON invalid but status is ok, then it's a success
-            if (saveData.ok) {
-                return { success: true, message: 'Datos guardados correctamente' };
-            }
-            throw new Error('Respuesta inválida del servidor');
-        }
-    } catch (error) {
-        showAlert('Error', 'Error al guardar los datos. Por favor, intenta nuevamente.', 'error');
-        throw error;
+    if (!userId || !token || !projectId) {
+      showAlert('Error de Sesión', '¡Sesión no iniciada!, redirigiendo a login...', 'error');
+      return;
     }
+
+    await getOrGenerateExit(); // Puts exitId in ExitStore
+
+    // Formatting WBS data
+    const formattedWBS = formatWBS();
+
+    const saveData = await fetch(url_parameters + `/saveParametersList?idExit=${ExitStore.exitId}`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        ...formData,
+        edtWbs: formattedWBS,
+      }),
+    });
+
+    if (!saveData.ok) {
+      const errorData = await saveData.json();
+      throw new Error(errorData.message || 'Error al guardar los datos');
+    }
+
+    const responseText = await saveData.text();
+
+    // If JSON empty but status is ok, then it's a success
+    if (saveData.ok && (!responseText || responseText.trim() === '')) {
+      return { success: true, message: 'Datos guardados correctamente' };
+    }
+
+    try {
+      const responseData = JSON.parse(responseText);
+      return responseData;
+    } catch (e) {
+      // If JSON invalid but status is ok, then it's a success
+      if (saveData.ok) {
+        return { success: true, message: 'Datos guardados correctamente' };
+      }
+      throw new Error('Respuesta inválida del servidor');
+    }
+  } catch (error) {
+    showAlert('Error', 'Error al guardar los datos. Por favor, intenta nuevamente.', 'error');
+    throw error;
+  }
 };
 
 const getExistingExit = async () => {
   const nameExit = 'EDT';
   const idProcess = ProcessStore.processId;
   if (!idProcess) {
-      showAlert('Error de Sesión', 'Proceso no pudo ser identificado, redirigiendo a vista principal...', 'error');
-      navigateTo('/principalView');
-      return;
+    showAlert('Error de Sesión', 'Proceso no pudo ser identificado, redirigiendo a vista principal...', 'error');
+    navigateTo('/principalView');
+    return;
   }
 
   const checkResponse = await fetch(
-      url_exit + `/getByIdProcessAndNameExit?idProcess=${idProcess}&nameExit=${nameExit}`,
-      {
-          headers: {
-              'Authorization': `Bearer ${AuthStore.token}`,
-              'Content-Type': 'application/json',
-          },
-      }
+    url_exit + `/getByIdProcessAndNameExit?idProcess=${idProcess}&nameExit=${nameExit}`,
+    {
+      headers: {
+        'Authorization': `Bearer ${AuthStore.token}`,
+        'Content-Type': 'application/json',
+      },
+    }
   );
 
   if (checkResponse.ok) {
@@ -733,43 +744,43 @@ const getExistingExit = async () => {
       ExitStore.exitName = exitData.nameExit;
       return true;
     }
-  } 
+  }
   return false;
 }
 
 const createNewExit = async () => {
   const idProcess = ProcessStore.processId;
   if (!idProcess) {
-      showAlert('Error de Sesión', 'Proceso no pudo ser identificado, redirigiendo a vista principal...', 'error');
-      navigateTo('/principalView');
-      return;
+    showAlert('Error de Sesión', 'Proceso no pudo ser identificado, redirigiendo a vista principal...', 'error');
+    navigateTo('/principalView');
+    return;
   }
   const createResponse = await fetch(
-      url_exit + '/create',
-      {
-          method: 'POST',
-          headers: {
-              'Authorization': `Bearer ${AuthStore.token}`,
-              'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-              idProcess: ProcessStore.processId,
-              nameExit: "EDT",
-              state: "Activo",
-              dateCreation: formData.elaborationDate,
-              dateValidation: new Date().toISOString().split('T')[0],
-              priority: "Media",
-              responsible: formData.proyectLeader,
-              description: "La EDT (Estructura de Desglose del Trabajo) es una herramienta comúnmente ocupada en la Gestión del Alcance"
-          })
-      }
+    url_exit + '/create',
+    {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${AuthStore.token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        idProcess: ProcessStore.processId,
+        nameExit: "EDT",
+        state: "Activo",
+        dateCreation: formData.elaborationDate,
+        dateValidation: new Date().toISOString().split('T')[0],
+        priority: "Media",
+        responsible: formData.proyectLeader,
+        description: "La EDT (Estructura de Desglose del Trabajo) es una herramienta comúnmente ocupada en la Gestión del Alcance"
+      })
+    }
   );
   const responseText = await createResponse.text();
   if (!responseText.trim()) {
-      throw new Error('No se recibió ningún contenido JSON');
+    throw new Error('No se recibió ningún contenido JSON');
   }
   if (!createResponse.ok) {
-      throw new Error(`Error al crear la salida: ${responseText}`);
+    throw new Error(`Error al crear la salida: ${responseText}`);
   }
 
   const newExitData = JSON.parse(responseText);
@@ -793,24 +804,24 @@ onMounted(() => {
 
 // Alert popup handling START
 const alert = reactive({
-    show: false,
-    title: '',
-    message: '',
-    type: 'info',
+  show: false,
+  title: '',
+  message: '',
+  type: 'info',
 });
 
 const showAlert = (title, message, type = 'info') => {
-    alert.title = title;
-    alert.message = message;
-    alert.type = type;
-    alert.show = true;
+  alert.title = title;
+  alert.message = message;
+  alert.type = type;
+  alert.show = true;
 };
 
 const handleAlertConfirm = () => {
-    alert.show = false;
-    if (alert.type === 'error' && alert.message.includes('Sesión no iniciada')) {
-      navigateTo('/login');
-    }
+  alert.show = false;
+  if (alert.type === 'error' && alert.message.includes('Sesión no iniciada')) {
+    navigateTo('/login');
+  }
 };
 // Alert popoup handling END
 
@@ -823,64 +834,64 @@ const handleCancel = () => {
 
 
 const handleSave = async () => {
-    try {
-        loading.value = true;
-        showSaveConfirmation.value = false;
+  try {
+    loading.value = true;
+    showSaveConfirmation.value = false;
 
-        await saveData();
-        showAlert('Éxito', 'Los datos se han guardado correctamente', 'success');
+    await saveData();
+    showAlert('Éxito', 'Los datos se han guardado correctamente', 'success');
 
-    } catch (error) {
-        showAlert('Error', 'Error al guardar los datos. Por favor, intenta nuevamente.', 'error');
-    } finally {
-        loading.value = false;
-    }
+  } catch (error) {
+    showAlert('Error', 'Error al guardar los datos. Por favor, intenta nuevamente.', 'error');
+  } finally {
+    loading.value = false;
+  }
 };
 
 
 const handleSubmit = async () => {
   if (!validateForm()) {
-      return;
+    return;
   }
   try {
-      loading.value = true;
-      errorMessage.value = '';
-      const userId = AuthStore.userId;
-      const token = AuthStore.token;
-      const projectId = ProjectStore.projectId;
-      if (!userId || !token || !projectId) {
-          showAlert('Error de Sesión', '¡Sesión no iniciada!, redirigiendo a login...', 'error');
-          return;
-      }
+    loading.value = true;
+    errorMessage.value = '';
+    const userId = AuthStore.userId;
+    const token = AuthStore.token;
+    const projectId = ProjectStore.projectId;
+    if (!userId || !token || !projectId) {
+      showAlert('Error de Sesión', '¡Sesión no iniciada!, redirigiendo a login...', 'error');
+      return;
+    }
 
-      // Getting Exit Id
-      await getOrGenerateExit();
-      const exitId = ExitStore.exitId;
+    // Getting Exit Id
+    await getOrGenerateExit();
+    const exitId = ExitStore.exitId;
 
-      const formattedWBS = formatWBS();
+    const formattedWBS = formatWBS();
 
-      const responseWBS = await fetch(url_doc_generator + `/generate?idExit=${exitId}`, {
-          method: 'POST',
-          headers: {
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-              ...formData,
-              edtWbs: formattedWBS,
-          }),
-      });
-      if (!responseWBS.ok) {
-          const errorData = await responseWBS.json();
-          throw new Error(errorData.message || 'Error al crear la Estructura de Desglose del Trabajo');
-      }
+    const responseWBS = await fetch(url_doc_generator + `/generate?idExit=${exitId}`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        ...formData,
+        edtWbs: formattedWBS,
+      }),
+    });
+    if (!responseWBS.ok) {
+      const errorData = await responseWBS.json();
+      throw new Error(errorData.message || 'Error al crear la Estructura de Desglose del Trabajo');
+    }
 
-      const pdfBlob = await responseWBS.blob();
-      pdfUrl.value = URL.createObjectURL(pdfBlob);
+    const pdfBlob = await responseWBS.blob();
+    pdfUrl.value = URL.createObjectURL(pdfBlob);
   } catch (error) {
-      showAlert('Error', error.message || 'Error al crear la Estructura de Desglose del Trabajo. Por favor, intenta nuevamente.', 'error');
+    showAlert('Error', error.message || 'Error al crear la Estructura de Desglose del Trabajo. Por favor, intenta nuevamente.', 'error');
   } finally {
-      loading.value = false;
+    loading.value = false;
   }
 };
 // Handlers END
@@ -888,15 +899,18 @@ const handleSubmit = async () => {
 </script>
 
 <style scoped>
-
 .background {
   background-color: #F5F5F5;
   width: 100%;
-  min-height: 100vh; /* Ensure it covers the full viewport */
+  min-height: 100vh;
+  /* Ensure it covers the full viewport */
   display: flex;
-  align-items: center; /* Center the form vertically */
-  justify-content: center; /* Center the form horizontally */
-  box-sizing: border-box; /* Include padding in width/height calculations */
+  align-items: center;
+  /* Center the form vertically */
+  justify-content: center;
+  /* Center the form horizontally */
+  box-sizing: border-box;
+  /* Include padding in width/height calculations */
 }
 
 .container {
@@ -907,8 +921,10 @@ const handleSubmit = async () => {
   padding: 20px;
   border-radius: 8px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  margin-top: 150px; /* Moves the form below the header */
-  margin-bottom: 5%; /* Moves the form below the header */
+  margin-top: 150px;
+  /* Moves the form below the header */
+  margin-bottom: 5%;
+  /* Moves the form below the header */
 }
 
 .form-title {
@@ -917,11 +933,11 @@ const handleSubmit = async () => {
   font-size: 1.8rem;
   color: #333;
 }
-  
+
 .form-section {
   margin-bottom: 20px;
 }
-  
+
 .section-title {
   font-size: 1.5rem;
   margin-bottom: 10px;
@@ -929,7 +945,7 @@ const handleSubmit = async () => {
   margin-right: 15px;
   color: #444;
 }
-  
+
 .form-group {
   margin-bottom: 15px;
   margin-left: 15px;
@@ -946,7 +962,8 @@ const handleSubmit = async () => {
 }
 
 .half-width {
-  flex: 1;  /* Ensure each field takes half the available width */
+  flex: 1;
+  /* Ensure each field takes half the available width */
 }
 
 input,
@@ -992,6 +1009,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   border-color: #00B8B0;
   box-shadow: 0 0 0 2px rgba(0, 184, 176, 0.1);
 }
+
 .form-input:disabled {
   color: #007973;
 }
@@ -1056,7 +1074,8 @@ textarea {
   border-radius: 16px;
   background-color: #5f5f5f;
   border-color: black;
-  overflow: hidden; /* Ensure that the content stays within the rounded corners */
+  overflow: hidden;
+  /* Ensure that the content stays within the rounded corners */
 }
 
 .rounded-table .v-table-header,
@@ -1088,215 +1107,214 @@ label {
 
 .submit-button,
 .cancel-button {
-    padding: 0.75rem 1.5rem;
-    border-radius: 4px;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: all 0.3s;
+  padding: 0.75rem 1.5rem;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s;
 }
 
 .submit-button {
-    background-color: #00B8B0;
-    color: white;
-    border: none;
+  background-color: #00B8B0;
+  color: white;
+  border: none;
 }
 
 .submit-button:hover:not(:disabled) {
-    background-color: #009B94;
+  background-color: #009B94;
 }
 
 .submit-button:disabled {
-    opacity: 0.7;
-    cursor: not-allowed;
+  opacity: 0.7;
+  cursor: not-allowed;
 }
 
 .cancel-button {
-    background-color: #f5f5f5;
-    color: #666;
-    border: 1px solid #ddd;
+  background-color: #f5f5f5;
+  color: #666;
+  border: 1px solid #ddd;
 }
 
 .cancel-button:hover {
-    background-color: #eee;
+  background-color: #eee;
 }
 
 .error-message {
-    margin-top: 1rem;
-    padding: 1rem;
-    border-radius: 4px;
-    background-color: #ffe6e6;
-    color: #dc3545;
-    text-align: center;
+  margin-top: 1rem;
+  padding: 1rem;
+  border-radius: 4px;
+  background-color: #ffe6e6;
+  color: #dc3545;
+  text-align: center;
 }
 
 .form-actions {
-    display: flex;
-    gap: 1rem;
-    justify-content: flex-end;
-    margin-top: 2rem;
-    padding-top: 2rem;
-    border-top: 1px solid #eee;
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid #eee;
 }
 
 .save-button {
-    padding: 0.75rem 1.5rem;
-    border-radius: 4px;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: all 0.3s;
-    background-color: #4CAF50;
-    color: white;
-    border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
 }
 
 .save-button:hover:not(:disabled) {
-    background-color: #45a049;
+  background-color: #45a049;
 }
 
 .save-button:disabled {
-    opacity: 0.7;
-    cursor: not-allowed;
+  opacity: 0.7;
+  cursor: not-allowed;
 }
 
 .modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(0, 0, 0, 0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
 }
 
 .modal-content {
-    background: white;
-    padding: 2rem;
-    border-radius: 8px;
-    max-width: 500px;
-    width: 90%;
+  background: white;
+  padding: 2rem;
+  border-radius: 8px;
+  max-width: 500px;
+  width: 90%;
 }
 
 .modal-content h3 {
-    margin-top: 0;
-    margin-bottom: 1rem;
+  margin-top: 0;
+  margin-bottom: 1rem;
 }
 
 .modal-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 1rem;
-    margin-top: 2rem;
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 2rem;
 }
 
 .confirm-button {
-    padding: 0.75rem 1.5rem;
-    border-radius: 4px;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: all 0.3s;
-    background-color: #dc3545;
-    color: white;
-    border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s;
+  background-color: #dc3545;
+  color: white;
+  border: none;
 }
 
 .confirm-button:hover {
-    background-color: #c82333;
+  background-color: #c82333;
 }
 
 .pdf-container {
-    margin-top: 2rem;
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    padding: 1.5rem;
+  margin-top: 2rem;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
 }
 
 .pdf-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1rem;
-    padding-bottom: 1rem;
-    border-bottom: 1px solid #eee;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #eee;
 }
 
 .pdf-title {
-    font-size: 1.25rem;
-    color: #333;
-    margin: 0;
+  font-size: 1.25rem;
+  color: #333;
+  margin: 0;
 }
 
 .pdf-actions {
-    display: flex;
-    gap: 1rem;
+  display: flex;
+  gap: 1rem;
 }
 
 .pdf-viewer {
-    background: #f5f5f5;
-    padding: 1rem;
-    border-radius: 4px;
-    margin-bottom: 1rem;
+  background: #f5f5f5;
+  padding: 1rem;
+  border-radius: 4px;
+  margin-bottom: 1rem;
 }
 
 .pdf-iframe {
-    width: 100%;
-    height: 700px;
-    border: none;
-    border-radius: 4px;
+  width: 100%;
+  height: 700px;
+  border: none;
+  border-radius: 4px;
 }
 
 .pdf-footer {
-    display: flex;
-    justify-content: flex-end;
-    gap: 1rem;
-    padding-top: 1rem;
-    border-top: 1px solid #eee;
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #eee;
 }
 
 .pdf-button {
-    padding: 0.75rem 1.5rem;
-    border-radius: 4px;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: all 0.3s;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .download-button {
-    background-color: #00B8B0;
-    color: white;
-    text-decoration: none;
-    border: none;
+  background-color: #00B8B0;
+  color: white;
+  text-decoration: none;
+  border: none;
 }
 
 .download-button:hover {
-    background-color: #009B94;
+  background-color: #009B94;
 }
 
 .return-button {
-    background-color: #f5f5f5;
-    color: #666;
-    border: 1px solid #ddd;
+  background-color: #f5f5f5;
+  color: #666;
+  border: 1px solid #ddd;
 }
 
 .return-button:hover {
-    background-color: #eee;
+  background-color: #eee;
 }
 
 .button-icon {
-    font-size: 1.2rem;
+  font-size: 1.2rem;
 }
 
 .invalid-feedback {
-    color: #ff7d8a;
-    font-size: 0.875rem;
-    margin-top: 0.25rem;
-    display: block;
+  color: #ff7d8a;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+  display: block;
 }
 </style>
-
