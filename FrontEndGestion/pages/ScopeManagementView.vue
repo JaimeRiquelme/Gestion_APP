@@ -66,7 +66,7 @@ const managementAreas = [
     {
         id: 6,
         title: 'Línea base del alcance',
-        route: '/scope-control'
+        route: '/Scope-Baseline-block'
     },
     {
         id: 7,
@@ -77,6 +77,11 @@ const managementAreas = [
         id: 8,
         title: 'Informes de desempeño del trabajo',
         route: '/work-performance-reports'
+    },
+    {
+        id: 9,
+        title: 'Documentacion y matriz de trazabilidad',
+        route: '/DocumentationTraceabilityMatrix'
     }
 ];
 
