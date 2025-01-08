@@ -126,11 +126,30 @@
   import { useAuthStore } from '../stores/auth';
   import { useProjectStore } from '../stores/project';
   import { useExitStore } from '../stores/Exit';
+  import { useProcessStore } from '../stores/Process';
+  
+
+  // Alert popup handling START
+const alert = reactive({
+    show: false,
+    title: '',
+    message: '',
+    type: 'info',
+});
+
+const showAlert = (title, message, type = 'info') => {
+    alert.title = title;
+    alert.message = message;
+    alert.type = type;
+    alert.show = true;
+};
+
 
   const AuthStore = useAuthStore();
   const ProjectStore = useProjectStore();
   const { fetch } = useFetchWithAuth();
   const ExitStore = useExitStore();
+  const ProcessStore = useProcessStore();
 
   const url_parameters = "http://localhost:8080/api/v1/parameters"
   const idExit = ExitStore.exitId;
@@ -275,6 +294,7 @@ const saveData = async () => {
             return;
         }
 
+        await getOrGenerateExit(); // Puts exitId in ExitStore
 
         const saveData = await fetch(url_parameters + `/saveParametersList?idExit=${ExitStore.exitId}`, {
             method: 'POST',
@@ -283,8 +303,7 @@ const saveData = async () => {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                ...formData,
-                edtWbs: formattedWBS,
+                ...formData.value
             }),
         }); 
 
@@ -314,6 +333,90 @@ const saveData = async () => {
         throw error;
     }
 };
+
+const getOrGenerateExit = async () => {
+  try {
+    if (!await getExistingExit()) {
+      await createNewExit();
+    }
+  } catch (error) {
+    console.error('Error en la gestión del Exit:', error);
+  }
+}
+
+
+const createNewExit = async () => {
+  const idProcess = ProcessStore.processId;
+  if (!idProcess) {
+      showAlert('Error de Sesión', 'Proceso no pudo ser identificado, redirigiendo a vista principal...', 'error');
+      navigateTo('/principalView');
+      return;
+  }
+  const createResponse = await fetch(
+      url_exit + '/create',
+      {
+          method: 'POST',
+          headers: {
+              'Authorization': `Bearer ${AuthStore.token}`,
+              'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+              idProcess: ProcessStore.processId,
+              nameExit: "Matriz de trazabilidad",
+              state: "1",
+              dateCreation: formData.elaborationDate,
+              dateValidation: new Date().toISOString().split('T')[0],
+              priority: "Media",
+              responsible: formData.proyectLeader,
+              description: "Matriz de trazabilidad del proyecto"
+          })
+      }
+  );
+  const responseText = await createResponse.text();
+  if (!responseText.trim()) {
+      throw new Error('No se recibió ningún contenido JSON');
+  }
+  if (!createResponse.ok) {
+      throw new Error(`Error al crear la salida: ${responseText}`);
+  }
+
+  const newExitData = JSON.parse(responseText);
+  ExitStore.exitId = newExitData.idExit;
+  ExitStore.exitName = newExitData.nameExit;
+}
+
+
+const getExistingExit = async () => {
+  const nameExit = 'EDT';
+  const idProcess = ProcessStore.processId;
+  if (!idProcess) {
+      showAlert('Error de Sesión', 'Proceso no pudo ser identificado, redirigiendo a vista principal...', 'error');
+      navigateTo('/principalView');
+      return;
+  }
+
+  const checkResponse = await fetch(
+      url_exit + `/getByIdProcessAndNameExit?idProcess=${idProcess}&nameExit=${nameExit}`,
+      {
+          headers: {
+              'Authorization': `Bearer ${AuthStore.token}`,
+              'Content-Type': 'application/json',
+          },
+      }
+  );
+
+  if (checkResponse.ok) {
+    const responseBody = await checkResponse.text()
+    if (responseBody.trim()) {
+      const exitData = JSON.parse(responseBody);
+      ExitStore.exitId = exitData.idExit;
+      ExitStore.exitName = exitData.nameExit;
+      return true;
+    }
+  } 
+  return false;
+}
+
 
   </script>
   

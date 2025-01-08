@@ -55,48 +55,58 @@ import { useProcessStore } from '../stores/Process';
 
 const ProcessStore = useProcessStore();
 const AuthStore = useAuthStore();
-const pdfBlobs = ref([]);
+const url_exit = "http://localhost:8080/api/v1/exit"
 
 // Lista de documentos con sus respectivos valores de nameExit y state
 const documents = ref([
-  { label: 'Última EDT aprobada', nameExit: 'Línea Base del Alcance', state: '1' },
-  { label: 'EDT actual', nameExit: 'Línea Base del Alcance', state: '0' },
-  { label: 'Último enunciado del alcance del proyecto', nameExit: 'Enunciado del alcance', state: '1' },
-  { label: 'Enunciado del alcance actual', nameExit: 'Enunciado del alcance', state: '0' },
+  { label: 'Última EDT aprobada', nameExit: 'prueba1', state: '1' },
+  { label: 'EDT actual', nameExit: 'prueba1', state: '0' },
+  { label: 'Último enunciado del alcance del proyecto', nameExit: 'Línea Base del Alcance', state: '0' },
+  { label: 'Enunciado del alcance actual', nameExit: 'Línea Base del Alcance', state: '1' },
 ]);
 
 // Lista para manejar los documentos que no se encontraron
 const missingDocuments = ref([]);
+const pdfBlobs = ref([]); // Asegúrate de que esta lista exista para almacenar las URLs de los PDFs
 
 async function fetchPdfs() {
   try {
     const token = AuthStore.token;
+
+    // Verificar si el usuario tiene sesión iniciada
     if (!token) {
       alert('ALERTA: ¡Sesión no iniciada! Redirigiendo a login...');
       await router.push('/login');
       return;
     }
 
-    // Hacer la solicitud de PDFs de manera asíncrona para cada documento
+    // Crear solicitudes de PDFs de manera asíncrona para cada documento
     const pdfPromises = documents.value.map(async (doc) => {
       try {
-        const response = await axios.get('http://localhost:8080/api/v1/exit/ByNameAndState', {
+        const response = await axios.get(`http://localhost:8080/api/v1/exit/ByNameAndState`, {
           params: {
             nameExit: doc.nameExit,
             state: doc.state,
           },
           headers: { Authorization: `Bearer ${token}` },
-          responseType: 'blob',
+          responseType: 'blob', // Importante para manejar archivos binarios
         });
 
-        // Si el PDF se encuentra, se agrega a pdfBlobs
+        // Verificar que la respuesta sea un PDF
+        if (response.data.type !== 'application/pdf') {
+          throw new Error('El archivo recibido no es un PDF válido');
+        }
+
+        // Crear URL para el Blob
+        const blob = new Blob([response.data], { type: 'application/pdf' });
+        const pdfUrl = URL.createObjectURL(blob);
+
         return {
           label: doc.label,
-          pdfUrl: URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' })),
+          pdfUrl: pdfUrl,
           found: true,
         };
       } catch (error) {
-        // Si ocurre un error (por ejemplo, el documento no se encuentra), agregar a missingDocuments
         console.error(`Error al cargar el PDF de ${doc.label}:`, error);
         return {
           label: doc.label,
@@ -109,15 +119,29 @@ async function fetchPdfs() {
     // Esperar a que todas las promesas se resuelvan
     const results = await Promise.all(pdfPromises);
 
-    // Filtrar los documentos encontrados y los que faltan
-    pdfBlobs.value = results.filter(result => result.found).map(result => result.pdfUrl);
-    missingDocuments.value = results.filter(result => !result.found);
+    // Filtrar y asignar los resultados
+    pdfBlobs.value = results
+      .filter(result => result.found) // Solo los encontrados
+      .map(result => result.pdfUrl);
+
+    missingDocuments.value = results
+      .filter(result => !result.found) // Solo los no encontrados
+      .map(result => ({
+        label: result.label,
+      }));
+
+    // Mensaje opcional si hay documentos faltantes
+    if (missingDocuments.value.length > 0) {
+      console.warn('Documentos faltantes:', missingDocuments.value);
+    }
 
   } catch (error) {
     console.error('Error al cargar los documentos:', error);
-    alert('Hubo un problema al cargar los documentos.');
+    alert('Hubo un problema al cargar los documentos. Intenta nuevamente.');
   }
 }
+
+
 
 // Llamar a la función cuando el componente se monte
 onMounted(fetchPdfs);
@@ -125,41 +149,65 @@ onMounted(fetchPdfs);
 // Función para autorizar el documento
 async function createExit() {
   try {
-    const token = AuthStore.token;
-
-    if (!pdfBlobs.value[1]) {
+    if (!pdfBlobs.value[0]) {
       alert('El PDF no está cargado.');
       return;
     }
 
-    // Asegúrate de enviar el cuerpo correcto con todos los parámetros
-    const response = await axios.post(
-      'http://localhost:8080/api/v1/exit/create',
-      {
-        document: pdfBlobs.value[1], // Ajusta según el formato esperado
-        state: '1', // Estado 1
-        nameExit: 'Línea Base del Alcance', // Puedes ajustar esto dinámicamente
-        description: 'Descripción de prueba', // Descripción proporcionada
-        priority: 'Alta', // Prioridad
-        responsible: 'Usuario Responsable', // Responsable
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
+    const reader = new FileReader();
 
-    if (response.status === 201) {
+    // Leer el archivo como ArrayBuffer
+    reader.readAsArrayBuffer(pdfBlobs.value[0]);
+
+    reader.onload = async () => {
+      const arrayBuffer = reader.result;
+
+      // Convertir el ArrayBuffer a un array de bytes
+      const documentBytes = Array.from(new Uint8Array(arrayBuffer));
+
+      // Realizar la solicitud al backend
+      const createResponse = await fetch(url_exit + '/create', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${AuthStore.token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          idProcess: 1, // ProcessStore.processId
+          nameExit: 'EDT',
+          state: '1',
+          dateCreation: new Date().toISOString().split('T')[0],
+          dateValidation: new Date().toISOString().split('T')[0],
+          priority: 'Media',
+          documents: documentBytes, // Enviar como array de bytes
+          responsible: 'place holder',
+          description:
+            'La EDT (Estructura de Desglose del Trabajo) es una herramienta comúnmente ocupada en la Gestión del Alcance',
+        }),
+      });
+
+      const responseText = await createResponse.text();
+      if (!responseText.trim()) {
+        throw new Error('No se recibió ningún contenido JSON');
+      }
+
+      if (!createResponse.ok) {
+        throw new Error(`Error al crear la salida: ${responseText}`);
+      }
+
       alert('Exit creado exitosamente');
-    } else {
-      alert('Hubo un problema al crear el Exit.');
-    }
+    };
+
+    reader.onerror = () => {
+      console.error('Error al leer el archivo:', reader.error);
+      alert('Hubo un problema al procesar el archivo.');
+    };
   } catch (error) {
     console.error('Error al crear el Exit:', error);
     alert('Hubo un problema al crear el Exit.');
   }
 }
+
 </script>
 
 <style scoped>
