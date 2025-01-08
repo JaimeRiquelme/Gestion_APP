@@ -149,4 +149,35 @@ public class ExitController {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+    @GetMapping("/ByNameAndState")
+    public ResponseEntity<byte[]> getActInstitutionByNameAndState(
+            @RequestParam String nameExit,
+            @RequestParam String state) {
+        try {
+            byte[] pdfContent = exitService.getActInstitutionByNameAndState(nameExit, state);
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_PDF);
+            headers.setContentDispositionFormData("filename", nameExit + ".pdf");
+
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .body(pdfContent);
+        } catch (RuntimeException e) {
+            if (e.getMessage().contains("Exit not found")) {
+                return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+            } else if (e.getMessage().contains("Document not found")) {
+                return new ResponseEntity<>(null, HttpStatus.NO_CONTENT);
+            } else {
+                e.printStackTrace();
+                return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+
+
 }

@@ -200,6 +200,7 @@ const ProcessStore = useProcessStore();
 const ExitStore = useExitStore();
 const ManagementsStore = useManagementsStore();
 
+
 const loading = ref(false);
 const errorMessage = ref('');
 const pdfUrl = ref(null);
