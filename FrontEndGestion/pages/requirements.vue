@@ -682,7 +682,7 @@
 
   const handleCancel = () => {
       showCancelConfirmation.value = false;
-      navigateTo('/principalView');
+      navigateTo('/ScopeManagementView');
   };
 
   const handleSave = async () => {
