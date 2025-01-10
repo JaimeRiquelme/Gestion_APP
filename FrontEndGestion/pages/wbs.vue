@@ -673,7 +673,6 @@ const fetchProjectData = async () => {
         ProcessStore.processId = newProcess.idProcess;
         ProcessStore.processName = newProcess.nameProcess;
         console.log('Proceso creado:', newProcess);
-        router.push(area.route);
       } else {
         console.error('Error al crear el proceso');
       }
